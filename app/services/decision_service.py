@@ -1,35 +1,28 @@
-# services/decision_service.py
+# app/services/decision_service.py
 
 from typing import List, Optional
+
 from sqlalchemy.orm import Session
 
 from app.models.decision import Decision
 from app.models.enums import DecisionStatusEnum
 from app.repositories.decision_repository import DecisionRepository
 from app.schemas.decision import DecisionCreate
-from app.services.exceptions import DecisionNotFoundError, InvalidStatusTransitionError
 
 
 class DecisionService:
     """
-    Business logic layer for Decision.
+    Handles all business logic for Decision operations.
 
-    For now this is mostly a thin pass-through to DecisionRepository:
-    field-level validation (length, required-ness, etc.) is already
-    handled by the DecisionCreate schema, so create_decision() just
-    coordinates the call to the repository.
-
-    Keeping this as its own class (rather than calling the repository
-    directly from the router) gives us a single place to add real
-    business rules later — e.g. checking department-level permissions,
-    enforcing decision_date constraints, triggering notifications,
-    kicking off an AI-assisted recommendation step, etc. — without
-    touching the router or the repository.
+    Responsibilities:
+    - Validate business rules
+    - Coordinate repository operations
+    - Enforce decision workflow
+    - Keep routers thin
     """
 
     def __init__(self, db: Session):
-        self.db = db
-        self.repository = DecisionRepository(db)
+        self.decision_repo = DecisionRepository(db)
 
     # -------------------------------------------------------
     # CREATE
@@ -37,39 +30,28 @@ class DecisionService:
 
     def create_decision(
         self,
-        payload: DecisionCreate,
+        data: DecisionCreate,
         department_id: int,
         created_by: int,
     ) -> Decision:
         """
         Creates a new decision.
 
-        department_id and created_by are NOT taken from the payload —
-        they're passed in explicitly by the router, sourced from the
-        authenticated user's session/token. This mirrors the same
-        rule already enforced in DecisionRepository.create().
-
-        Args:
-            payload: validated DecisionCreate schema from the request body.
-            department_id: department of the authenticated user.
-            created_by: user_id of the authenticated user.
-
-        Returns:
-            The newly persisted Decision ORM object.
+        Business rules can be added here later, such as:
+        - Permission checks
+        - AI validation
+        - Duplicate detection
+        - Notifications
         """
-        # Future home for pre-create business rules, e.g.:
-        #   - confirm the user is allowed to create decisions for this department
-        #   - validate decision_date isn't in the past
-        #   - default decision_type based on department settings
 
-        return self.repository.create(
+        return self.decision_repo.create(
             department_id=department_id,
             created_by=created_by,
-            title=payload.title,
-            problem_statement=payload.problem_statement,
-            decision_desc=payload.decision_desc,
-            decision_type=payload.decision_type,
-            decision_date=payload.decision_date,
+            title=data.title,
+            problem_statement=data.problem_statement,
+            decision_desc=data.decision_desc,
+            decision_type=data.decision_type,
+            decision_date=data.decision_date,
         )
 
     # -------------------------------------------------------
@@ -78,14 +60,14 @@ class DecisionService:
 
     def get_decision(self, decision_id: int) -> Decision:
         """
-        Fetches a single decision by ID.
-
-        Raises:
-            DecisionNotFoundError: if no decision with this ID exists.
+        Returns a decision by ID.
         """
-        decision = self.repository.get_by_id(decision_id)
+
+        decision = self.decision_repo.get_by_id(decision_id)
+
         if decision is None:
-            raise DecisionNotFoundError(decision_id)
+            raise ValueError("Decision not found.")
+
         return decision
 
     def list_decisions_for_department(
@@ -96,42 +78,27 @@ class DecisionService:
         limit: int = 100,
     ) -> List[Decision]:
         """
-        Lists decisions for a department, optionally filtered by status.
-        Backs the department dashboard endpoint.
+        Returns all decisions belonging to a department.
+        Optionally filters by status.
         """
+
         if status is not None:
-            return self.repository.get_all_by_department_and_status(
+            return self.decision_repo.get_all_by_department_and_status(
                 department_id=department_id,
                 status=status,
                 skip=skip,
                 limit=limit,
             )
-        return self.repository.get_all_by_department(
+
+        return self.decision_repo.get_all_by_department(
             department_id=department_id,
             skip=skip,
             limit=limit,
         )
 
     # -------------------------------------------------------
-    # STATUS TRANSITIONS
+    # STATUS UPDATE
     # -------------------------------------------------------
-
-    # TODO: replace with your actual DecisionStatusEnum members and the
-    # real workflow you want enforced. We know `draft` exists (it's the
-    # DB default in the Decision model) — fill in the rest once the other
-    # statuses are confirmed. Until this map has entries, every transition
-    # is allowed (permissive default) so this doesn't block you in the
-    # meantime.
-    #
-    # Example, once you confirm the real member names:
-    # _ALLOWED_TRANSITIONS: dict[DecisionStatusEnum, set[DecisionStatusEnum]] = {
-    #     DecisionStatusEnum.draft: {DecisionStatusEnum.submitted},
-    #     DecisionStatusEnum.submitted: {DecisionStatusEnum.approved, DecisionStatusEnum.rejected},
-    #     DecisionStatusEnum.approved: {DecisionStatusEnum.implemented},
-    #     DecisionStatusEnum.rejected: set(),     # terminal
-    #     DecisionStatusEnum.implemented: set(),  # terminal
-    # }
-    _ALLOWED_TRANSITIONS: dict = {}
 
     def update_decision_status(
         self,
@@ -139,45 +106,79 @@ class DecisionService:
         new_status: DecisionStatusEnum,
     ) -> Decision:
         """
-        Validates and applies a status transition.
+        Enforces the decision workflow.
 
-        Raises:
-            DecisionNotFoundError: if the decision doesn't exist.
-            InvalidStatusTransitionError: if the transition isn't allowed
-                from the decision's current status (only enforced once
-                _ALLOWED_TRANSITIONS is filled in above).
+        Workflow:
+
+        draft
+            ↓
+        approved
+            ↓
+        implemented
+            ↓
+        completed
+
+        cancelled can be reached from any non-terminal state
+        and is terminal.
         """
+
         decision = self.get_decision(decision_id)
 
-        allowed_next = self._ALLOWED_TRANSITIONS.get(decision.status)
-        if allowed_next is not None and new_status not in allowed_next:
-            raise InvalidStatusTransitionError(decision.status, new_status)
+        # Cannot change a cancelled decision
+        if decision.status == DecisionStatusEnum.cancelled:
+            raise ValueError(
+                "Cancelled decisions cannot be modified."
+            )
 
-        return self.repository.update_status(decision, new_status)
+        # Allow cancelling at any time
+        if new_status == DecisionStatusEnum.cancelled:
+            return self.decision_repo.update_status(
+                decision,
+                new_status,
+            )
+
+        status_order = [
+            DecisionStatusEnum.draft,
+            DecisionStatusEnum.approved,
+            DecisionStatusEnum.implemented,
+            DecisionStatusEnum.completed,
+        ]
+
+        # Completed is terminal
+        if decision.status == DecisionStatusEnum.completed:
+            raise ValueError(
+                "Completed decisions cannot be modified."
+            )
+
+        current_index = status_order.index(decision.status)
+        expected_next = status_order[current_index + 1]
+
+        if new_status != expected_next:
+            raise ValueError(
+                f"Decision can only move from "
+                f"{decision.status.value} "
+                f"to "
+                f"{expected_next.value}."
+            )
+
+        return self.decision_repo.update_status(
+            decision,
+            new_status,
+        )
 
 
 # -------------------------------------------------------
-# FastAPI dependency
+# Dependency
 # -------------------------------------------------------
 
 def get_decision_service(db: Session) -> DecisionService:
     """
-    Convenience factory for wiring DecisionService into routers via
-    FastAPI's Depends(), e.g.:
+    FastAPI dependency.
 
-        def get_db() -> Session: ...
+    Example:
 
-        @router.post("/decisions")
-        def create_decision(
-            payload: DecisionCreate,
-            db: Session = Depends(get_db),
-            current_user: User = Depends(get_current_user),
-        ):
-            service = DecisionService(db)
-            return service.create_decision(
-                payload=payload,
-                department_id=current_user.department_id,
-                created_by=current_user.user_id,
-            )
+        service: DecisionService = Depends(get_decision_service)
     """
+
     return DecisionService(db)
+
