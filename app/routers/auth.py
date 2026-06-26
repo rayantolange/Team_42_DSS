@@ -89,3 +89,31 @@ def get_me(
     No DB call needed — get_current_user already fetched the user.
     """
     return current_user
+
+# -------------------------------------------------------
+# EMAIL VERIFICATION
+# -------------------------------------------------------
+
+@router.get("/verify-email", status_code=status.HTTP_200_OK)
+def verify_email(token: str, db: Session = Depends(get_db)):
+    """
+    Called when the user clicks the verification link in their email.
+    """
+    service = UserService(db)
+    try:
+        service.verify_email(token)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    return {"message": "Email verified successfully. You can now log in."}
+
+
+@router.post("/resend-verification", status_code=status.HTTP_200_OK)
+def resend_verification(email: str, db: Session = Depends(get_db)):
+    """
+    Resends a verification link if the account exists and isn't verified yet.
+    Always returns the same message regardless of outcome.
+    """
+    service = UserService(db)
+    service.resend_verification(email)
+    return {"message": "If that account exists and isn't verified, a new link has been sent."}
