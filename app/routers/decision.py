@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.models.enums import DecisionStatusEnum
-from app.schemas.decision import DecisionCreate, DecisionResponse, DecisionSummary
+from app.schemas.decision import DecisionCreate, DecisionUpdate, DecisionResponse, DecisionSummary
 from app.services.decision_service import DecisionService
-
+from app.core.access import check_decision_access
 
 router = APIRouter(prefix="/decisions", tags=["Decisions"])
 
@@ -106,16 +106,46 @@ def get_decision(
             detail=str(e)
         )
 
-    # Cross-department access guard.
-    # Move this into the service layer if other routes need the same check.
-    if decision.department_id != current_user.department_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this decision."
-        )
+    check_decision_access(decision, current_user)
 
     return decision
 
+
+@router.patch(
+    "/{decision_id}",
+    response_model=DecisionResponse,
+    status_code=status.HTTP_200_OK
+)
+def update_decision(
+    decision_id: int,
+    data: DecisionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Partially updates a decision's editable fields
+    (title, problem_statement, decision_desc, decision_type, decision_date).
+    Status changes must go through PATCH /decisions/{id}/status instead.
+    """
+    service = DecisionService(db)
+
+    try:
+        decision = service.get_decision(decision_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+
+    check_decision_access(decision, current_user)
+
+    try:
+        return service.update_decision(decision_id, data)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 # -------------------------------------------------------
 # STATUS UPDATE (workflow-controlled)
