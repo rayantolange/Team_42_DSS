@@ -7,8 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.decision import Decision
 from app.models.enums import DecisionStatusEnum
 from app.repositories.decision_repository import DecisionRepository
-from app.schemas.decision import DecisionCreate
-
+from app.schemas.decision import DecisionCreate, DecisionUpdate
 
 class DecisionService:
     """
@@ -166,7 +165,46 @@ class DecisionService:
             new_status,
         )
 
+# -------------------------------------------------------
+    # UPDATE (partial, non-status fields)
+    # -------------------------------------------------------
 
+    def update_decision(
+        self,
+        decision_id: int,
+        data: DecisionUpdate,
+    ) -> Decision:
+        """
+        Partially updates a decision's editable fields.
+        Does NOT handle status transitions — use update_decision_status
+        for that, since status changes follow a strict workflow.
+        """
+
+        decision = self.get_decision(decision_id)
+
+        if decision.status == DecisionStatusEnum.completed:
+            raise ValueError(
+                "Completed decisions cannot be modified."
+            )
+
+        if decision.status == DecisionStatusEnum.cancelled:
+            raise ValueError(
+                "Cancelled decisions cannot be modified."
+            )
+
+        update_data = data.model_dump(exclude_unset=True, exclude={"status"})
+
+        if not update_data:
+            raise ValueError("No fields provided to update.")
+
+        return self.decision_repo.update(
+            decision,
+            title=update_data.get("title"),
+            problem_statement=update_data.get("problem_statement"),
+            decision_desc=update_data.get("decision_desc"),
+            decision_type=update_data.get("decision_type"),
+            decision_date=update_data.get("decision_date"),
+        )
 # -------------------------------------------------------
 # Dependency
 # -------------------------------------------------------
