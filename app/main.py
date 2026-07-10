@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 
-from app.routers import auth, decision , document, outcome
+from app.routers import auth, decision , document, outcome, strategy
 
 
 app = FastAPI(
@@ -20,6 +20,7 @@ app.include_router(auth.router)
 app.include_router(decision.router)
 app.include_router(document.router)
 app.include_router(outcome.router)
+app.include_router(strategy.router)
 
 # -------------------------------------------------------
 # ROOT / HEALTH CHECK
