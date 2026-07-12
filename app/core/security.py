@@ -77,3 +77,36 @@ def decode_access_token(token: str) -> Optional[dict]:
         return payload
     except PyJWTError:
         return None
+
+# -------------------------------------------------------
+# EMAIL VERIFICATION
+# -------------------------------------------------------
+
+EMAIL_VERIFICATION_EXPIRE_MINUTES = 30
+
+def create_email_verification_token(user_id: int) -> str:
+    """
+    Short-lived JWT scoped specifically to email verification.
+    The 'scope' claim stops this token being reused as a login/reset token.
+    """
+    to_encode = {
+        "sub": str(user_id),
+        "scope": "email_verification",
+        "exp": datetime.utcnow() + timedelta(minutes=EMAIL_VERIFICATION_EXPIRE_MINUTES),
+    }
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_email_verification_token(token: str) -> Optional[int]:
+    """
+    Decodes a verification token and returns the user_id if valid.
+    Returns None if expired, tampered, or wrong scope.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("scope") != "email_verification":
+            return None
+        user_id = payload.get("sub")
+        return int(user_id) if user_id else None
+    except PyJWTError:
+        return None
