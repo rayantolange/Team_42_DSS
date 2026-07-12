@@ -7,6 +7,11 @@ from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserLogin
 
+from app.core.security import (
+    hash_password, verify_password, create_access_token,
+    create_email_verification_token, decode_email_verification_token,
+)
+from app.services.email_service import send_verification_email 
 
 class UserService:
     """
@@ -90,3 +95,31 @@ class UserService:
             "full_name": user.full_name,
             "role": user.role,
         }
+    
+    def verify_email(self, token: str) -> User:
+        """
+        Validates the verification token and marks the user as verified.
+        """
+        user_id = decode_email_verification_token(token)
+        if user_id is None:
+            raise ValueError("Invalid or expired verification link.")
+
+        user = self.user_repo.get_by_id(user_id)
+        if user is None:
+            raise ValueError("User not found.")
+
+        if user.is_verified:
+            return user  # idempotent — already verified, no error
+
+        return self.user_repo.mark_verified(user)
+    
+    def resend_verification(self, email: str) -> None:
+        """
+        Re-sends a verification email. Always succeeds silently if the
+        email doesn't exist or is already verified, to avoid leaking
+        which emails are registered.
+        """
+        user = self.user_repo.get_by_email(email)
+        if user and not user.is_verified:
+            token = create_email_verification_token(user.user_id)
+            send_verification_email(user.email, user.full_name, token)

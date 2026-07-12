@@ -89,6 +89,14 @@ class UserRepository(BaseRepository[User]):
         return self.db.query(
             exists().where(User.email == email.lower())
         ).scalar()
+    
+    # Marks a user's email as verified
+    def mark_verified(self, user: User) -> User:
+        """
+        Sets is_verified = True after a successful token check.
+        """
+        user.is_verified = True
+        return self.save(user)
 
     # -------------------------------------------------------
     # CREATE
