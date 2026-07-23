@@ -2,12 +2,13 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+from fastapi.security import OAuth2PasswordRequestForm
 from app.core.dependencies import get_db, get_current_user
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse
+# from app.schemas.user import UserCreate, UserLogin, UserResponse
+from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import UserService
-
+from app.schemas.auth import LoginRequest, Token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -46,31 +47,54 @@ def register(
 # LOGIN
 # -------------------------------------------------------
 
+# @router.post(
+#     "/login",
+#     status_code=status.HTTP_200_OK
+# )
+# def login(
+#     data: LoginRequest,
+#     db: Session = Depends(get_db)
+# ):
+#     """
+#     Authenticates a user and returns a JWT access token.
+#     Use the token in the Authorization header as: Bearer <token>
+#     """
+#     service = UserService(db)
+
+#     try:
+#         token_data = service.login_user(data)
+#     except ValueError as e:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail=str(e)
+#         )
+
+#     return token_data
+
 @router.post(
     "/login",
+    response_model=Token,
     status_code=status.HTTP_200_OK
 )
 def login(
-    data: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    """
-    Authenticates a user and returns a JWT access token.
-    Use the token in the Authorization header as: Bearer <token>
-    """
     service = UserService(db)
 
+    login_data = LoginRequest(
+        email=form_data.username,
+        password=form_data.password
+    )
+
     try:
-        token_data = service.login_user(data)
+        return service.login_user(login_data)
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e)
         )
-
-    return token_data
-
-
 # -------------------------------------------------------
 # ME (get current logged-in user)
 # -------------------------------------------------------
