@@ -6,10 +6,10 @@ from app.schemas.user import UserCreate
 from app.services.user_service import UserService
 from app.models.user import User
 from app.services.email_service import send_verification_email 
-from app.core.security import (
-    hash_password, verify_password, create_access_token,
-    create_email_verification_token, decode_email_verification_token,
-)
+
+from app.core.password import hash_password,verify_password
+from app.core.jwt import create_access_token,decode_access_token
+from app.core.email_tokens import create_email_verification_token, decode_email_verification_token
 
 class AuthService:
     """
