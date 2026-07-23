@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password, verify_password, create_access_token
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import UserCreate, UserLogin
-
+# from app.schemas.user import UserCreate, UserLogin
+from app.schemas.user import UserCreate
+from app.schemas.auth import LoginRequest
 from app.core.security import (
     hash_password, verify_password, create_access_token,
     create_email_verification_token, decode_email_verification_token,
@@ -59,7 +60,7 @@ class UserService:
     # LOGIN
     # -------------------------------------------------------
 
-    def login_user(self, data: UserLogin) -> dict:
+    def login_user(self, data: LoginRequest) -> dict:
         """
         Full login flow:
         1. Check user exists by email

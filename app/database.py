@@ -2,8 +2,13 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+import os
 
-DATABASE_URL = "postgresql://user:password@localhost:5432/mydb"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 # or sqlite:
 # DATABASE_URL = "sqlite:///./app.db"
 
