@@ -5,7 +5,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.core.security import decode_access_token
+# from app.core.security import decode_access_token
+from app.core.jwt import decode_access_token
 from app.database import SessionLocal          # your DB session factory
 from app.models.user import User
 from app.repositories.user_repository import UserRepository

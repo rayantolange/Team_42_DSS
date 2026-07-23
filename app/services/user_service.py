@@ -8,10 +8,7 @@ from app.repositories.user_repository import UserRepository
 # from app.schemas.user import UserCreate, UserLogin
 from app.schemas.user import UserCreate
 from app.schemas.auth import LoginRequest
-from app.core.security import (
-    hash_password, verify_password, create_access_token,
-    create_email_verification_token, decode_email_verification_token,
-)
+
 from app.services.email_service import send_verification_email 
 
 class UserService:
