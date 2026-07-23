@@ -9,7 +9,7 @@ from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import UserService
 from app.schemas.auth import LoginRequest, Token
-
+from app.services.auth_services import AuthService
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
@@ -30,10 +30,10 @@ def register(
     Creates a new user account.
     Returns the created user — without password hash.
     """
-    service = UserService(db)
+    service = AuthService(db)
 
     try:
-        new_user = service.register_user(data)
+        new_user = service.register(data)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -80,7 +80,7 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    service = UserService(db)
+    service = AuthService(db)
 
     login_data = LoginRequest(
         email=form_data.username,
@@ -88,7 +88,7 @@ def login(
     )
 
     try:
-        return service.login_user(login_data)
+        return service.login(login_data)
 
     except ValueError as e:
         raise HTTPException(
@@ -123,7 +123,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     """
     Called when the user clicks the verification link in their email.
     """
-    service = UserService(db)
+    service = AuthService(db)
     try:
         service.verify_email(token)
     except ValueError as e:
@@ -138,6 +138,6 @@ def resend_verification(email: str, db: Session = Depends(get_db)):
     Resends a verification link if the account exists and isn't verified yet.
     Always returns the same message regardless of outcome.
     """
-    service = UserService(db)
+    service = AuthService(db)
     service.resend_verification(email)
     return {"message": "If that account exists and isn't verified, a new link has been sent."}
