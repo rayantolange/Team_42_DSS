@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas.documents import DocumentCreate, DocumentResponse, DocumentSummary
 from app.services.document_service import DocumentService
 from app.services.decision_service import DecisionService
+from app.core.permissions import allow_academics
 
 router = APIRouter(tags=["Documents"])
 
@@ -24,7 +25,8 @@ async def upload_document(
     decision_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Uploads a file and attaches it to a decision.
@@ -78,7 +80,8 @@ def list_documents_for_decision(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Lists all documents attached to a decision.
@@ -111,7 +114,8 @@ def list_documents_for_decision(
 def get_document(
     document_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Returns full detail of a single document, including file_path.
@@ -139,7 +143,8 @@ def get_document(
 def get_document_download_url(
     document_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Returns a temporary signed URL the frontend can use to download/preview the file.
@@ -168,7 +173,8 @@ def get_document_download_url(
 def delete_document(
     document_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Deletes a document record (and, once storage deletion is

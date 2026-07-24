@@ -10,6 +10,7 @@ from app.models.enums import DecisionStatusEnum
 from app.schemas.decision import DecisionCreate, DecisionUpdate, DecisionResponse, DecisionSummary
 from app.services.decision_service import DecisionService
 from app.core.access import check_decision_access
+from app.core.permissions import allow_academics
 
 router = APIRouter(prefix="/decisions", tags=["Decisions"])
 
@@ -26,7 +27,8 @@ router = APIRouter(prefix="/decisions", tags=["Decisions"])
 def create_decision(
     data: DecisionCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Creates a new decision under the current user's department.
@@ -62,7 +64,8 @@ def list_decisions(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Lists decisions belonging to the current user's department.
@@ -91,7 +94,8 @@ def list_decisions(
 def get_decision(
     decision_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Returns full details of a single decision.
@@ -120,7 +124,8 @@ def update_decision(
     decision_id: int,
     data: DecisionUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Partially updates a decision's editable fields
@@ -160,7 +165,8 @@ def update_decision_status(
     decision_id: int,
     new_status: DecisionStatusEnum,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Advances a decision's status according to the workflow:
