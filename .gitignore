@@ -30,4 +30,5 @@ build/
 
 # Coverage reports
 coverage/
-.coveragecookies.txt
+.coverage
+cookies.txt
