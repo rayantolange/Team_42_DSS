@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator, ConfigDict, EmailStr
-ALLOWED_DOMAIN = "@randomcollege.edu.np"
+ALLOWED_DOMAIN = "@gmail.com"
 
 
 def validate_college_email(value: str) -> str:
