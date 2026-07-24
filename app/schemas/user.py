@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator, ConfigDict, EmailStr
 from app.core.validators import validate_college_email
-from typing import Optional
 from app.models.enums import UserRoleEnum
 # ALLOWED_DOMAIN = "@randomcollege.edu.np"
 
@@ -62,9 +61,8 @@ class UserCreate(BaseModel):
         description="Institutional email address ending with @randomcollege.edu.np."
     )
 
-    role: Optional[UserRoleEnum] = Field(
-        default=None,
-        description="Updated status of the decision."
+    role: UserRoleEnum = Field(
+        description="Role assigned to the user within the system."
     )
 
     password: str = Field(
