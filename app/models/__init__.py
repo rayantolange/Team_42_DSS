@@ -2,6 +2,7 @@ from app.models.base import Base
 from app.models.enums import DecisionStatusEnum, OutcomeStatusEnum
 from app.models.department import Department
 from app.models.user import User
+from app.models.refresh_token import RefreshToken
 from app.models.decision import Decision
 from app.models.strategy import Strategy, ConstraintMaster
 from app.models.junction import DecisionStrategy, DecisionConstraint
@@ -14,6 +15,7 @@ __all__ = [
     "OutcomeStatusEnum",
     "Department",
     "User",
+    "RefreshToken",
     "Decision",
     "Strategy",
     "ConstraintMaster",
