@@ -18,21 +18,7 @@ from app.services.decision_service import DecisionService
 
 
 router = APIRouter(tags=["Strategies"])
-
-
-def _require_admin(current_user: User) -> None:
-    """
-    Strategy master data is shared across all departments,
-    so creating/editing/deleting entries is restricted to admins.
-    """
-    is_admin = getattr(current_user, "role", None) == "admin"  # adjust to your actual role field/enum
-
-    if not is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only admins can manage the strategy master list."
-        )
-
+from app.core.permissions import allow_admin, allow_academics
 
 # -------------------------------------------------------
 # CREATE (admin only — master list)
@@ -46,12 +32,12 @@ def _require_admin(current_user: User) -> None:
 def create_strategy(
     data: StrategyCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_admin)
 ):
     """
     Adds a new strategy to the master list.
     """
-    _require_admin(current_user)
 
     service = StrategyService(db)
 
@@ -129,12 +115,12 @@ def update_strategy(
     strategy_id: int,
     data: StrategyUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_admin)
 ):
     """
     Updates a strategy's name or description.
     """
-    _require_admin(current_user)
 
     service = StrategyService(db)
 
@@ -158,12 +144,12 @@ def update_strategy(
 def delete_strategy(
     strategy_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_admin)
 ):
     """
     Removes a strategy from the master list.
     """
-    _require_admin(current_user)
 
     service = StrategyService(db)
 
@@ -190,7 +176,8 @@ def link_strategy_to_decision(
     decision_id: int,
     data: DecisionStrategyLink,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Links an existing strategy to a decision.
@@ -262,7 +249,8 @@ def unlink_strategy_from_decision(
     decision_id: int,
     strategy_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Removes a strategy from a decision.

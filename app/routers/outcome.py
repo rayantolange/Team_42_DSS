@@ -11,7 +11,7 @@ from app.models.enums import OutcomeStatusEnum
 from app.schemas.outcome import OutcomeCreate, OutcomeUpdate, OutcomeResponse, OutcomeSummary
 from app.services.outcome_service import OutcomeService
 from app.services.decision_service import DecisionService
-
+from app.core.permissions import allow_academics
 
 router = APIRouter(tags=["Outcomes"])
 
@@ -29,7 +29,8 @@ def create_outcome(
     decision_id: int,
     data: OutcomeCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Records a new outcome evaluation against a decision.
@@ -71,7 +72,8 @@ def list_outcomes_for_decision(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Lists all outcomes recorded for a decision, most recent first.
@@ -108,7 +110,8 @@ def list_outcomes_for_decision(
 def get_latest_outcome(
     decision_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Returns only the most recent outcome for a decision.
@@ -150,7 +153,8 @@ def get_latest_outcome(
 def get_outcome(
     outcome_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Returns full detail of a single outcome.
@@ -185,7 +189,8 @@ def update_outcome(
     outcome_id: int,
     data: OutcomeUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Partially updates an outcome — e.g. re-evaluating success_score
@@ -225,7 +230,8 @@ def update_outcome(
 def delete_outcome(
     outcome_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Deletes a single outcome record.
