@@ -1,6 +1,5 @@
 # routers/auth.py
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.dependencies import get_db, get_current_user
@@ -10,13 +9,15 @@ from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import UserService
 from app.schemas.auth import LoginRequest, Token
 from app.services.auth_services import AuthService
+from pydantic import ValidationError
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+REFRESH_COOKIE_NAME = "refresh_token"
 
 # -------------------------------------------------------
 # REGISTER
 # -------------------------------------------------------
-
 @router.post(
     "/register",
     response_model=UserResponse,
@@ -31,7 +32,6 @@ def register(
     Returns the created user — without password hash.
     """
     service = AuthService(db)
-
     try:
         new_user = service.register(data)
     except ValueError as e:
@@ -39,66 +39,109 @@ def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-
     return new_user
 
 
 # -------------------------------------------------------
 # LOGIN
 # -------------------------------------------------------
-
-# @router.post(
-#     "/login",
-#     status_code=status.HTTP_200_OK
-# )
-# def login(
-#     data: LoginRequest,
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Authenticates a user and returns a JWT access token.
-#     Use the token in the Authorization header as: Bearer <token>
-#     """
-#     service = UserService(db)
-
-#     try:
-#         token_data = service.login_user(data)
-#     except ValueError as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail=str(e)
-#         )
-
-#     return token_data
-
 @router.post(
     "/login",
     response_model=Token,
     status_code=status.HTTP_200_OK
 )
 def login(
+    response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
     service = AuthService(db)
-
-    login_data = LoginRequest(
-        email=form_data.username,
-        password=form_data.password
-    )
-
     try:
-        return service.login(login_data)
-
+        login_data = LoginRequest(
+            email=form_data.username,
+            password=form_data.password
+        )
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e)
+        )
+    try:
+        result = service.login(login_data)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e)
         )
+
+    refresh_token = result.pop("refresh_token")
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=refresh_token,
+        httponly=True,
+        secure=False,   # set True once you're serving over HTTPS
+        samesite="lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/auth",
+    )
+    return result
+
+
+# -------------------------------------------------------
+# REFRESH
+# -------------------------------------------------------
+@router.post("/refresh", status_code=status.HTTP_200_OK, response_model=Token)
+def refresh(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None, alias=REFRESH_COOKIE_NAME),
+    db: Session = Depends(get_db),
+):
+    if refresh_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing refresh token."
+        )
+
+    service = AuthService(db)
+    try:
+        result = service.refresh(refresh_token)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e)
+        )
+
+    new_refresh_token = result.pop("refresh_token")
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=new_refresh_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=60 * 60 * 24 * 30,
+        path="/auth",
+    )
+    return result
+
+
+# -------------------------------------------------------
+# LOGOUT
+# -------------------------------------------------------
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logout(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None, alias=REFRESH_COOKIE_NAME),
+    db: Session = Depends(get_db),
+):
+    if refresh_token:
+        AuthService(db).logout(refresh_token)
+    response.delete_cookie(key=REFRESH_COOKIE_NAME, path="/auth")
+    return {"message": "Logged out."}
+
+
 # -------------------------------------------------------
 # ME (get current logged-in user)
 # -------------------------------------------------------
-
 @router.get(
     "/me",
     response_model=UserResponse,
@@ -114,10 +157,10 @@ def get_me(
     """
     return current_user
 
+
 # -------------------------------------------------------
 # EMAIL VERIFICATION
 # -------------------------------------------------------
-
 @router.get("/verify-email", status_code=status.HTTP_200_OK)
 def verify_email(token: str, db: Session = Depends(get_db)):
     """
@@ -128,7 +171,6 @@ def verify_email(token: str, db: Session = Depends(get_db)):
         service.verify_email(token)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
     return {"message": "Email verified successfully. You can now log in."}
 
 
