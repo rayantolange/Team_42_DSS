@@ -6,6 +6,7 @@ import {
   History,
   Upload,
   HelpCircle,
+  Users,
 } from "lucide-react";
 
 export interface NavItem {
@@ -55,6 +56,20 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Decision History",
     icon: History,
     description: "Browse and filter past institutional decisions",
+  },
+];
+
+/**
+ * Primary navigation for the admin role — technical/system
+ * administration only. Admins are not institutional stakeholders
+ * and do not see decision, policy, or department analytics data.
+ */
+export const ADMIN_NAV_ITEMS: NavItem[] = [
+  {
+    to: "/admin/users",
+    label: "User Management",
+    icon: Users,
+    description: "View accounts and manage role assignments",
   },
 ];
 

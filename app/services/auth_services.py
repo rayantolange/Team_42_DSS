@@ -42,22 +42,22 @@ class AuthService:
         Full login flow:
         1. Check user exists by email
         2. Verify the plain password against the stored hash
-        3. Create and return a JWT access token + refresh token
+        3. Reject deactivated accounts
+        4. Create and return a JWT access token + refresh token
         """
-
         # Step 1 — find user
         user = self.user_repo.get_by_email(data.email)
-
         if not user:
             # deliberately vague — don't reveal whether
             # email exists or password is wrong
             raise ValueError("Invalid email or password.")
-
         # Step 2 — verify password
         password_valid = verify_password(data.password, user.password_hash)
-
         if not password_valid:
             raise ValueError("Invalid email or password.")
+        # Step 3 — reject deactivated accounts
+        if not user.is_active:
+            raise ValueError("This account has been deactivated.")
 
         # Step 3 — create JWT + refresh token
         access_token = create_access_token(
@@ -167,7 +167,7 @@ class AuthService:
         if user:
             token = create_password_reset_token(user.user_id)
             send_password_reset_email(user.email, user.full_name, token)
-            
+
     def reset_password(self, token: str, new_password: str) -> User:
         """
         Validates the reset token and updates the user's password.

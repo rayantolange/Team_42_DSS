@@ -112,6 +112,28 @@ class UserResponse(BaseModel):
         description="Timestamp of when the user account was created."
     )
 
+class AdminUserResponse(BaseModel):
+    """
+    Extended user shape for admin views — includes verification
+    status alongside the standard safe fields.
+    """
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    department_id: int
+    full_name: str
+    email: str
+    role: str
+    is_verified: bool
+    is_active: bool
+    created_at: datetime
+
+
+class UpdateUserRoleRequest(BaseModel):
+    """
+    Payload for an admin changing another user's role.
+    """
+    role: UserRoleEnum
 
 # UserLogin--- POST /auth/login---- Accepts email + plain password
 # UserCreate---- POST /auth/register---- Accepts all registration fields + plain password

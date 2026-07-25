@@ -12,18 +12,32 @@ export function useAuth() {
   const logout = useAuthStore((s) => s.logout);
 
   const isAdmin = user?.role === "admin";
-  const isDepartmentHead = user?.role === "department_head";
+  const isPrincipal = user?.role === "principal";
+  const isHod = user?.role === "hod";
+  const isFaculty = user?.role === "faculty";
+  const isStaff = user?.role === "staff";
 
-  /** The department a non-admin user is scoped to, if any. */
-  const scopedDepartmentId = isAdmin ? null : user?.departmentId ?? null;
+  /** Principal sees/acts across every department; everyone else is scoped to their own. */
+  const canSeeAllDepartments = isPrincipal;
+
+  /** The department a department-scoped user is limited to, if any. */
+  const scopedDepartmentId = canSeeAllDepartments ? null : user?.departmentId ?? null;
+
+  /** Principal (full) and HOD (within their own department) can create/edit decisions. */
+  const canActOnDecisions = isPrincipal || isHod;
 
   return {
     user,
     token,
     isAuthenticated,
     isAdmin,
-    isDepartmentHead,
+    isPrincipal,
+    isHod,
+    isFaculty,
+    isStaff,
+    canSeeAllDepartments,
     scopedDepartmentId,
+    canActOnDecisions,
     login,
     logout,
   };

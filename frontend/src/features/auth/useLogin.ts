@@ -19,8 +19,11 @@ export function useLogin() {
         description: "You're signed in to Nirnaya.",
         variant: "success",
       });
+      const defaultRoute =
+        response.user.role === "admin" ? "/admin/users" : "/dashboard";
       const redirectTo =
-        (location.state as { from?: Location } | null)?.from?.pathname ?? "/dashboard";
+        (location.state as { from?: Location } | null)?.from?.pathname ??
+        defaultRoute;
       navigate(redirectTo, { replace: true });
     },
   });

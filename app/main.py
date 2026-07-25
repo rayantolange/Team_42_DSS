@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 
-from app.routers import auth, decision , document, outcome, strategy, department
+from app.routers import auth, decision , document, outcome, strategy, department, admin
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -30,6 +30,7 @@ app.include_router(document.router)
 app.include_router(outcome.router)
 app.include_router(strategy.router)
 app.include_router(department.router)
+app.include_router(admin.router)
 
 # -------------------------------------------------------
 # ROOT / HEALTH CHECK

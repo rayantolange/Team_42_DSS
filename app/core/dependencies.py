@@ -70,3 +70,22 @@ def get_current_user(
         )
 
     return user
+
+
+# -------------------------------------------------------
+# ADMIN-ONLY GUARD
+# -------------------------------------------------------
+def require_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """
+    Ensures the current user has the 'admin' role.
+    Use as a dependency on any route restricted to admins.
+    Raises 403 if the authenticated user isn't an admin.
+    """
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This action requires administrator privileges."
+        )
+    return current_user
