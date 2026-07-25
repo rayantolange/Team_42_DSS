@@ -29,9 +29,9 @@ interface AuthSplitLayoutProps {
  */
 export function AuthSplitLayout({ title, description, highlights, children }: AuthSplitLayoutProps) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="grid h-screen overflow-hidden lg:grid-cols-2">
       {/* Brand / narrative panel — hidden on small screens to keep the form the focus on mobile */}
-      <div className="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-12">
+      <div className="relative h-screen hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-12">
         <img
           src={campusPhoto}
           alt=""
@@ -81,7 +81,7 @@ export function AuthSplitLayout({ title, description, highlights, children }: Au
       </div>
 
       {/* Form panel */}
-      <div className="flex flex-col bg-background">
+      <div className="flex h-screen flex-col overflow-y-auto bg-background">
         <div className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
           <div className="w-full max-w-sm animate-fade-in-up">
             <div className="mb-8 flex justify-center lg:hidden">

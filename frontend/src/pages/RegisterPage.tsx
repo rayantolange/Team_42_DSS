@@ -1,10 +1,23 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle, CheckCircle2, Lock, Layers, ArrowRight } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Lock,
+  Layers,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { Button } from "@components/ui/Button";
 import { AuthSplitLayout } from "@layouts/AuthSplitLayout";
 import { useRegister } from "@features/auth/useRegister";
-import { DEPARTMENTS } from "@services/index";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDepartments } from "@services/index";
+import {
+  PasswordStrengthMeter,
+  getPasswordErrors,
+} from "@components/ui/PasswordStrengthMeter";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -13,36 +26,55 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [departmentId, setDepartmentId] = useState("");
+  const [role, setRole] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartments,
+  });
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFormError(null);
+
+    const passwordErrors = getPasswordErrors(password);
+    if (passwordErrors.length > 0) {
+      setFormError(
+        `Password needs: ${passwordErrors.join(", ").toLowerCase()}`,
+      );
+      return;
+    }
 
     if (password !== confirmPassword) {
       setFormError("Passwords do not match.");
       return;
     }
     if (!agreed) {
-      setFormError("You must agree to the Terms of Service and Privacy Policy to continue.");
+      setFormError(
+        "You must agree to the Terms of Service and Privacy Policy to continue.",
+      );
       return;
     }
 
     registerMutation.mutate(
-      { fullName, email, password, departmentId },
+      { fullName, email, password, departmentId, role },
       {
         onSuccess: () => {
           navigate("/login", { state: { registered: true } });
         },
-      }
+      },
     );
   }
 
   const apiError =
-    registerMutation.error instanceof Error ? registerMutation.error.message : undefined;
+    registerMutation.error instanceof Error
+      ? registerMutation.error.message
+      : undefined;
 
   return (
     <AuthSplitLayout
@@ -62,8 +94,13 @@ export default function RegisterPage() {
       ]}
     >
       <div className="mb-8">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Create Account</h2>
-        <Link to="/login" className="mt-1.5 inline-block text-sm font-medium text-primary hover:underline">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
+          Create Account
+        </h2>
+        <Link
+          to="/login"
+          className="mt-1.5 inline-block text-sm font-medium text-primary hover:underline"
+        >
           Join into Nirnaya
         </Link>
       </div>
@@ -77,7 +114,11 @@ export default function RegisterPage() {
           </p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+          noValidate
+        >
           <div className="flex flex-col gap-1.5">
             <label htmlFor="fullName" className="text-sm font-medium">
               Full Name
@@ -108,37 +149,68 @@ export default function RegisterPage() {
               placeholder="ruby@iimscollege.edu.np"
               className="h-11 rounded-lg border border-input bg-background px-3.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
-            <p className="text-xs text-muted-foreground">Must be a verified .edu or .gov domain.</p>
+            <p className="text-xs text-muted-foreground">
+              Must be a verified .edu or .gov domain.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="reg-password" className="text-sm font-medium">
-                Password
-              </label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="reg-password" className="text-sm font-medium">
+              Password
+            </label>
+            <div className="relative">
               <input
                 id="reg-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-11 rounded-lg border border-input bg-background px-3.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-full rounded-lg border border-input bg-background px-3.5 pr-10 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="confirm-password" className="text-sm font-medium">
-                Confirm Password
-              </label>
+            <PasswordStrengthMeter password={password} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="confirm-password" className="text-sm font-medium">
+              Confirm Password
+            </label>
+            <div className="relative">
               <input
                 id="confirm-password"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="h-11 rounded-lg border border-input bg-background px-3.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-11 w-full rounded-lg border border-input bg-background px-3.5 pr-10 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((s) => !s)}
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -156,11 +228,32 @@ export default function RegisterPage() {
               <option value="" disabled>
                 Select department
               </option>
-              {DEPARTMENTS.map((dept) => (
+              {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="role" className="text-sm font-medium">
+              Role
+            </label>
+            <select
+              id="role"
+              required
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="h-11 rounded-lg border border-input bg-background px-3.5 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="" disabled>
+                Select role
+              </option>
+              <option value="principal">Principal</option>
+              <option value="hod">Head of Department</option>
+              <option value="faculty">Faculty</option>
+              <option value="staff">Staff</option>
             </select>
           </div>
 
@@ -185,15 +278,27 @@ export default function RegisterPage() {
           </label>
 
           {(formError ?? apiError) && (
-            <div role="alert" className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <div
+              role="alert"
+              className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
+            >
               <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>{formError ?? apiError}</span>
             </div>
           )}
 
-          <Button type="submit" size="lg" isLoading={registerMutation.isPending} className="mt-1">
-            {registerMutation.isPending ? "Creating account…" : "Create Account"}
-            {!registerMutation.isPending && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+          <Button
+            type="submit"
+            size="lg"
+            isLoading={registerMutation.isPending}
+            className="mt-1"
+          >
+            {registerMutation.isPending
+              ? "Creating account…"
+              : "Create Account"}
+            {!registerMutation.isPending && (
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            )}
           </Button>
         </form>
       )}

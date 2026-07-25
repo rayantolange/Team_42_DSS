@@ -2,8 +2,9 @@
 
 from fastapi import FastAPI
 
-from app.routers import auth, decision , document, outcome, strategy
+from app.routers import auth, decision , document, outcome, strategy, department
 
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="College Decision Support System",
@@ -11,6 +12,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -------------------------------------------------------
 # ROUTERS
@@ -21,6 +29,7 @@ app.include_router(decision.router)
 app.include_router(document.router)
 app.include_router(outcome.router)
 app.include_router(strategy.router)
+app.include_router(department.router)
 
 # -------------------------------------------------------
 # ROOT / HEALTH CHECK

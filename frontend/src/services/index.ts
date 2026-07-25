@@ -11,10 +11,8 @@
  * rather than reaching into services/mock directly.
  */
 
-export {
-  fetchDepartments,
-  fetchDepartmentById,
-} from "./mock/departmentService";
+export { fetchDepartments } from "./departmentService";
+export { fetchDepartmentById } from "./mock/departmentService";
 
 export {
   fetchDashboardMetrics,
@@ -40,13 +38,10 @@ export {
   validateFile,
 } from "./mock/uploadService";
 
-export {
-  login,
-  getDemoAccounts,
-  register,
-  requestPasswordReset,
-  type RegisterRequest,
-} from "./mock/authService";
+export { login } from "./authService";
+export { register, type RegisterRequest } from "./authService";
+
+export { requestPasswordReset, resetPassword } from "./authService";
 
 export { POLICIES, DEPARTMENTS, getPolicyById, getPoliciesByDepartment, getDepartmentById } from "@/data/datasetLoader";
 export { DECISIONS, getDecisionsByPolicy, getDecisionById } from "@/data/decisionGenerator";

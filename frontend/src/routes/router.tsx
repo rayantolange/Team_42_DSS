@@ -19,6 +19,8 @@ const SettingsPage = lazy(() => import("@pages/SettingsPage"));
 const HelpCenterPage = lazy(() => import("@pages/HelpCenterPage"));
 const NotAuthorizedPage = lazy(() => import("@pages/NotAuthorizedPage"));
 const NotFoundPage = lazy(() => import("@pages/NotFoundPage"));
+const VerifyEmailPage = lazy(() => import("@pages/VerifyEmailPage"));
+const ResetPasswordPage = lazy(() => import("@pages/ResetPasswordPage"));
 
 /** Wraps a lazy page in Suspense with a consistent loading skeleton. */
 function withSuspense(element: ReactNode) {
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: withSuspense(<RegisterPage />),
+  },
+  {
+    path: "/verify-email",
+    element: withSuspense(<VerifyEmailPage />),
+  },
+  {
+    path: "/reset-password",
+    element: withSuspense(<ResetPasswordPage />),
   },
   {
     path: "/forgot-password",
