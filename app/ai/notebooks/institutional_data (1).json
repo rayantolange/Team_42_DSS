@@ -1,0 +1,563 @@
+[
+  {
+    "id": "decision_001",
+    "title": "Initiate Five-Year Program Review for BBA",
+    "strategies": [
+      "Form a review committee comprising the Department Head, two senior faculty, one industry representative, and the QA Office Liaison. Conduct gap analysis against UGC Program Approval Guidelines and current market needs over an eight-week period."
+    ],
+    "constraints": [
+      "Changes require Academic Council approval at least one semester before implementation.",
+      "All revisions must be reflected in the updated course catalog submitted to the affiliating university."
+    ],
+    "decisions": [
+      "Authorize the immediate execution of a comprehensive curriculum review for the BBA program to align learning modules with regional commercial practices and national university guidelines."
+    ],
+    "outcomes": [
+      "Program review completed and approved; updated BBA curriculum submitted to Academic Council."
+    ]
+  },
+  {
+    "id": "decision_002",
+    "title": "Approve New MBA Specialization in Digital Finance",
+    "strategies": [
+      "Draft new specialization proposal including learning outcomes, credit structure, resource requirements, and faculty mapping. Submit to Department Review Committee and Academic Council for approval at least one full semester before intended launch."
+    ],
+    "constraints": [
+      "New program proposals must be reviewed and approved by Academic Council at least one semester before implementation.",
+      "Revised program catalog must be submitted to the affiliating university before enrollment commences."
+    ],
+    "decisions": [
+      "Draft new specialization proposal including learning outcomes, credit structure, resource requirements, and faculty mapping. Submit to Department Review Committee and Academic Council."
+    ],
+    "outcomes": [
+      "MBA Digital Finance specialization approved by Academic Council; catalog updated; student enrollment opened."
+    ]
+  },
+  {
+    "id": "decision_003",
+    "title": "Adjudicate Academic Misconduct in Final Year Project",
+    "strategies": [
+      "Convene the Departmental Discipline Committee within five working days. Collect plagiarism detection report as primary evidence. Conduct separate hearings for each implicated student and issue decisions within 21 working days of the initial report."
+    ],
+    "constraints": [
+      "Plagiarism detection tool must be used for all major assessments and results documented.",
+      "Investigations must be completed within 21 working days of the initial report."
+    ],
+    "decisions": [
+      "Convening the Departmental Discipline Committee within five working days. Collect plagiarism detection report as primary evidence and conduct separate hearings."
+    ],
+    "outcomes": [
+      "Both students found in violation; grade of zero assigned for the project component. Incident recorded in academic files."
+    ]
+  },
+  {
+    "id": "decision_004",
+    "title": "Suspend Student for Repeat Examination Cheating",
+    "strategies": [
+      "Escalate the matter to the full Academic Council as required for repeat violations. Provide the student written notice of the escalated hearing, compile all previous violation records, and issue a formal decision within 21 working days."
+    ],
+    "constraints": [
+      "Repeat academic integrity violations must be referred to the Academic Council for decision.",
+      "All decisions and investigation records must be documented in the student s academic file."
+    ],
+    "decisions": [
+      "Escalate the matter to the full Academic Council as required for repeat violations. Provide the student written notice of the escalated hearing."
+    ],
+    "outcomes": [
+      "Academic Council upholds suspension for one semester. Student notified in writing with conditions for reinstatement."
+    ]
+  },
+  {
+    "id": "decision_005",
+    "title": "Approve MOU with Commercial Bank for Internship Partnership",
+    "strategies": [
+      "Draft MOU covering placement scope, student obligations, faculty supervisor access, and financial terms. Route through Finance Office for financial review and Legal/Compliance Officer for validation. Submit to College Principal for signature."
+    ],
+    "constraints": [
+      "All MOUs must be reviewed by the legal/compliance officer before signing.",
+      "MOUs must be reviewed and renewed every three years."
+    ],
+    "decisions": [
+      "Draft MOU covering placement scope, student obligations, faculty supervisor access, and financial terms. Route through Finance Office for financial review."
+    ],
+    "outcomes": [
+      "MOU signed by College Principal. Departmental liaison assigned. First cohort of 15 students placed."
+    ]
+  },
+  {
+    "id": "decision_006",
+    "title": "Renew Expired MOU with Accounting Firm Partner",
+    "strategies": [
+      "Initiate renewal process by contacting the partner organization and revising MOU terms. Conduct legal compliance review. Obtain Finance Office sign-off on any revised financial obligations. Present to College Principal for signature."
+    ],
+    "constraints": [
+      "Expired MOUs must be formally renewed before any partnership activities resume.",
+      "Revised MOU terms must include updated financial clauses reviewed by the Finance Office."
+    ],
+    "decisions": [
+      "Initiate renewal process by contacting the partner organization and revising MOU terms. Conduct legal compliance review and obtain Finance sign-off."
+    ],
+    "outcomes": [
+      "Renewed MOU executed with expanded capacity for 20 student placements per semester. Activities resumed."
+    ]
+  },
+  {
+    "id": "decision_007",
+    "title": "Resolve Student Internship Dispute with Host Organization",
+    "strategies": [
+      "Internship Coordinator to investigate complaint by reviewing placement agreement and contacting host organization. Faculty supervisor to conduct remedial on-site visit within five working days. Mediation session to be arranged if dispute is unresolved."
+    ],
+    "constraints": [
+      "Host organizations must comply with the pre-approved internship scope and student task assignment terms.",
+      "Students failing the internship due to host organization breach must be offered an alternative placement."
+    ],
+    "decisions": [
+      "Internship Coordinator to investigate complaint by reviewing placement agreement and contacting host organization. Faculty supervisor to conduct remedial visit."
+    ],
+    "outcomes": [
+      "Host organization cautioned and scope realigned. Faculty supervisor visit completed. Student continued placement."
+    ]
+  },
+  {
+    "id": "decision_008",
+    "title": "Suspend IT Access After AUP Violation",
+    "strategies": [
+      "Suspend the users IT access pending investigation. Notify the HR Department to involve the relevant line manager. The IT Department Head conducts the investigation and produces a written findings report within seven working days."
+    ],
+    "constraints": [
+      "Non-compliance with the AUP may result in immediate suspension of IT access pending investigation.",
+      "The AUP must be reviewed and re-signed by all users annually; compliance records must be maintained."
+    ],
+    "decisions": [
+      "Suspend the users IT access pending investigation. Notify the HR Department to involve the relevant line manager and issue a formal findings report."
+    ],
+    "outcomes": [
+      "Violation confirmed. IT access suspended for 30 days. Disciplinary proceedings initiated through HR."
+    ]
+  },
+  {
+    "id": "decision_009",
+    "title": "Respond to Suspected Data Breach of Student Records",
+    "strategies": [
+      "Activate the Cybersecurity Incident Response Plan. IT Head escalates to Level 1 (Critical). DPO assesses scope of data exposure. Affected parties identified within 72 hours. Nepal Cyber Bureau notified as required."
+    ],
+    "constraints": [
+      "Restricted data cannot be transmitted via unencrypted channels; breach must be escalated within 72 hours.",
+      "Student records must be retained for 10 years post-graduation under the data classification framework."
+    ],
+    "decisions": [
+      "Activate the Cybersecurity Incident Response Plan. IT Head escalates to Level 1 (Critical). DPO assesses scope of data exposure and notifies Cyber Bureau."
+    ],
+    "outcomes": [
+      "Breach confirmed. Incident response plan activated. 120 student records identified as potentially exposed."
+    ]
+  },
+  {
+    "id": "decision_010",
+    "title": "Classify and Restrict New HR Payroll Database",
+    "strategies": [
+      "DPO conducts data classification assessment based on ITD-POL-002 framework. Payroll data classified as Restricted. System Administrators configure role-based access controls, encryption at rest and in transit, and retention deletion schedules."
+    ],
+    "constraints": [
+      "Restricted data cannot be transmitted via unencrypted channels; encryption is mandatory.",
+      "HR records must be retained for 5 years post-separation per the data retention schedule."
+    ],
+    "decisions": [
+      "DPO conducts data classification assessment based on framework. System Administrators configure role-based access controls and encryption matrices."
+    ],
+    "outcomes": [
+      "Payroll database classified as Restricted. Access restricted to HR Head, Finance Officer, and auditor roles."
+    ]
+  },
+  {
+    "id": "decision_011",
+    "title": "Contain and Recover from Ransomware Attack",
+    "strategies": [
+      "Activate Level 1 Critical Incident Response. Isolate affected systems immediately. Restore from last verified backup. IT Head communicates to College Administration. DPO assesses data exposure. Nepal Cyber Bureau notified. Post-incident report to be produced within seven days."
+    ],
+    "constraints": [
+      "Level 1 critical incidents must be contained within 4 hours of detection.",
+      "Reportable cybersecurity incidents must be escalated to the Nepal Cyber Bureau as required by national law."
+    ],
+    "decisions": [
+      "Activate Level 1 Critical Incident Response. Isolate affected systems immediately. Restore from last verified backup and file Police Cyber Bureau reports."
+    ],
+    "outcomes": [
+      "Systems contained within 3 hours. LMS restored from 24-hour backup within 6 hours. Cyber Bureau report filed."
+    ]
+  },
+  {
+    "id": "decision_012",
+    "title": "Investigate and Remove Unauthorized Software Installation",
+    "strategies": [
+      "Remove unauthorized software immediately from all affected devices. Issue formal warning letters to the responsible department. Document the finding in the software asset register. Conduct departmental briefing on software policy compliance."
+    ],
+    "constraints": [
+      "No software may be installed on institutional devices without IT Department prior approval.",
+      "Annual license audit must be conducted and all unauthorized installations addressed immediately."
+    ],
+    "decisions": [
+      "Remove unauthorized software immediately from all affected devices. Issue formal warning letters and update software asset register tracking lines."
+    ],
+    "outcomes": [
+      "Unauthorized software removed from all 12 devices. Department Head issued formal warning letter."
+    ]
+  },
+  {
+    "id": "decision_013",
+    "title": "Procure and Deploy Campus-Wide Anti-Virus Licensing",
+    "strategies": [
+      "IT Procurement Officer requests quotes from at least three vendors. Finance Department verifies budget availability. IT Head reviews technical proposals. College Principal approves procurement if cost exceeds NPR 500,000. Contract awarded and deployment scheduled."
+    ],
+    "constraints": [
+      "Purchases above NPR 500,000 require a minimum of three competitive quotations.",
+      "Open-source software must be vetted for license compatibility; all commercial software must be licensed before deployment."
+    ],
+    "decisions": [
+      "IT Procurement Officer requests quotes from at least three vendors. Finance Department verifies budget availability and awards deployment contract."
+    ],
+    "outcomes": [
+      "Three-year enterprise endpoint security license procured at competitive rate. Deployed across all devices."
+    ]
+  },
+  {
+    "id": "decision_014",
+    "title": "Execute Annual IT Disaster Recovery Drill",
+    "strategies": [
+      "IT Head schedules a full DR drill simulating a critical system failure of the Student Information System. Backup Administrator verifies off-site backup integrity. Recovery procedures tested against 4-hour RTO and 24-hour RPO targets. Results documented."
+    ],
+    "constraints": [
+      "DR drills must be conducted at least annually; RTO for critical systems is 4 hours.",
+      "Backups must be stored off-site or in a geographically separate cloud region."
+    ],
+    "decisions": [
+      "IT Head schedules a full DR drill simulating a critical system failure of the Student Information System. Backup Administrator verifies off-site backup."
+    ],
+    "outcomes": [
+      "DR drill completed successfully. SIS restored within 3 hours 20 minutes (within RTO). RPO met perfectly."
+    ]
+  },
+  {
+    "id": "decision_015",
+    "title": "Activate Business Continuity Plan After Earthquake Disruption",
+    "strategies": [
+      "IT Head activates the Business Continuity Plan. Manual procedures activated for critical administrative processes. Backup systems at offsite cloud region brought online. All departments notified of manual continuity steps per departmental dependency list."
+    ],
+    "constraints": [
+      "Critical systems must be restored within 4-hour RTO; manual continuity procedures must be activated if recovery fails.",
+      "College Administration must formally declare a business continuity event before BCP activation."
+    ],
+    "decisions": [
+      "IT Head activates the Business Continuity Plan. Manual procedures activated for critical processes. Cloud backup storage assets brought online."
+    ],
+    "outcomes": [
+      "Financial Management System restored within 3.5 hours via cloud backup. LMS restored within 5 hours."
+    ]
+  },
+  {
+    "id": "decision_016",
+    "title": "Implement Annual AUP Re-Signing Cycle for All Staff",
+    "strategies": [
+      "IT Department Head generates non-compliance list in coordination with HR. Email reminders issued with seven-day deadline. Non-compliant users IT access suspended until re-signing is confirmed. HR notified for inclusion in service compliance records."
+    ],
+    "constraints": [
+      "The AUP must be reviewed and re-signed by all users annually as a condition of continued IT access.",
+      "Non-compliance with AUP re-signing may result in temporary suspension of IT resource access."
+    ],
+    "decisions": [
+      "IT Department Head generates non-compliance list in coordination with HR. Email reminders issued with temporary access suspension warning."
+    ],
+    "outcomes": [
+      "100% compliance achieved within 12 days. Seven users had access temporarily suspended; six reinstated."
+    ]
+  },
+  {
+    "id": "decision_017",
+    "title": "Approve Faculty Sabbatical for Doctoral Research",
+    "strategies": [
+      "Department Head reviews faculty CPD plan and confirms alignment with departmental needs. HR verifies service record and calculates return-of-service bond. Finance confirms CPD budget availability. Return-of-service bond agreement prepared for signing."
+    ],
+    "constraints": [
+      "Faculty sponsored for degree-level study must serve a return-of-service period equal to the sponsorship duration.",
+      "CPD budget must not exceed 5% of the departmental annual budget."
+    ],
+    "decisions": [
+      "Department Head reviews faculty CPD plan. HR verifies service record and calculates return-of-service bond. Finance confirms budget allocation tracking."
+    ],
+    "outcomes": [
+      "Sabbatical approved for two years. Return-of-service bond of two years signed. Finance releases CPD budget."
+    ]
+  },
+  {
+    "id": "decision_018",
+    "title": "Deny Conference Travel Grant Due to Budget Ceiling",
+    "strategies": [
+      "Department Head ranks requests by academic merit, conference ranking, and alignment with departmental research priorities. Finance confirms the 5% budget ceiling. Two grants approved; one deferred to next fiscal year with written justification."
+    ],
+    "constraints": [
+      "CPD budget must not exceed 5% of the departmental annual budget (Duplicate tracking constraint).",
+      "Faculty must submit a utilization report within 30 days of returning from any CPD activity."
+    ],
+    "decisions": [
+      "Department Head ranks requests by academic merit and priorities. Finance confirms the 5% budget ceiling boundary limits; defer one grant tracking profile."
+    ],
+    "outcomes": [
+      "Two travel grants approved. One deferred with written reason and priority consideration for next cycle."
+    ]
+  },
+  {
+    "id": "decision_019",
+    "title": "Submit Annual Strategic Plan to College Principal",
+    "strategies": [
+      "Department Head convenes final faculty planning session to finalize KPIs linked to budget requests. QA Office Liaison reviews plan for accreditation alignment. Plan formatted per institutional template and submitted to College Principal within the deadline."
+    ],
+    "constraints": [
+      "Strategic plans must be submitted to the College Principal by the end of the first month of each academic year.",
+      "KPIs must be measurable and linked to resource allocations in the departmental budget request."
+    ],
+    "decisions": [
+      "Department Head convenes final faculty planning session to finalize KPIs linked to budget requests. QA Office reviews for accreditation alignment vectors."
+    ],
+    "outcomes": [
+      "Annual strategic plan submitted on time. College Principal endorses the plan. Resources allocated accordingly."
+    ]
+  },
+  {
+    "id": "decision_020",
+    "title": "Approve Graduate Thesis Ethics Clearance",
+    "strategies": [
+      "Research Ethics Committee reviews proposal for informed consent procedures, confidentiality safeguards, and voluntary participation assurances. Requests clarification on anonymization approach for identifiable interview responses. Issues conditional clearance pending revisions."
+    ],
+    "constraints": [
+      "No data collection may begin without written REC clearance.",
+      "Students must submit research proposals for ethics review within 60 days of thesis registration."
+    ],
+    "decisions": [
+      "Research Ethics Committee reviews proposal for informed consent, confidentiality safeguards, and voluntary participation assurance metrics."
+    ],
+    "outcomes": [
+      "Conditional ethics clearance granted. Student revises anonymization procedures and resubmits. Full clearance issued."
+    ]
+  },
+  {
+    "id": "decision_021",
+    "title": "Assign Replacement Thesis Supervisor",
+    "strategies": [
+      "Research Coordinator identifies eligible faculty not currently exceeding the 6-student supervision cap. Students consulted on reassignment. New supervisor briefed on each student progress status and given access to submitted draft chapters."
+    ],
+    "constraints": [
+      "Supervisors may not supervise more than 6 active thesis students simultaneously.",
+      "Thesis must be submitted in the format prescribed by the affiliating university."
+    ],
+    "decisions": [
+      "Research Coordinator identifies eligible faculty not currently exceeding the 6-student supervision cap tracking parameters. Reassign portfolios."
+    ],
+    "outcomes": [
+      "Two eligible faculty identified. Three students reassigned with no workload cap exceeded. Transition documented."
+    ]
+  },
+  {
+    "id": "decision_022",
+    "title": "Approve Funding Request for Open-Access Journal Publication",
+    "strategies": [
+      "Research Coordinator tracks the manuscript submission process and verifies funding documentation. Upon verification, the request is routed to the Finance Officer for allocation of open-access fee tranches from the research development fund."
+    ],
+    "constraints": [
+      "Open-access funding eligibility requires the targeted journal to maintain an active Scopus index.",
+      "The maximum open-access publication support tranche allowed per faculty track is bounded at NPR 150,000."
+    ],
+    "decisions": [
+      "Research Coordinator tracks the manuscript submission process and verifies funding documentation against Scopus index filters before routing for asset payment."
+    ],
+    "outcomes": [
+      "Journal verified as Scopus-indexed. APC funding tranche of NPR 135,000 approved and disbursed to publisher."
+    ]
+  },
+  {
+    "id": "decision_023",
+    "title": "Suspend External Research Project Due to Budget Overrun",
+    "strategies": [
+      "Principal Investigator suspends project spending lines. Research Coordinator reviews project files and financial records. External audit requested from University Finance Committee to clear structural reporting variances."
+    ],
+    "constraints": [
+      "External project spending variances above 10% of the active quarterly target trigger system budget holds.",
+      "Financial progress reporting must be submitted to the funding agency within 15 days of the quarter end."
+    ],
+    "decisions": [
+      "Principal Investigator suspends project spending lines. Research Coordinator reviews project files and financial records, requesting external review loops."
+    ],
+    "outcomes": [
+      "Project account frozen. Detailed expense reconciliation completed. Revised quarterly budget submitted."
+    ]
+  },
+  {
+    "id": "decision_024",
+    "title": "Investigate Research Ethics Violation Allegation",
+    "strategies": [
+      "Principal Investigator halts all field data collection activities immediately. Research Ethics Committee initiates investigation into informed consent procedures and participant data handling records. Written report issued within 14 working days."
+    ],
+    "constraints": [
+      "Participant safety or data tracking non-compliance mandates an immediate freeze on project operations.",
+      "Research activities must remain fully halted until a formal Ethical Clearance Certificate is issued."
+    ],
+    "decisions": [
+      "Principal Investigator halts all field data collection activities immediately. Research Ethics Committee initiates investigation into informed consent."
+    ],
+    "outcomes": [
+      "Fieldwork suspended for 14 days. Corrective ethics applications backfiled. IRB issued formal warning certificate."
+    ]
+  },
+  {
+    "id": "decision_025",
+    "title": "Enforce Culinary Laboratory Attendance and Safety Compliance",
+    "strategies": [
+      "Department Head establishes laboratory usage rules, implements a physical asset register, and initiates biometric check-in systems. Faculty supervisors schedule weekly safety and cleanliness checks across all practical batches."
+    ],
+    "constraints": [
+      "Laboratory configurations and student density profiles must adhere directly to standard academic space capacities.",
+      "Biometric tracking deployment must satisfy the internal privacy controls defined by the data compliance office."
+    ],
+    "decisions": [
+      "Department Head establishes lab usage rules, implements a physical asset register, and initiates biometric check-in systems for tracking safety records."
+    ],
+    "outcomes": [
+      "Biometric check-in operational. Attendance recovered by 18%. Three students penalized for dress-code breach."
+    ]
+  },
+  {
+    "id": "decision_026",
+    "title": "Modernize Hospitality Production Kitchen Labs",
+    "strategies": [
+      "Department Head initiates physical safety review. Lab Supervisor compiles asset liquidation tracking and technical replacement lists. Finance Department allocates capital expenditure tranches for structural kitchen overhaul pipelines."
+    ],
+    "constraints": [
+      "The structural configuration of the industrial kitchen must satisfy the safety criteria in the Hotel and Restaurant Act.",
+      "Capital outlays for structural laboratory modernization cannot exceed the specific budget bounds authorized."
+    ],
+    "decisions": [
+      "Department Head initiates physical safety review. Lab Supervisor compiles asset liquidation tracking. Finance allocates expenditure tranches."
+    ],
+    "outcomes": [
+      "Laboratory modernization completed within budget limits. Upgraded hardware safety lines fully certified."
+    ]
+  },
+  {
+    "id": "decision_027",
+    "title": "Approve International Trainee Placement Framework Agreement",
+    "strategies": [
+      "Placement Coordinator initiates validation tracking against international safety frameworks, reviews current standard operating agreements, and mandates global liability insurance coverages for all inbound student cohorts."
+    ],
+    "constraints": [
+      "Inbound global trainee placements require formalized standard liability agreements verified by legal counseling.",
+      "International placements must align with the parameters specified in the UNWTO Sustainable Tourism Guidelines."
+    ],
+    "decisions": [
+      "Placement Coordinator initiates validation tracking against safety frameworks, reviews current agreements, and mandates liability coverages."
+    ],
+    "outcomes": [
+      "Standard placement framework executed. 20 trainees secured global internships with pre-authorized medical coverage."
+    ]
+  },
+  {
+    "id": "decision_028",
+    "title": "Deactivate Defective Industrial Ventilation Hood Array",
+    "strategies": [
+      "Department Head issues immediate stop-work advisory on manual machinery. Lab Supervisor reviews chemical hazard documentation and schedules technical extraction network maintenance with local specialized engineering contractors."
+    ],
+    "constraints": [
+      "Industrial ventilation networks must maintain extraction performance thresholds under continuous operations.",
+      "Machinery failing extraction safety standards must be deactivated immediately until certified maintenance completes."
+    ],
+    "decisions": [
+      "Department Head issues immediate stop-work advisory. Lab Supervisor reviews hazard documents and schedules maintenance with specialized contractors."
+    ],
+    "outcomes": [
+      "Extraction fan assembly replaced completely. Local environmental sound pressure checks returned beneath bounds."
+    ]
+  },
+  {
+    "id": "decision_029",
+    "title": "Terminate Defective Non-Compliant ERP Software Contract",
+    "strategies": [
+      "Procurement Officer registers the contract break in the supplier asset file, stops pending payment tranches, and routes specifications to the legal officer to issue a formal breach notice and schedule remedial vendor mediation sessions."
+    ],
+    "constraints": [
+      "Tendering and supplier selections must strictly adhere to the mandatory public thresholds defined in the Public Procurement Act 2063.",
+      "Technical and financial evaluation reports must be fully prepared and submitted to the Public Procurement Monitoring Office within 30 days."
+    ],
+    "decisions": [
+      "Procurement Officer registers contract break, stops payment tranches, and routes specifications to the legal officer to issue a formal breach notice."
+    ],
+    "outcomes": [
+      "Contract cancelled successfully. Retained NPR 400,000 execution bond asset. Alternative supplier identified."
+    ]
+  },
+  {
+    "id": "decision_030",
+    "title": "Authorize Contingency Buffer Funds for Unplanned Roof Repairs",
+    "strategies": [
+      "Finance Officer reviews the emergency liquidity buffer allocation guidelines, verifies active cash asset states, and routes the contingency release proposal to the Budget Committee and College Principal for executive authorization profiles."
+    ],
+    "constraints": [
+      "Emergency liquidity reserve balances cannot drop below the mandatory 15% institutional operations floor constraint.",
+      "Contingency asset releases must be authorized by unanimous approval of the institutional Budget Committee board."
+    ],
+    "decisions": [
+      "Finance Officer reviews the emergency liquidity buffer guidelines and routes the contingency release proposal to the Budget Committee for authorization."
+    ],
+    "outcomes": [
+      "Budget Committee cleared emergency fund deployment of NPR 250,000. Leak contained; server infrastructure fully secured."
+    ]
+  },
+  {
+    "id": "decision_031",
+    "title": "Procure Enterprise Resource Planning (ERP) Software System",
+    "strategies": [
+      "Procurement Officer publishes national call for tenders via public portal, constructs secure physical bid safe boxes, executes standardized public financial openings, maps technical criteria scoring matrices, and awards contracts."
+    ],
+    "constraints": [
+      "Public procurement bidding processes must maintain a minimum open public publication tracking window of 15 days.",
+      "All electronic system tender records must comply with digital signature protocols in the Electronic Transactions Act."
+    ],
+    "decisions": [
+      "Procurement Officer publishes national call for tenders via public portal, constructs secure physical safe boxes, and maps technical criteria matrices."
+    ],
+    "outcomes": [
+      "National competitive bidding completed. Evaluated proposals and awarded implementation contract to lowest vendor."
+    ]
+  },
+  {
+    "id": "decision_032",
+    "title": "Execute Comprehensive Fiscal Asset Inventory Audit",
+    "strategies": [
+      "Internal Auditor matches physical warehouse inventories against automated financial records, maps historical purchase order trails, and issues structural variance findings to the Finance Officer for administrative action."
+    ],
+    "constraints": [
+      "Annual asset verification loops must capture 100% of physical inventories across all physical campus sites.",
+      "Unreconciled physical-to-financial ledger variances above 2% trigger mandatory internal management audits."
+    ],
+    "decisions": [
+      "Internal Auditor matches physical inventories against automated financial records, maps purchase order trails, and issues structural variance findings."
+    ],
+    "outcomes": [
+      "Physical audit loops captured 100% of campus hardware. Ledger mismatch calculated at 0.45%, below review trigger bounds."
+    ]
+  },
+  {
+    "id": "decision_033",
+    "title": "Resolve Formal Academic Appeal on Final Grade Dispute",
+    "strategies": [
+      "Complaints Officer acknowledges appeal within 3 working days. Departmental Review Panel reviews the examination script against the official marking scheme. External moderation requested for borderline cases. Written decision issued to student within 21 days."
+    ],
+    "constraints": [
+      "Complaints and appeals must be submitted within 14 days of the triggering event; acknowledgment within 3 working days.",
+      "First-level appeal response must be issued within 21 days; all decisions must be provided in writing."
+    ],
+    "decisions": [
+      "Convene the Departmental Review Panel to conduct a blind re-evaluation of the examination script against the formal rubric and coordinate with external moderators."
+    ],
+    "outcomes": [
+      "Appeal upheld. Marking error identified in one question worth 8 marks. Grade revised from Fail to Pass."
+    ]
+  }
+]

@@ -1,0 +1,996 @@
+{
+  "metadata": {
+    "dataset_name": "Simulated College Institutional Policy Dataset",
+    "total_policies": 29,
+    "total_departments": 8,
+    "department_types": {
+      "operational_academic": 5,
+      "administrative": 3
+    },
+    "knowledge_graph_pattern": "Policy -> Department, Policy -> Role, Policy -> Regulation, Policy -> Decision, Decision -> Outcome",
+    "node_types": [
+      { "type": "Policy", "key_properties": ["id", "title", "category", "status", "effectiveDate"], "kg_relationships": ["-> Department", "-> Regulation", "-> Decision", "-> Role"] },
+      { "type": "Department", "key_properties": ["name", "type", "head"], "kg_relationships": ["-> Policy", "-> Staff", "-> Budget", "-> Program"] },
+      { "type": "Role", "key_properties": ["title", "department", "responsibilities"], "kg_relationships": ["-> Policy (owns/enforces)", "-> Decision (makes)"] },
+      { "type": "Regulation", "key_properties": ["name", "jurisdiction", "authority", "year"], "kg_relationships": ["-> Policy (governs)", "-> Department (applies to)"] },
+      { "type": "Decision", "key_properties": ["description", "trigger", "decisionMaker"], "kg_relationships": ["-> Policy (based on)", "-> Outcome"] },
+      { "type": "Outcome", "key_properties": ["description", "type"], "kg_relationships": ["-> Decision", "-> Action"] },
+      { "type": "Student", "key_properties": ["enrollmentStatus", "program"], "kg_relationships": ["-> Policy (subject to)", "-> Department (enrolled in)"] },
+      { "type": "AccreditationBody", "key_properties": ["name", "criteria", "cycle"], "kg_relationships": ["-> QAA Policy", "-> Department", "-> Institution"] }
+    ]
+  },
+  "departments": [
+    {
+      "department_id": "BAD",
+      "department_name": "Business Administration Department",
+      "department_type": "Operational Academic Unit",
+      "description": "This department manages academic programs in business, finance, entrepreneurship, and commerce. Its policies govern curriculum design, academic integrity, faculty conduct, and industry engagement.",
+      "policy_count": 4,
+      "key_regulations": ["UGC Nepal", "Labour Act 2074", "Contract Act 2056"],
+      "policies": [
+        {
+          "policy_id": "BAD-POL-001",
+          "department_id": "BAD",
+          "department_name": "Business Administration Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Academic Program Review and Approval Policy",
+          "category": "Curriculum Governance",
+          "description": "Defines the process for initiating, reviewing, modifying, or discontinuing academic programs. Programs must undergo internal review every five years and must align with national higher education standards and affiliating university regulations.",
+          "scope": "All undergraduate and postgraduate programs offered by the department.",
+          "key_responsibilities": {
+            "Department Head": "Initiates review cycle, forms review committee.",
+            "Review Committee": "Evaluates curriculum relevance, learning outcomes, and resource requirements.",
+            "Academic Council": "Approves or rejects proposed changes.",
+            "Registrar Office": "Updates program catalog upon approval."
+          },
+          "related_entities": ["Department Head", "Academic Council", "Registrar Office", "Affiliating University", "Quality Assurance Office"],
+          "decision_context": "Used when: proposing a new program, revising an existing curriculum, responding to accreditation feedback, or phasing out an underperforming program.",
+          "legal_regulatory_basis": ["National Higher Education Policy 2076", "University Grants Commission (UGC) Program Approval Guidelines", "Affiliating University Academic Regulations"],
+          "constraints": [
+            "Changes require Academic Council approval at least one semester before implementation.",
+            "All revisions must be reflected in the updated course catalog submitted to the affiliating university."
+          ],
+          "outcomes": {
+            "Approved": "Program is updated in catalog and communicated to students.",
+            "Rejected": "Review committee receives written feedback and must revise proposal.",
+            "Deferred": "Additional stakeholder consultation required."
+          },
+          "rag_chunk": "Policy BAD-POL-001: Academic Program Review and Approval Policy. Department: Business Administration Department (Operational Academic Unit). Category: Curriculum Governance. This policy defines the process for initiating, reviewing, modifying, or discontinuing academic programs. Programs must undergo internal review every five years and must align with national higher education standards and affiliating university regulations. Scope: All undergraduate and postgraduate programs. Key roles: Department Head initiates review; Review Committee evaluates curriculum; Academic Council approves changes; Registrar updates catalog. Triggered when proposing a new program, revising curriculum, responding to accreditation feedback, or phasing out programs. Legal basis: National Higher Education Policy 2076, UGC Program Approval Guidelines. Constraints: Academic Council approval required one semester before implementation. Outcomes: Approved - catalog updated; Rejected - written feedback issued; Deferred - additional consultation required."
+        },
+        {
+          "policy_id": "BAD-POL-002",
+          "department_id": "BAD",
+          "department_name": "Business Administration Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Academic Integrity and Anti-Plagiarism Policy",
+          "category": "Student Academic Conduct",
+          "description": "Establishes standards for academic honesty, defines forms of academic misconduct (plagiarism, cheating, fabrication, collusion), and outlines investigation and disciplinary procedures.",
+          "scope": "All enrolled students across all programs.",
+          "key_responsibilities": {
+            "Faculty Members": "Detect and report academic misconduct.",
+            "Department Discipline Committee": "Investigate reported cases.",
+            "Department Head": "Issue final decision on minor violations.",
+            "Academic Council": "Handle appeals and severe violations."
+          },
+          "related_entities": ["Students", "Faculty", "Discipline Committee", "Department Head", "Academic Council", "Examination Office"],
+          "decision_context": "Triggered when faculty suspect or detect academic misconduct in assignments, examinations, or research submissions.",
+          "legal_regulatory_basis": ["College Code of Conduct", "Electronic Transactions Act 2063 (digital plagiarism reference)", "Affiliating University Examination Rules"],
+          "constraints": [
+            "Plagiarism detection tool must be used for all major assessments.",
+            "Investigations must be completed within 21 working days of initial report."
+          ],
+          "outcomes": {
+            "Minor violation (first offence)": "Grade penalty (zero on the assignment).",
+            "Moderate violation": "Repeat of the course.",
+            "Severe or repeat violation": "Suspension or expulsion. All decisions are recorded in the student's academic file."
+          },
+          "rag_chunk": "Policy BAD-POL-002: Academic Integrity and Anti-Plagiarism Policy. Department: Business Administration Department (Operational Academic Unit). Category: Student Academic Conduct. Establishes standards for academic honesty, defines forms of academic misconduct (plagiarism, cheating, fabrication, collusion), and outlines investigation and disciplinary procedures. Scope: All enrolled students. Key roles: Faculty detect and report misconduct; Discipline Committee investigates; Department Head decides on minor violations; Academic Council handles appeals. Triggered when faculty detect misconduct in assignments, exams, or research. Legal basis: College Code of Conduct, Electronic Transactions Act 2063, Affiliating University Examination Rules. Constraints: Plagiarism tool required for all major assessments; investigations must complete within 21 working days. Outcomes: Minor violation - grade penalty (zero); Moderate - repeat course; Severe/repeat - suspension or expulsion."
+        },
+        {
+          "policy_id": "BAD-POL-003",
+          "department_id": "BAD",
+          "department_name": "Business Administration Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Industry Partnership and MOU Governance Policy",
+          "category": "External Engagement",
+          "description": "Governs the initiation, approval, management, and renewal of Memoranda of Understanding (MOUs) with industry partners, NGOs, and professional bodies for internships, guest lectures, joint research, and project collaboration.",
+          "scope": "All formal institutional partnerships involving the Business Administration Department.",
+          "key_responsibilities": {
+            "Department Head": "Proposes and recommends MOUs.",
+            "Finance Office": "Reviews financial terms.",
+            "Legal/Compliance Officer": "Validates legal compliance.",
+            "College Principal": "Signs and approves MOUs.",
+            "HR Department": "Tracks personnel obligations arising from MOUs."
+          },
+          "related_entities": ["Department Head", "College Principal", "Finance Office", "HR Department", "External Partner Organizations"],
+          "decision_context": "Required when formalizing any collaboration for internship placement, sponsored research, or co-curricular activities with an external entity.",
+          "legal_regulatory_basis": ["Contract Act 2056 (Nepal)", "UGC Higher Education Affiliation Guidelines", "College Governance Charter"],
+          "constraints": [
+            "MOUs must be reviewed and renewed every three years.",
+            "All MOUs must be reviewed by the legal/compliance officer before signing."
+          ],
+          "outcomes": {
+            "Signed MOU": "Activates collaboration plan and assigns a departmental liaison.",
+            "Expired without renewal": "Partnership activities suspended until renewal is processed."
+          },
+          "rag_chunk": "Policy BAD-POL-003: Industry Partnership and MOU Governance Policy. Department: Business Administration Department (Operational Academic Unit). Category: External Engagement. Governs the initiation, approval, management, and renewal of MOUs with industry partners, NGOs, and professional bodies for internships, guest lectures, joint research, and project collaboration. Scope: All formal institutional partnerships of the department. Key roles: Department Head proposes MOUs; Finance Office reviews financial terms; Legal/Compliance Officer validates compliance; College Principal signs and approves. Triggered when formalizing collaborations with external entities. Legal basis: Contract Act 2056, UGC Affiliation Guidelines, College Governance Charter. Constraints: MOUs renewed every three years; legal review required before signing. Outcomes: Signed MOU activates collaboration; expired MOU suspends activities until renewal."
+        },
+        {
+          "policy_id": "BAD-POL-004",
+          "department_id": "BAD",
+          "department_name": "Business Administration Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Student Internship and Practicum Policy",
+          "category": "Work-Integrated Learning",
+          "description": "Defines the requirements, placement procedures, supervision responsibilities, and assessment criteria for mandatory internships and practicums that are part of the Business Administration curriculum.",
+          "scope": "All students enrolled in programs with a mandatory internship component.",
+          "key_responsibilities": {
+            "Internship Coordinator": "Identifies and approves placement organizations, manages placement records.",
+            "Faculty Supervisor": "Conducts mid-term visits and assesses performance.",
+            "Students": "Submit weekly logs and a final internship report.",
+            "HR Department": "Maintains internship MOU records."
+          },
+          "related_entities": ["Internship Coordinator", "Faculty Supervisor", "Host Organization", "HR Department", "Examination Office"],
+          "decision_context": "Applied when placing students for internship, evaluating internship performance, or resolving disputes between students and host organizations.",
+          "legal_regulatory_basis": ["UGC Program-Level Learning Standards", "Affiliating University Internship Rules", "Labour Act 2074 (Nepal) - student intern provisions"],
+          "constraints": [
+            "Internship duration must meet minimum credit-hour requirements.",
+            "Host organizations must be pre-approved.",
+            "Students failing the internship component must repeat the placement."
+          ],
+          "outcomes": {
+            "Pass": "Internship credits are awarded and recorded in the transcript.",
+            "Fail": "Student must re-enrol in the internship component in the following semester."
+          },
+          "rag_chunk": "Policy BAD-POL-004: Student Internship and Practicum Policy. Department: Business Administration Department (Operational Academic Unit). Category: Work-Integrated Learning. Defines requirements, placement procedures, supervision responsibilities, and assessment criteria for mandatory internships. Scope: Students in programs with mandatory internship. Key roles: Internship Coordinator approves placements; Faculty Supervisor conducts visits and assesses; Students submit weekly logs and final report; HR Department maintains MOU records. Applied when placing students, evaluating performance, or resolving disputes. Legal basis: UGC Learning Standards, Affiliating University Internship Rules, Labour Act 2074. Constraints: Duration must meet credit-hour minimums; host organizations pre-approved; failed students must repeat. Outcomes: Pass - credits awarded; Fail - re-enrol next semester."
+        }
+      ]
+    },
+    {
+      "department_id": "ITD",
+      "department_name": "Information Technology Department",
+      "department_type": "Operational Academic Unit",
+      "description": "This department manages IT infrastructure, digital systems, data governance, and cybersecurity for the entire institution. Its policies align with Nepal's National Cyber Security Policy 2023 and the Electronic Transactions Act 2063.",
+      "policy_count": 5,
+      "key_regulations": ["National Cyber Security Policy 2023", "Data Act 2079", "Electronic Transactions Act 2063"],
+      "policies": [
+        {
+          "policy_id": "ITD-POL-001",
+          "department_id": "ITD",
+          "department_name": "Information Technology Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Acceptable Use of Information Technology Resources Policy",
+          "category": "IT Governance",
+          "description": "Defines permitted and prohibited uses of all institutional IT resources including computers, networks, internet access, email systems, and licensed software. All users must comply as a condition of access.",
+          "scope": "All students, faculty, administrative staff, and third-party contractors using institutional IT resources.",
+          "key_responsibilities": {
+            "IT Department Head": "Maintains and enforces the AUP.",
+            "Network Administrator": "Monitors network usage for violations.",
+            "Users": "Must read, sign, and comply with the AUP on joining.",
+            "HR Department": "Incorporates AUP compliance into onboarding and service contracts."
+          },
+          "related_entities": ["IT Department", "HR Department", "All User Groups", "Network Administrator", "College Administration"],
+          "decision_context": "Applied during onboarding, when investigating potential misuse, or when reviewing access privileges.",
+          "legal_regulatory_basis": ["Nepal National Cyber Security Policy 2023", "Electronic Transactions Act 2063", "Individual Privacy Act 2075 (Nepal)", "College IT Governance Framework"],
+          "constraints": [
+            "Non-compliance may result in suspension of IT access.",
+            "The AUP must be reviewed and re-signed by all users annually.",
+            "Personal use of institutional resources is permitted within defined limits."
+          ],
+          "outcomes": {
+            "Violation confirmed": "Access suspended pending investigation; disciplinary proceedings initiated.",
+            "Policy breach not confirmed": "Access restored with written advisory."
+          },
+          "rag_chunk": "Policy ITD-POL-001: Acceptable Use of Information Technology Resources Policy. Department: Information Technology Department (Operational Academic Unit). Category: IT Governance. Defines permitted and prohibited uses of all institutional IT resources including computers, networks, internet access, email, and licensed software. Scope: All students, faculty, staff, and third-party contractors. Key roles: IT Head enforces AUP; Network Administrator monitors; Users must sign AUP on joining; HR incorporates into onboarding. Applied during onboarding, misuse investigations, or access reviews. Legal basis: National Cyber Security Policy 2023, Electronic Transactions Act 2063, Individual Privacy Act 2075. Constraints: Non-compliance leads to access suspension; AUP re-signed annually. Outcomes: Violation confirmed - access suspended, disciplinary proceedings; Not confirmed - access restored with written advisory."
+        },
+        {
+          "policy_id": "ITD-POL-002",
+          "department_id": "ITD",
+          "department_name": "Information Technology Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Data Classification and Information Security Policy",
+          "category": "Data Governance & Security",
+          "description": "Establishes a data classification framework (Public, Internal, Confidential, Restricted) and defines handling, storage, access control, and retention requirements for each classification level. Aligns with Nepal's Data Act 2079.",
+          "scope": "All institutional data generated, processed, or stored by the college in any format.",
+          "key_responsibilities": {
+            "Data Protection Officer (DPO)": "Oversees classification compliance and annual audits.",
+            "System Administrators": "Implement technical controls for each data class.",
+            "Department Heads": "Ensure departmental data is properly classified and handled.",
+            "Users": "Follow data handling procedures for their classification level."
+          },
+          "related_entities": ["DPO", "IT Department", "All Departments", "System Administrators", "External Auditor"],
+          "decision_context": "Used when onboarding new data systems, responding to a data request, conducting an audit, or investigating a suspected data breach.",
+          "legal_regulatory_basis": ["Nepal Data Act 2079", "Electronic Transactions Act 2063", "National Cyber Security Policy 2023", "ISO/IEC 27001 (reference standard)"],
+          "constraints": [
+            "Restricted data cannot be transmitted via unencrypted channels.",
+            "Retention periods: Student records - 10 years post-graduation; Financial records - 7 years; HR records - 5 years post-separation."
+          ],
+          "outcomes": {
+            "Non-compliance identified": "Immediate remediation required; reported to DPO.",
+            "Data breach confirmed": "Incident response plan activated; affected parties notified within 72 hours."
+          },
+          "rag_chunk": "Policy ITD-POL-002: Data Classification and Information Security Policy. Department: Information Technology Department (Operational Academic Unit). Category: Data Governance & Security. Establishes a data classification framework (Public, Internal, Confidential, Restricted) with handling, storage, access control, and retention requirements. Aligns with Nepal's Data Act 2079. Scope: All institutional data in any format. Key roles: DPO oversees compliance and audits; System Admins implement controls; Department Heads ensure proper classification; Users follow procedures. Applied during new data system onboarding, data requests, audits, or breach investigations. Legal basis: Nepal Data Act 2079, Electronic Transactions Act 2063, ISO/IEC 27001. Constraints: Restricted data cannot use unencrypted channels; retention: student records 10 years, financial 7 years, HR 5 years. Outcomes: Non-compliance - immediate remediation; Breach confirmed - incident response activated, parties notified within 72 hours."
+        },
+        {
+          "policy_id": "ITD-POL-003",
+          "department_id": "ITD",
+          "department_name": "Information Technology Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Cybersecurity Incident Response Policy",
+          "category": "Cybersecurity",
+          "description": "Provides a structured procedure for detecting, reporting, containing, investigating, and recovering from cybersecurity incidents including ransomware, phishing, DDoS attacks, and data breaches.",
+          "scope": "All institutional IT systems, networks, and digital assets.",
+          "key_responsibilities": {
+            "Incident Response Team (IRT)": "Leads containment and investigation.",
+            "IT Head": "Escalates critical incidents to college management.",
+            "DPO": "Assesses data exposure and manages notification obligations.",
+            "College Administration": "Approves public communications regarding incidents."
+          },
+          "related_entities": ["IRT", "IT Head", "DPO", "College Administration", "Nepal Cyber Bureau (external authority)"],
+          "decision_context": "Activated upon confirmed or suspected cybersecurity incident. Severity levels (1-3) determine response timelines.",
+          "legal_regulatory_basis": ["National Cyber Security Policy 2023", "Electronic Transactions Act 2063", "ISO/IEC 27035 Incident Management (reference)", "Nepal Police Cyber Bureau Reporting Guidelines"],
+          "constraints": [
+            "Level 1 incidents (critical) must be contained within 4 hours.",
+            "Reportable incidents must be escalated to the Nepal Cyber Bureau as required by national law."
+          ],
+          "outcomes": {
+            "Incident resolved": "Post-incident report produced within 7 days; root cause documented; preventive measures implemented.",
+            "Unresolved": "Escalated to national authorities and external forensic support engaged."
+          },
+          "rag_chunk": "Policy ITD-POL-003: Cybersecurity Incident Response Policy. Department: Information Technology Department (Operational Academic Unit). Category: Cybersecurity. Provides a structured procedure for detecting, reporting, containing, investigating, and recovering from cybersecurity incidents including ransomware, phishing, DDoS attacks, and data breaches. Scope: All institutional IT systems, networks, and digital assets. Key roles: IRT leads containment; IT Head escalates critical incidents; DPO manages notification obligations; College Administration approves communications. Activated upon confirmed or suspected incident; severity levels 1-3 determine timelines. Legal basis: National Cyber Security Policy 2023, Electronic Transactions Act 2063, ISO/IEC 27035. Constraints: Level 1 (critical) must be contained within 4 hours; reportable incidents escalated to Nepal Cyber Bureau. Outcomes: Resolved - post-incident report within 7 days; Unresolved - escalated to national authorities."
+        },
+        {
+          "policy_id": "ITD-POL-004",
+          "department_id": "ITD",
+          "department_name": "Information Technology Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Software Procurement and License Management Policy",
+          "category": "IT Asset Management",
+          "description": "Governs the acquisition, registration, deployment, and audit of all software licenses used by the institution. Prevents unauthorized software use and ensures compliance with vendor agreements.",
+          "scope": "All software installed or used on institutional hardware or institutional cloud platforms.",
+          "key_responsibilities": {
+            "IT Procurement Officer": "Manages license procurement and renewal calendar.",
+            "Department Heads": "Submit software needs requests with justification.",
+            "Finance Department": "Approves budget allocation for software licenses.",
+            "IT Head": "Maintains software asset register."
+          },
+          "related_entities": ["IT Department", "Finance Department", "Department Heads", "Software Vendors", "Internal Audit"],
+          "decision_context": "Required when purchasing new software, renewing existing licenses, auditing installed software, or investigating unlicensed software use.",
+          "legal_regulatory_basis": ["Copyright Act 2059 (Nepal)", "College Procurement Guidelines", "IT Asset Management Framework"],
+          "constraints": [
+            "No software may be installed on institutional devices without IT Department approval.",
+            "Open-source software must be vetted for license compatibility before use.",
+            "Annual license audit must be conducted."
+          ],
+          "outcomes": {
+            "Unauthorized software found": "Immediate removal and departmental warning.",
+            "Non-compliant license": "Cease use until properly licensed or replaced with approved alternative."
+          },
+          "rag_chunk": "Policy ITD-POL-004: Software Procurement and License Management Policy. Department: Information Technology Department (Operational Academic Unit). Category: IT Asset Management. Governs acquisition, registration, deployment, and audit of all software licenses. Prevents unauthorized software use and ensures vendor agreement compliance. Scope: All software on institutional hardware or cloud platforms. Key roles: IT Procurement Officer manages licenses; Department Heads submit requests; Finance approves budget; IT Head maintains software register. Applied when purchasing, renewing, auditing, or investigating software use. Legal basis: Copyright Act 2059, College Procurement Guidelines, IT Asset Management Framework. Constraints: No software installed without IT approval; open-source vetted for license compatibility; annual audit required. Outcomes: Unauthorized software - immediate removal and warning; Non-compliant license - cease use."
+        },
+        {
+          "policy_id": "ITD-POL-005",
+          "department_id": "ITD",
+          "department_name": "Information Technology Department",
+          "department_type": "Operational Academic Unit",
+          "title": "IT Disaster Recovery and Business Continuity Policy",
+          "category": "Business Continuity",
+          "description": "Defines recovery time objectives (RTO), recovery point objectives (RPO), backup procedures, and continuity plans to ensure institutional systems remain operational or are quickly restored after disruption.",
+          "scope": "All critical IT systems including student information system (SIS), financial management system, email, and learning management system (LMS).",
+          "key_responsibilities": {
+            "IT Head": "Owns the Disaster Recovery Plan (DRP).",
+            "Backup Administrator": "Executes and verifies daily backups.",
+            "College Administration": "Declares business continuity events.",
+            "Department Heads": "Identify and report critical process dependencies."
+          },
+          "related_entities": ["IT Department", "College Administration", "Finance Department", "All Academic Departments"],
+          "decision_context": "Activated when a major system failure, natural disaster, or cyberattack causes significant disruption to institutional operations.",
+          "legal_regulatory_basis": ["National Cyber Security Policy 2023", "IT Governance Policy", "ISO 22301 (reference)", "Nepal Disaster Risk Reduction and Management Act 2074"],
+          "constraints": [
+            "Critical systems RTO: 4 hours; RPO: 24 hours.",
+            "Backups must be stored off-site or in a geographically separate cloud region.",
+            "DR drills must be conducted annually."
+          ],
+          "outcomes": {
+            "Successful recovery": "Systems restored within RTO; incident report produced.",
+            "Failed recovery": "Escalation to senior management and activation of manual continuity procedures."
+          },
+          "rag_chunk": "Policy ITD-POL-005: IT Disaster Recovery and Business Continuity Policy. Department: Information Technology Department (Operational Academic Unit). Category: Business Continuity. Defines recovery time objectives (RTO), recovery point objectives (RPO), backup procedures, and continuity plans. Covers SIS, financial system, email, and LMS. Key roles: IT Head owns the Disaster Recovery Plan; Backup Administrator runs daily backups; College Administration declares continuity events; Department Heads report critical dependencies. Activated during major system failure, natural disaster, or cyberattack. Legal basis: National Cyber Security Policy 2023, ISO 22301, Nepal Disaster Risk Reduction Act 2074. Constraints: RTO 4 hours, RPO 24 hours; off-site backups required; annual DR drills. Outcomes: Successful recovery - systems restored within RTO, incident report produced; Failed - escalated to senior management."
+        }
+      ]
+    },
+    {
+      "department_id": "MGT",
+      "department_name": "Management Department",
+      "department_type": "Operational Academic Unit",
+      "description": "This department oversees programs in organizational management, leadership, and strategy. Its policies govern faculty development, curriculum delivery, research output, and community engagement.",
+      "policy_count": 3,
+      "key_regulations": ["UGC", "Labour Act 2074", "National Research Policy"],
+      "policies": [
+        {
+          "policy_id": "MGT-POL-001",
+          "department_id": "MGT",
+          "department_name": "Management Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Faculty Development and Continuing Professional Education Policy",
+          "category": "Faculty Affairs",
+          "description": "Defines the institution's commitment to ongoing faculty skill enhancement through training, workshops, conference participation, sabbaticals, and higher study sponsorship. Establishes entitlements, application procedures, and return-of-service obligations.",
+          "scope": "All permanent and contract faculty members of the department.",
+          "key_responsibilities": {
+            "Department Head": "Approves CPD plans and nominates faculty for programs.",
+            "HR Department": "Manages leave, travel advance, and return-of-service records.",
+            "Finance Department": "Allocates CPD budget.",
+            "Faculty Member": "Submits CPD plan, attends programs, and submits post-training report."
+          },
+          "related_entities": ["Department Head", "HR Department", "Finance Department", "Faculty Members", "External Training Providers"],
+          "decision_context": "Used when approving faculty training requests, awarding conference travel grants, or managing sabbatical applications.",
+          "legal_regulatory_basis": ["Labour Act 2074 (Nepal) - training entitlement provisions", "TU Staff Service Rules (reference)", "UGC Faculty Development Framework"],
+          "constraints": [
+            "Faculty sponsored for degree-level study must serve a return-of-service period equal to the duration of sponsorship.",
+            "CPD budget shall not exceed 5% of the departmental annual budget.",
+            "Faculty must submit a utilization report within 30 days of returning."
+          ],
+          "outcomes": {
+            "Approved": "Leave and funding granted; return-of-service bond signed.",
+            "Rejected": "Written justification provided; alternative development options suggested."
+          },
+          "rag_chunk": "Policy MGT-POL-001: Faculty Development and Continuing Professional Education Policy. Department: Management Department (Operational Academic Unit). Category: Faculty Affairs. Defines the institution's commitment to faculty skill enhancement through training, workshops, conferences, sabbaticals, and higher study sponsorship. Scope: All permanent and contract faculty. Key roles: Department Head approves CPD plans; HR manages leave and return-of-service; Finance allocates budget; Faculty submits CPD plan and post-training report. Applied when approving training, conference grants, or sabbatical applications. Legal basis: Labour Act 2074, TU Staff Service Rules, UGC Faculty Development Framework. Constraints: Return-of-service equal to sponsorship duration; CPD budget max 5% of departmental budget; utilization report within 30 days of return. Outcomes: Approved - leave and funding granted, bond signed; Rejected - written justification, alternatives suggested."
+        },
+        {
+          "policy_id": "MGT-POL-002",
+          "department_id": "MGT",
+          "department_name": "Management Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Strategic Departmental Planning Policy",
+          "category": "Institutional Planning",
+          "description": "Establishes the annual and medium-term (3-5 year) planning process for the department, including setting objectives, aligning with institutional strategy, monitoring KPIs, and reporting to senior management.",
+          "scope": "Management Department administration, faculty, and support staff.",
+          "key_responsibilities": {
+            "Department Head": "Leads planning process and approves final plan.",
+            "Faculty Representatives": "Contribute to program-level goals.",
+            "QA Office Liaison": "Ensures plan aligns with accreditation criteria.",
+            "College Principal": "Reviews and endorses the department's strategic plan."
+          },
+          "related_entities": ["Department Head", "Faculty", "QA Office", "College Principal", "Finance Department"],
+          "decision_context": "Used during annual planning cycles, in response to QA audit findings, or when the institution revises its strategic framework.",
+          "legal_regulatory_basis": ["UGC Higher Education Strategic Plan 2021-2030", "College Institutional Effectiveness Policy", "Nepal Higher Education Policy 2076"],
+          "constraints": [
+            "Plans must be submitted to the College Principal by the end of the first month of each academic year.",
+            "KPIs must be measurable and linked to resource allocations in the departmental budget request."
+          ],
+          "outcomes": {
+            "Plan approved": "Resources allocated accordingly.",
+            "Plan returned": "Department must revise within 14 days.",
+            "Unsubmitted": "Subject to administrative review."
+          },
+          "rag_chunk": "Policy MGT-POL-002: Strategic Departmental Planning Policy. Department: Management Department (Operational Academic Unit). Category: Institutional Planning. Establishes the annual and medium-term (3-5 year) planning process including objectives, institutional strategy alignment, KPI monitoring, and senior management reporting. Scope: Department administration, faculty, and support staff. Key roles: Department Head leads and approves plan; Faculty Representatives contribute to goals; QA Office Liaison ensures accreditation alignment; College Principal reviews and endorses. Used during annual planning cycles, QA audit responses, or strategic framework revisions. Legal basis: UGC Strategic Plan 2021-2030, Nepal Higher Education Policy 2076. Constraints: Submitted to Principal by end of first month of academic year; KPIs must be measurable and linked to budget. Outcomes: Approved - resources allocated; Returned - revise within 14 days; Unsubmitted - administrative review."
+        },
+        {
+          "policy_id": "MGT-POL-003",
+          "department_id": "MGT",
+          "department_name": "Management Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Graduate Research and Thesis Supervision Policy",
+          "category": "Research Governance",
+          "description": "Defines the requirements for thesis/dissertation registration, supervisor assignment, ethical review, progress monitoring, examination, and degree conferment for postgraduate management programs.",
+          "scope": "All students enrolled in Master's or M.Phil. programs requiring a thesis or dissertation.",
+          "key_responsibilities": {
+            "Research Coordinator": "Assigns supervisors; maintains progress records.",
+            "Thesis Supervisor": "Guides research design, reviews drafts, approves for submission.",
+            "Research Ethics Committee": "Reviews research proposals involving human subjects.",
+            "Examination Office": "Coordinates external examiners and defense scheduling."
+          },
+          "related_entities": ["Research Coordinator", "Thesis Supervisor", "Research Ethics Committee", "Examination Office", "Affiliating University"],
+          "decision_context": "Applied at thesis registration, ethical review, mid-point progress review, and final submission/defense stages.",
+          "legal_regulatory_basis": ["Affiliating University Postgraduate Research Rules", "APA Publication Manual (style reference)", "Nepal National Research and Innovation Policy"],
+          "constraints": [
+            "Students must submit a research proposal for ethics review within 60 days of thesis registration.",
+            "Supervisors may not supervise more than 6 active thesis students simultaneously.",
+            "Thesis must be submitted in the format prescribed by the affiliating university."
+          ],
+          "outcomes": {
+            "Ethical clearance granted": "Student proceeds with data collection.",
+            "Minor thesis revisions": "Resubmit within 30 days.",
+            "Major revisions": "6-month extension granted.",
+            "Rejection": "Student must re-register topic."
+          },
+          "rag_chunk": "Policy MGT-POL-003: Graduate Research and Thesis Supervision Policy. Department: Management Department (Operational Academic Unit). Category: Research Governance. Defines requirements for thesis/dissertation registration, supervisor assignment, ethical review, progress monitoring, and examination for postgraduate programs. Scope: Master's and M.Phil. students requiring thesis. Key roles: Research Coordinator assigns supervisors; Thesis Supervisor guides and approves submission; Research Ethics Committee reviews proposals; Examination Office coordinates defense. Applied at registration, ethical review, progress review, and final submission stages. Legal basis: Affiliating University Postgraduate Research Rules, Nepal National Research and Innovation Policy. Constraints: Ethics proposal within 60 days of registration; supervisors limited to 6 active students; university format required. Outcomes: Ethical clearance - proceeds with data collection; Minor revisions - resubmit in 30 days; Major revisions - 6-month extension; Rejection - re-register topic."
+        }
+      ]
+    },
+    {
+      "department_id": "SSD",
+      "department_name": "Social Sciences Department",
+      "department_type": "Operational Academic Unit",
+      "description": "This department covers sociology, psychology, political science, and economics. Its policies emphasize research ethics, human subjects protection, DEI, and data management aligned with Nepal's educational and cultural context.",
+      "policy_count": 3,
+      "key_regulations": ["National Code of Research Ethics", "Data Act 2079", "Constitution of Nepal 2072"],
+      "policies": [
+        {
+          "policy_id": "SSD-POL-001",
+          "department_id": "SSD",
+          "department_name": "Social Sciences Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Human Subjects Research and Institutional Review Policy",
+          "category": "Research Ethics",
+          "description": "Establishes the framework for ethical review and approval of all research involving human participants. Based on principles of informed consent, voluntary participation, confidentiality, and minimization of harm.",
+          "scope": "All faculty-led, student-led, or externally commissioned research involving human participants conducted under the department's affiliation.",
+          "key_responsibilities": {
+            "Research Ethics Committee (REC)": "Reviews proposals, grants clearance, monitors active studies.",
+            "Principal Investigator": "Submits proposal, obtains informed consent, reports adverse events.",
+            "Department Head": "Ensures all research in the department complies with this policy.",
+            "Participants": "Voluntary, informed consent must be documented."
+          },
+          "related_entities": ["Research Ethics Committee", "Principal Investigator", "Department Head", "Participants", "Affiliating University Research Board"],
+          "decision_context": "Triggered at research proposal stage; re-triggered for major protocol amendments or adverse event reports.",
+          "legal_regulatory_basis": ["National Code of Research Ethics (Nepal)", "UGC Research Guidelines", "Belmont Principles (reference)", "Nepal Health Research Council Act (for health-related social research)"],
+          "constraints": [
+            "No data collection may begin without written REC clearance.",
+            "Research involving minors (under 18) or vulnerable groups requires enhanced review.",
+            "Informed consent forms must be available in Nepali and English."
+          ],
+          "outcomes": {
+            "Clearance granted": "Research proceeds; REC registers study and monitors timeline.",
+            "Conditional clearance": "Researcher must address listed conditions before proceeding.",
+            "Rejected": "Researcher receives written reasons; may revise and resubmit."
+          },
+          "rag_chunk": "Policy SSD-POL-001: Human Subjects Research and Institutional Review Policy. Department: Social Sciences Department (Operational Academic Unit). Category: Research Ethics. Establishes the framework for ethical review and approval of research involving human participants, based on informed consent, voluntary participation, confidentiality, and harm minimization. Scope: All faculty-led, student-led, or externally commissioned research with human participants. Key roles: REC reviews proposals and grants clearance; Principal Investigator submits proposal and obtains consent; Department Head ensures compliance. Triggered at proposal stage and for major protocol amendments. Legal basis: National Code of Research Ethics, UGC Research Guidelines, Belmont Principles. Constraints: No data collection without REC clearance; minors and vulnerable groups require enhanced review; consent forms in Nepali and English. Outcomes: Clearance granted - research proceeds; Conditional clearance - conditions must be addressed; Rejected - written reasons provided."
+        },
+        {
+          "policy_id": "SSD-POL-002",
+          "department_id": "SSD",
+          "department_name": "Social Sciences Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Research Data Management and Archiving Policy",
+          "category": "Research Data Governance",
+          "description": "Defines requirements for the collection, storage, protection, sharing, and archiving of research data across the project lifecycle to ensure data integrity, reproducibility, and compliance.",
+          "scope": "All research data produced by faculty and students affiliated with the Social Sciences Department.",
+          "key_responsibilities": {
+            "Principal Investigator": "Produces a Data Management Plan (DMP) before data collection.",
+            "IT Department": "Provides secure storage infrastructure.",
+            "Department Head": "Approves DMP; ensures data archiving after project completion.",
+            "Research Ethics Committee": "Verifies data handling complies with consent agreements."
+          },
+          "related_entities": ["Principal Investigator", "IT Department", "REC", "Department Head", "Affiliating University Repository"],
+          "decision_context": "Applied at research proposal stage (DMP creation), during active research (data security), and post-project (archiving and disposal).",
+          "legal_regulatory_basis": ["Nepal Data Act 2079", "UGC Research Data Policy", "Individual Privacy Act 2075"],
+          "constraints": [
+            "Raw data must be retained for a minimum of 5 years post-publication.",
+            "Personally identifiable information (PII) must be anonymized before archiving.",
+            "Data from studies involving human subjects cannot be shared publicly without re-consent or full anonymization."
+          ],
+          "outcomes": {
+            "Non-compliant data handling identified": "Immediate remediation required; REC notified.",
+            "Data loss or breach": "Incident response procedure activated; participants notified as required."
+          },
+          "rag_chunk": "Policy SSD-POL-002: Research Data Management and Archiving Policy. Department: Social Sciences Department (Operational Academic Unit). Category: Research Data Governance. Defines requirements for collection, storage, protection, sharing, and archiving of research data across the project lifecycle. Scope: All research data from faculty and students of the department. Key roles: Principal Investigator creates Data Management Plan; IT provides secure storage; Department Head approves DMP; REC verifies data handling compliance. Applied at proposal stage, during active research, and post-project. Legal basis: Nepal Data Act 2079, UGC Research Data Policy, Individual Privacy Act 2075. Constraints: Raw data retained minimum 5 years post-publication; PII must be anonymized; human subjects data cannot be shared without re-consent. Outcomes: Non-compliance identified - immediate remediation; Data breach - incident response activated."
+        },
+        {
+          "policy_id": "SSD-POL-003",
+          "department_id": "SSD",
+          "department_name": "Social Sciences Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Diversity, Equity, and Inclusion (DEI) in Curriculum and Hiring Policy",
+          "category": "Equity and Inclusion",
+          "description": "Embeds DEI principles into course design, teaching practices, and faculty hiring to reflect Nepal's socially and culturally diverse student population, including representation of Janajati, Dalit, Madhesi, women, and persons with disabilities.",
+          "scope": "All academic programs, teaching activities, and faculty recruitment processes within the department.",
+          "key_responsibilities": {
+            "Department Head": "Ensures DEI principles are reflected in course syllabi and faculty hiring.",
+            "Faculty": "Design courses that represent diverse perspectives and use inclusive teaching methods.",
+            "HR Department": "Incorporates DEI criteria in job descriptions and selection panels."
+          },
+          "related_entities": ["Department Head", "Faculty", "HR Department", "Student Representative Body", "QA Office"],
+          "decision_context": "Applied during syllabus review, accreditation self-study, and faculty hiring rounds.",
+          "legal_regulatory_basis": ["Constitution of Nepal 2072 - Right to Equality (Art. 18), Right against Untouchability (Art. 24)", "UGC Inclusive Education Framework", "National Dalit Commission Guidelines"],
+          "constraints": [
+            "At least 33% representation of women in departmental hiring panels as required by law.",
+            "All new course syllabi must include at least two assigned texts by Nepali or South Asian authors."
+          ],
+          "outcomes": {
+            "DEI audit pass": "No action required.",
+            "Gap identified": "Action plan with timeline required; reported to QA Office.",
+            "Discrimination complaint": "Investigated under the college's Grievance and Harassment Policy."
+          },
+          "rag_chunk": "Policy SSD-POL-003: Diversity, Equity, and Inclusion (DEI) in Curriculum and Hiring Policy. Department: Social Sciences Department (Operational Academic Unit). Category: Equity and Inclusion. Embeds DEI principles into course design, teaching, and faculty hiring to reflect Nepal's diverse student population, including Janajati, Dalit, Madhesi, women, and persons with disabilities. Scope: All programs, teaching activities, and faculty recruitment. Key roles: Department Head ensures DEI in syllabi and hiring; Faculty design inclusive courses; HR incorporates DEI criteria in selection. Applied during syllabus review, accreditation self-study, and hiring rounds. Legal basis: Constitution of Nepal 2072 (Art. 18, 24), UGC Inclusive Education Framework, National Dalit Commission Guidelines. Constraints: Minimum 33% women in hiring panels; new syllabi must include at least two texts by Nepali or South Asian authors. Outcomes: DEI audit pass - no action; Gap identified - action plan to QA Office; Discrimination complaint - investigated under Grievance Policy."
+        }
+      ]
+    },
+    {
+      "department_id": "HOD",
+      "department_name": "Hospitality Department",
+      "department_type": "Operational Academic Unit",
+      "description": "This department offers programs in hotel management, food and beverage management, and tourism. Its policies govern industry placements, training lab operations, food safety, and tourism-related curriculum aligned with Nepal's hospitality and tourism sector.",
+      "policy_count": 3,
+      "key_regulations": ["Labour Act 2074", "Hotel and Restaurant Act", "Nepal Tourism Policy"],
+      "policies": [
+        {
+          "policy_id": "HOD-POL-001",
+          "department_id": "HOD",
+          "department_name": "Hospitality Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Hotel Management Internship and Placement Policy",
+          "category": "Work-Integrated Learning",
+          "description": "Defines the structure, duration, placement criteria, supervision framework, and assessment methods for mandatory hotel and food service internships that form a core component of all hospitality programs.",
+          "scope": "All students enrolled in Bachelor's or Diploma programs in Hotel Management or Tourism.",
+          "key_responsibilities": {
+            "Placement Coordinator": "Identifies and approves hospitality industry partners; manages placement logistics.",
+            "Faculty Supervisor": "Conducts minimum two on-site visits; evaluates student performance.",
+            "Students": "Submit bi-weekly logs and a final reflective report.",
+            "HR Department": "Maintains placement MOU records."
+          },
+          "related_entities": ["Placement Coordinator", "Faculty Supervisor", "Host Hotel/Restaurant", "HR Department", "Nepal Tourism Board (reference partner)"],
+          "decision_context": "Applied when placing students, evaluating performance mid-placement, resolving workplace disputes, or approving alternative placement due to unavailability.",
+          "legal_regulatory_basis": ["Labour Act 2074 (Nepal) - trainee provisions", "Hotel and Restaurant Act 2023 (Nepal)", "UGC Work-Integrated Learning Policy", "Nepal Tourism Strategic Plan"],
+          "constraints": [
+            "Internship must be a minimum of 16 weeks for Bachelor's programs.",
+            "Host organizations must be registered with the relevant authority (e.g., Department of Tourism).",
+            "Students must pass a food safety orientation before placement in food-service roles."
+          ],
+          "outcomes": {
+            "Pass": "Internship credits awarded; host organization feedback recorded.",
+            "Fail": "Student must repeat the placement.",
+            "Exceptional performance": "Letter of commendation issued; eligible for departmental award."
+          },
+          "rag_chunk": "Policy HOD-POL-001: Hotel Management Internship and Placement Policy. Department: Hospitality Department (Operational Academic Unit). Category: Work-Integrated Learning. Defines structure, duration, placement criteria, supervision framework, and assessment for mandatory hotel and food service internships. Scope: Bachelor's and Diploma students in Hotel Management or Tourism. Key roles: Placement Coordinator identifies and approves industry partners; Faculty Supervisor conducts on-site visits; Students submit bi-weekly logs and final report; HR maintains MOU records. Applied when placing students, evaluating performance, resolving disputes, or approving alternative placements. Legal basis: Labour Act 2074, Hotel and Restaurant Act 2023, UGC Work-Integrated Learning Policy. Constraints: Minimum 16 weeks for Bachelor's; host must be registered with Department of Tourism; food safety orientation required for food-service roles. Outcomes: Pass - credits awarded; Fail - repeat placement; Exceptional - letter of commendation."
+        },
+        {
+          "policy_id": "HOD-POL-002",
+          "department_id": "HOD",
+          "department_name": "Hospitality Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Training Kitchen and Hospitality Lab Usage Policy",
+          "category": "Facility Management",
+          "description": "Regulates safe access, hygiene standards, equipment use, and supervision requirements for the department's training kitchen and hospitality simulation facilities.",
+          "scope": "All students, faculty, and visiting instructors using the training kitchen, mock front-desk, and event simulation labs.",
+          "key_responsibilities": {
+            "Lab Supervisor": "Oversees day-to-day operations; ensures compliance with food safety standards.",
+            "Faculty": "Provide induction training before first lab session.",
+            "Students": "Follow hygiene protocols and equipment handling guidelines.",
+            "IT Department": "Maintains point-of-sale and property management system (PMS) simulation software."
+          },
+          "related_entities": ["Lab Supervisor", "Faculty", "Students", "IT Department", "Administration", "External Food Safety Inspector"],
+          "decision_context": "Applied during lab scheduling, after a safety incident, or in response to hygiene inspection findings.",
+          "legal_regulatory_basis": ["Food Act 2023 (Nepal)", "Food Safety and Quality Authority of Nepal (DFTQC) Standards", "Nepal Standard for Hotels and Restaurants"],
+          "constraints": [
+            "No student may use kitchen equipment without completing the mandatory safety induction.",
+            "All perishable ingredients must be stored according to temperature control standards.",
+            "Lab capacity is limited to defined maximum occupancy per session."
+          ],
+          "outcomes": {
+            "Safety violation": "Session suspended; remedial training required; incident logged.",
+            "Hygiene inspection failed": "Lab closed until deficiencies are corrected and re-inspection passed.",
+            "Equipment damage": "Assessment of liability; replacement or repair costs assigned per policy."
+          },
+          "rag_chunk": "Policy HOD-POL-002: Training Kitchen and Hospitality Lab Usage Policy. Department: Hospitality Department (Operational Academic Unit). Category: Facility Management. Regulates safe access, hygiene standards, equipment use, and supervision requirements for the training kitchen and hospitality simulation facilities. Scope: All students, faculty, and visiting instructors using training kitchen, mock front-desk, and event simulation labs. Key roles: Lab Supervisor oversees operations and food safety compliance; Faculty provides induction training; Students follow hygiene protocols; IT maintains PMS software. Applied during lab scheduling, after safety incidents, or after hygiene inspection findings. Legal basis: Food Act 2023, DFTQC Standards, Nepal Standard for Hotels and Restaurants. Constraints: Mandatory safety induction before equipment use; temperature-controlled storage for perishables; maximum occupancy enforced. Outcomes: Safety violation - session suspended, remedial training; Hygiene inspection failed - lab closed; Equipment damage - liability assessed."
+        },
+        {
+          "policy_id": "HOD-POL-003",
+          "department_id": "HOD",
+          "department_name": "Hospitality Department",
+          "department_type": "Operational Academic Unit",
+          "title": "Sustainable Tourism and Responsible Hospitality Curriculum Policy",
+          "category": "Curriculum and Values",
+          "description": "Requires all hospitality programs to integrate sustainability, responsible tourism, and cultural sensitivity principles into course content, assessments, and field activities, consistent with Nepal's role as a major tourism destination.",
+          "scope": "All programs and modules offered by the Hospitality Department.",
+          "key_responsibilities": {
+            "Department Head": "Ensures sustainability content is embedded in all program specifications.",
+            "Faculty": "Design learning activities that develop students' understanding of environmental impact, cultural heritage, and community-based tourism.",
+            "QA Office": "Verifies sustainability integration during curriculum review."
+          },
+          "related_entities": ["Department Head", "Faculty", "QA Office", "Nepal Tourism Board", "Department of Tourism"],
+          "decision_context": "Applied during curriculum review cycles, program accreditation self-studies, and when developing new elective modules.",
+          "legal_regulatory_basis": ["Nepal Tourism Policy 2065", "UNWTO Sustainable Tourism Guidelines (reference)", "UGC Curriculum Standards", "Nepal Biodiversity Act 2058"],
+          "constraints": [
+            "At least 20% of program-level learning outcomes must explicitly address sustainability or responsible tourism.",
+            "Guest lecturer input from community tourism practitioners must be included at least once per academic year per program."
+          ],
+          "outcomes": {
+            "Full integration confirmed": "Program meets QA sustainability criterion.",
+            "Partial integration": "Action plan required with timeline for full compliance.",
+            "Non-integration": "Program placed on curriculum improvement watch list; QA oversight increased."
+          },
+          "rag_chunk": "Policy HOD-POL-003: Sustainable Tourism and Responsible Hospitality Curriculum Policy. Department: Hospitality Department (Operational Academic Unit). Category: Curriculum and Values. Requires all hospitality programs to integrate sustainability, responsible tourism, and cultural sensitivity into course content, assessments, and field activities. Scope: All programs and modules of the Hospitality Department. Key roles: Department Head ensures sustainability in program specifications; Faculty design relevant learning activities; QA Office verifies integration during curriculum review. Applied during curriculum review cycles, accreditation self-studies, and new elective development. Legal basis: Nepal Tourism Policy 2065, UNWTO Sustainable Tourism Guidelines, UGC Curriculum Standards, Nepal Biodiversity Act 2058. Constraints: Minimum 20% of program-level outcomes must address sustainability; community tourism guest lecturer required at least once per program per year. Outcomes: Full integration - meets QA criterion; Partial - action plan required; Non-integration - placed on watch list."
+        }
+      ]
+    },
+    {
+      "department_id": "FIN",
+      "department_name": "Finance Department",
+      "department_type": "Parent Administrative Department",
+      "description": "The Finance Department governs all institutional financial processes including budgeting, procurement, tuition management, audit, and reporting. It operates in compliance with Nepal's Financial Procedures and Fiscal Accountability Act 2076 (FPFAA) and public procurement regulations.",
+      "policy_count": 4,
+      "key_regulations": ["FPFAA 2076", "Public Procurement Act 2063", "Audit Act 2075"],
+      "policies": [
+        {
+          "policy_id": "FIN-POL-001",
+          "department_id": "FIN",
+          "department_name": "Finance Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Annual Budget Formulation and Approval Policy",
+          "category": "Budget Management",
+          "description": "Defines the annual budget planning cycle, departmental request procedures, resource allocation criteria, and approval workflow for the institution's operating and capital expenditure budget.",
+          "scope": "All departments and cost centres within the institution.",
+          "key_responsibilities": {
+            "Finance Officer": "Circulates budget call circular; consolidates departmental submissions.",
+            "Department Heads": "Submit budget proposals with justification and activity plans by the deadline.",
+            "Budget Committee": "Reviews proposals against institutional priorities; recommends final budget.",
+            "College Principal": "Approves the budget and presents it to the Governing Board."
+          },
+          "related_entities": ["Finance Department", "All Departments", "Budget Committee", "College Principal", "Governing Board"],
+          "decision_context": "Conducted annually before the start of the fiscal year (Shrawan 1 in Nepal). Supplementary budget requests may be made mid-year in exceptional circumstances.",
+          "legal_regulatory_basis": ["Financial Procedures and Fiscal Accountability Act 2076 (FPFAA)", "UGC Grant Disbursement Guidelines", "Institutional Finance Bylaws"],
+          "constraints": [
+            "Budget requests must be submitted by Chaitra 15 each year.",
+            "Unfunded requests are automatically deferred to the next cycle.",
+            "Departmental budget cannot be increased mid-year without Finance Committee approval."
+          ],
+          "outcomes": {
+            "Budget approved": "Funds released to departments in quarterly tranches.",
+            "Over-budget proposal": "Department must revise and resubmit with reduced scope.",
+            "Supplementary request approved": "Subject to available institutional reserves."
+          },
+          "rag_chunk": "Policy FIN-POL-001: Annual Budget Formulation and Approval Policy. Department: Finance Department (Parent Administrative Department). Category: Budget Management. Defines the annual budget planning cycle, departmental request procedures, resource allocation criteria, and approval workflow for operating and capital expenditure. Scope: All departments and cost centres. Key roles: Finance Officer circulates budget call and consolidates submissions; Department Heads submit proposals; Budget Committee reviews; College Principal approves and presents to Governing Board. Conducted annually before Shrawan 1; supplementary requests allowed mid-year in exceptional cases. Legal basis: FPFAA 2076, UGC Grant Disbursement Guidelines. Constraints: Submissions due by Chaitra 15; unfunded requests deferred; mid-year increases require Finance Committee approval. Outcomes: Approved - funds released quarterly; Over-budget - revise and resubmit; Supplementary request - subject to reserves."
+        },
+        {
+          "policy_id": "FIN-POL-002",
+          "department_id": "FIN",
+          "department_name": "Finance Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Procurement and Expenditure Control Policy",
+          "category": "Procurement",
+          "description": "Establishes procurement thresholds, competitive bidding requirements, vendor approval processes, and expenditure authorization levels to ensure transparent and accountable use of institutional funds.",
+          "scope": "All procurement of goods, services, and works undertaken by the institution.",
+          "key_responsibilities": {
+            "Procurement Officer": "Manages tender processes; maintains vendor register.",
+            "Finance Officer": "Verifies budget availability before procurement is authorized.",
+            "Departmental Requisitioners": "Submit justified purchase requests.",
+            "Internal Auditor": "Reviews high-value procurements.",
+            "College Principal": "Approves procurements above defined threshold."
+          },
+          "related_entities": ["Procurement Officer", "Finance Department", "Internal Auditor", "Vendors", "Department Heads", "College Principal"],
+          "decision_context": "Applied for all institutional purchases. Thresholds determine whether direct purchase, quotation-based purchase, or public tender is required.",
+          "legal_regulatory_basis": ["Public Procurement Act 2063 (Nepal)", "Public Procurement Regulations 2064", "Financial Procedures and Fiscal Accountability Act 2076"],
+          "constraints": [
+            "Purchases above NPR 500,000 require a minimum of three competitive quotations.",
+            "Purchases above NPR 5,000,000 require public tender.",
+            "No splitting of procurements to avoid tender thresholds is permitted."
+          ],
+          "outcomes": {
+            "Procurement approved": "Purchase order issued to vendor; contract signed for works/services.",
+            "Irregularity identified": "Procurement suspended; internal audit notified.",
+            "Vendor blacklisted": "Removed from approved register; reported to relevant authority."
+          },
+          "rag_chunk": "Policy FIN-POL-002: Procurement and Expenditure Control Policy. Department: Finance Department (Parent Administrative Department). Category: Procurement. Establishes procurement thresholds, competitive bidding requirements, vendor approval processes, and expenditure authorization levels. Scope: All procurement of goods, services, and works. Key roles: Procurement Officer manages tenders and vendor register; Finance Officer verifies budget availability; Departmental Requisitioners submit purchase requests; Internal Auditor reviews high-value procurements; College Principal approves above threshold. Applied for all institutional purchases. Legal basis: Public Procurement Act 2063, Public Procurement Regulations 2064, FPFAA 2076. Constraints: Above NPR 500,000 - three competitive quotations required; above NPR 5,000,000 - public tender required; splitting procurements to avoid thresholds is prohibited. Outcomes: Approved - purchase order issued; Irregularity - suspended, audit notified; Vendor blacklisted - removed from register."
+        },
+        {
+          "policy_id": "FIN-POL-003",
+          "department_id": "FIN",
+          "department_name": "Finance Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Tuition Fee, Scholarship, and Refund Policy",
+          "category": "Student Finance",
+          "description": "Sets fee structures for all academic programs, defines scholarship eligibility and disbursement procedures, and establishes the tuition refund schedule for withdrawals and programme cancellations.",
+          "scope": "All enrolled and prospective students.",
+          "key_responsibilities": {
+            "Finance Office": "Maintains fee schedule; processes payments, scholarships, and refunds.",
+            "Scholarship Committee": "Reviews applications and awards scholarships based on criteria.",
+            "Registrar": "Confirms enrollment status for fee and refund calculations.",
+            "Department Heads": "Nominate students for merit-based scholarships."
+          },
+          "related_entities": ["Finance Office", "Scholarship Committee", "Registrar", "Department Heads", "Students"],
+          "decision_context": "Applied at semester commencement, upon student withdrawal, when issuing scholarship awards, and when auditing fee collection.",
+          "legal_regulatory_basis": ["Consumer Protection Act 2075 (Nepal)", "UGC Fee Regulation Guidelines", "College Fee Schedule (approved by Governing Board)"],
+          "constraints": [
+            "Full refund: Withdrawal within 7 days of fee payment.",
+            "50% refund: Withdrawal between 8-30 days.",
+            "No refund: Withdrawal after 30 days.",
+            "Scholarship recipients who fail to maintain required GPA may have scholarship suspended pending review."
+          ],
+          "outcomes": {
+            "Refund approved": "Processed within 15 working days.",
+            "Refund denied": "Written reason provided; student may appeal to Finance Committee.",
+            "Scholarship suspended": "Student notified in writing; eligible to appeal within 14 days."
+          },
+          "rag_chunk": "Policy FIN-POL-003: Tuition Fee, Scholarship, and Refund Policy. Department: Finance Department (Parent Administrative Department). Category: Student Finance. Sets fee structures for all programs, defines scholarship eligibility and disbursement, and establishes tuition refund schedule for withdrawals and cancellations. Scope: All enrolled and prospective students. Key roles: Finance Office processes payments and refunds; Scholarship Committee awards scholarships; Registrar confirms enrollment; Department Heads nominate for merit scholarships. Applied at semester start, withdrawal, scholarship issuance, and fee auditing. Legal basis: Consumer Protection Act 2075, UGC Fee Regulation Guidelines. Constraints: Full refund within 7 days; 50% refund 8-30 days; no refund after 30 days; GPA below requirement suspends scholarship. Outcomes: Refund approved - processed in 15 days; Denied - written reason provided; Scholarship suspended - 14-day appeal window."
+        },
+        {
+          "policy_id": "FIN-POL-004",
+          "department_id": "FIN",
+          "department_name": "Finance Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Internal Audit and Financial Control Policy",
+          "category": "Audit and Compliance",
+          "description": "Establishes the mandate, scope, methodology, and reporting requirements for the institution's internal audit function to ensure financial controls are operating effectively and institutional funds are used appropriately.",
+          "scope": "All financial transactions, assets, and processes of the institution.",
+          "key_responsibilities": {
+            "Internal Auditor": "Conducts risk-based audits; reports findings to management.",
+            "Finance Officer": "Implements audit recommendations.",
+            "College Principal": "Receives and acts on audit reports.",
+            "Governing Board Audit Committee": "Reviews internal audit reports annually."
+          },
+          "related_entities": ["Internal Auditor", "Finance Department", "College Principal", "Governing Board", "External Auditor (Office of the Auditor General or licensed CA firm)"],
+          "decision_context": "Annual audit plan approved at the start of each fiscal year. Special audits triggered by complaints, anomalies, or Governing Board direction.",
+          "legal_regulatory_basis": ["Financial Procedures and Fiscal Accountability Act 2076", "Audit Act 2075 (Nepal)", "Institute of Chartered Accountants of Nepal (ICAN) Standards"],
+          "constraints": [
+            "Internal auditor must be independent of the Finance Officer.",
+            "Audit findings must be communicated to management within 30 days of field work completion.",
+            "Management must respond to audit findings within 21 days."
+          ],
+          "outcomes": {
+            "Finding actioned": "Management letter closed; control improvement documented.",
+            "Finding not actioned within deadline": "Escalated to College Principal and noted in next Governing Board report.",
+            "Material misstatement found": "Referred to external authority if required."
+          },
+          "rag_chunk": "Policy FIN-POL-004: Internal Audit and Financial Control Policy. Department: Finance Department (Parent Administrative Department). Category: Audit and Compliance. Establishes the mandate, scope, methodology, and reporting requirements for the institution's internal audit function. Scope: All financial transactions, assets, and processes. Key roles: Internal Auditor conducts risk-based audits; Finance Officer implements recommendations; College Principal acts on reports; Governing Board Audit Committee reviews annually. Annual audit plan approved at fiscal year start; special audits triggered by complaints or Governing Board direction. Legal basis: FPFAA 2076, Audit Act 2075, ICAN Standards. Constraints: Internal auditor must be independent of Finance Officer; findings communicated within 30 days of fieldwork; management responds within 21 days. Outcomes: Finding actioned - management letter closed; Not actioned - escalated to Principal; Material misstatement - referred to external authority."
+        }
+      ]
+    },
+    {
+      "department_id": "HRD",
+      "department_name": "Human Resource Department",
+      "department_type": "Parent Administrative Department",
+      "description": "The HR Department manages the full employment lifecycle for all faculty and staff in compliance with Nepal's Labour Act 2074, Labour Rules 2075, and applicable UGC staff service regulations.",
+      "policy_count": 4,
+      "key_regulations": ["Labour Act 2074", "Labour Rules 2075", "Equal Opportunity Commission Guidelines"],
+      "policies": [
+        {
+          "policy_id": "HRD-POL-001",
+          "department_id": "HRD",
+          "department_name": "Human Resource Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Recruitment, Selection, and Appointment Policy",
+          "category": "Staffing",
+          "description": "Defines the end-to-end procedure for advertising vacancies, screening applications, conducting interviews, making offers, and onboarding new employees for both academic and non-academic positions.",
+          "scope": "All permanent, contract, and part-time positions across the institution.",
+          "key_responsibilities": {
+            "HR Department": "Advertises vacancies, manages application pool, coordinates selection process, issues offer letters.",
+            "Selection Committee": "Reviews applications, conducts interviews, recommends candidates.",
+            "Department Head": "Provides technical assessment criteria; participates in selection.",
+            "College Principal": "Approves appointments for senior positions."
+          },
+          "related_entities": ["HR Department", "Selection Committee", "Department Heads", "College Principal", "Applicants", "UGC (for faculty appointments at applicable ranks)"],
+          "decision_context": "Applied when a vacancy arises due to new position creation, resignation, retirement, or contract expiry.",
+          "legal_regulatory_basis": ["Labour Act 2074 (Nepal)", "Labour Rules 2075", "Equal Opportunity Commission Guidelines", "Constitution of Nepal 2072 - Right against Discrimination", "UGC Faculty Appointment Regulations"],
+          "constraints": [
+            "Selection committees must include at least one woman as required by constitutional reservation provisions.",
+            "All job advertisements must be published in at least one national newspaper and the institution's website.",
+            "Appointment letters must specify grade, salary, probation period, and terms of service."
+          ],
+          "outcomes": {
+            "Candidate selected": "Offer letter issued; background verification completed; onboarding initiated.",
+            "No suitable candidate": "Position re-advertised or temporarily filled by internal acting arrangement.",
+            "Candidate rejects offer": "Next-ranked candidate considered or process restarted."
+          },
+          "rag_chunk": "Policy HRD-POL-001: Recruitment, Selection, and Appointment Policy. Department: Human Resource Department (Parent Administrative Department). Category: Staffing. Defines end-to-end procedure for advertising vacancies, screening applications, conducting interviews, making offers, and onboarding for academic and non-academic positions. Scope: All permanent, contract, and part-time positions. Key roles: HR manages recruitment and issues offer letters; Selection Committee reviews and recommends; Department Head provides assessment criteria; College Principal approves senior appointments. Applied when vacancies arise due to new positions, resignations, retirements, or contract expiry. Legal basis: Labour Act 2074, Labour Rules 2075, Equal Opportunity Commission Guidelines, Constitution of Nepal 2072. Constraints: At least one woman on selection committee; advertisements in national newspaper and website; appointment letters must specify grade, salary, probation, and terms. Outcomes: Candidate selected - offer issued and onboarded; No suitable candidate - re-advertised; Candidate rejects - next-ranked considered."
+        },
+        {
+          "policy_id": "HRD-POL-002",
+          "department_id": "HRD",
+          "department_name": "Human Resource Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Employee Performance Appraisal Policy",
+          "category": "Performance Management",
+          "description": "Establishes the framework for annual performance appraisal of all staff, linking performance outcomes to salary increments, promotion recommendations, professional development opportunities, and corrective action plans.",
+          "scope": "All permanent and long-term contract employees.",
+          "key_responsibilities": {
+            "Appraiser (Line Manager / Department Head)": "Conducts mid-year and annual review; completes appraisal form.",
+            "Appraisee": "Completes self-evaluation; participates in review discussion.",
+            "HR Department": "Manages appraisal calendar; processes outcomes.",
+            "College Principal": "Reviews aggregate performance data and approves promotion/increment recommendations."
+          },
+          "related_entities": ["HR Department", "Department Heads", "All Staff", "College Principal", "Finance Department"],
+          "decision_context": "Conducted annually, with a mid-year check-in. Triggered additionally when an employee's performance falls below acceptable standards.",
+          "legal_regulatory_basis": ["Labour Act 2074 - Section on performance and promotion", "UGC Faculty Evaluation Framework", "Institutional HR Policy Manual"],
+          "constraints": [
+            "Appraisals must be completed within 60 days of the end of the academic year.",
+            "Staff rated 'Unsatisfactory' must be placed on a Performance Improvement Plan (PIP) within 30 days.",
+            "Salary increments are processed only after appraisal completion."
+          ],
+          "outcomes": {
+            "Outstanding/Excellent": "Fast-track promotion consideration; CPD award eligible.",
+            "Satisfactory": "Standard increment processed.",
+            "Unsatisfactory": "PIP initiated; reviewed after 90 days.",
+            "Persistent underperformance": "Disciplinary proceedings or contract non-renewal."
+          },
+          "rag_chunk": "Policy HRD-POL-002: Employee Performance Appraisal Policy. Department: Human Resource Department (Parent Administrative Department). Category: Performance Management. Establishes the framework for annual performance appraisal linking outcomes to salary increments, promotions, professional development, and corrective action plans. Scope: All permanent and long-term contract employees. Key roles: Line Manager/Department Head conducts appraisal; Appraisee completes self-evaluation; HR manages calendar and processes outcomes; College Principal approves recommendations. Conducted annually with a mid-year check-in; also triggered by below-standard performance. Legal basis: Labour Act 2074, UGC Faculty Evaluation Framework. Constraints: Completed within 60 days of academic year end; Unsatisfactory rating requires PIP within 30 days; increments processed only after appraisal. Outcomes: Outstanding - fast-track promotion; Satisfactory - standard increment; Unsatisfactory - PIP in 90 days; Persistent underperformance - disciplinary proceedings."
+        },
+        {
+          "policy_id": "HRD-POL-003",
+          "department_id": "HRD",
+          "department_name": "Human Resource Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Leave and Attendance Management Policy",
+          "category": "Employee Entitlements",
+          "description": "Defines all categories of leave entitlement (annual, sick, maternity, paternity, bereavement, study, special), attendance recording procedures, and the consequences of unauthorized absence.",
+          "scope": "All permanent and contract employees.",
+          "key_responsibilities": {
+            "HR Department": "Maintains leave records; processes applications; tracks balances.",
+            "Line Manager": "Approves routine leave requests within defined delegations.",
+            "College Principal": "Approves extended or exceptional leave requests.",
+            "Finance Department": "Processes leave encashment where applicable."
+          },
+          "related_entities": ["HR Department", "Line Managers", "All Employees", "College Principal", "Finance Department"],
+          "decision_context": "Applied when an employee applies for leave, when investigating unauthorized absence, or when auditing leave balances.",
+          "legal_regulatory_basis": ["Labour Act 2074 - Chapter on leave entitlements", "Maternity Protection Act 2018 (Nepal)", "Public Holiday Gazette (Government of Nepal)"],
+          "constraints": [
+            "Annual leave: 18 days per year (accrual).",
+            "Sick leave: 12 days per year (non-encashable).",
+            "Maternity leave: 98 days (per Labour Act 2074).",
+            "Paternity leave: 15 days.",
+            "Leave exceeding entitlement is treated as leave without pay unless exceptional circumstances apply."
+          ],
+          "outcomes": {
+            "Leave approved": "Record updated; substitute arrangement made if required.",
+            "Leave denied": "Employee notified in writing with reason.",
+            "Unauthorized absence": "Treated as leave without pay; repeated absence triggers disciplinary review."
+          },
+          "rag_chunk": "Policy HRD-POL-003: Leave and Attendance Management Policy. Department: Human Resource Department (Parent Administrative Department). Category: Employee Entitlements. Defines all categories of leave entitlement (annual, sick, maternity, paternity, bereavement, study, special), attendance recording procedures, and consequences of unauthorized absence. Scope: All permanent and contract employees. Key roles: HR maintains leave records and processes applications; Line Manager approves routine leave; College Principal approves extended leave; Finance processes encashment. Applied for leave applications, unauthorized absence investigations, and leave audits. Legal basis: Labour Act 2074, Maternity Protection Act 2018. Constraints: Annual leave 18 days; Sick leave 12 days (non-encashable); Maternity 98 days; Paternity 15 days; excess treated as leave without pay. Outcomes: Approved - record updated; Denied - written notification; Unauthorized absence - treated as unpaid leave, repeat triggers disciplinary review."
+        },
+        {
+          "policy_id": "HRD-POL-004",
+          "department_id": "HRD",
+          "department_name": "Human Resource Department",
+          "department_type": "Parent Administrative Department",
+          "title": "Workplace Grievance and Anti-Harassment Policy",
+          "category": "Employee Relations",
+          "description": "Establishes a safe, confidential mechanism for employees and students to raise complaints related to workplace harassment, discrimination, bullying, and unfair treatment, with defined investigation and resolution procedures.",
+          "scope": "All employees, students, and third parties in the institutional environment.",
+          "key_responsibilities": {
+            "Grievance Officer (HR Head or designate)": "Receives complaints; initiates formal or informal resolution.",
+            "Investigation Committee": "Conducts impartial investigation of formal complaints.",
+            "College Principal": "Reviews committee findings and issues final decision.",
+            "HR Department": "Maintains records and ensures resolution timelines are met."
+          },
+          "related_entities": ["Grievance Officer", "Investigation Committee", "HR Department", "College Principal", "Respondent", "Complainant"],
+          "decision_context": "Activated upon receipt of a written or verbal complaint by any member of the institutional community.",
+          "legal_regulatory_basis": ["Labour Act 2074 - grievance and disciplinary provisions", "Gender Equality and State Restructuring Act (Nepal)", "Constitution of Nepal 2072 - Right against Exploitation"],
+          "constraints": [
+            "Acknowledgment of complaint within 3 working days.",
+            "Informal resolution: within 21 days.",
+            "Formal investigation: within 45 days.",
+            "Confidentiality must be maintained throughout.",
+            "Retaliation against complainants is strictly prohibited and is itself a disciplinary offence."
+          ],
+          "outcomes": {
+            "Complaint upheld": "Appropriate disciplinary action or remediation imposed.",
+            "Complaint not upheld": "Both parties notified with explanation.",
+            "Complaint withdrawn": "Recorded; underlying issues noted for monitoring."
+          },
+          "rag_chunk": "Policy HRD-POL-004: Workplace Grievance and Anti-Harassment Policy. Department: Human Resource Department (Parent Administrative Department). Category: Employee Relations. Establishes a safe, confidential mechanism for employees and students to raise complaints related to harassment, discrimination, bullying, and unfair treatment. Scope: All employees, students, and third parties. Key roles: Grievance Officer receives complaints and initiates resolution; Investigation Committee conducts impartial investigation; College Principal reviews findings and issues final decision; HR maintains records. Activated upon receipt of written or verbal complaint. Legal basis: Labour Act 2074, Gender Equality and State Restructuring Act, Constitution of Nepal 2072. Constraints: Acknowledgment within 3 working days; informal resolution in 21 days; formal investigation in 45 days; confidentiality maintained; retaliation is a disciplinary offence. Outcomes: Upheld - disciplinary action imposed; Not upheld - both parties notified; Withdrawn - recorded and monitored."
+        }
+      ]
+    },
+    {
+      "department_id": "QAA",
+      "department_name": "Quality Assurance and Accreditation Office",
+      "department_type": "Parent Administrative Department",
+      "description": "This office coordinates the institution's quality assurance, accreditation compliance, self-study processes, and continuous improvement activities in alignment with UGC Nepal's QAA framework and the eight QAA criteria established by the University Grants Commission.",
+      "policy_count": 4,
+      "key_regulations": ["UGC QAA Guidelines 2022", "UGC Act 2050", "Higher Education Policy 2076"],
+      "policies": [
+        {
+          "policy_id": "QAA-POL-001",
+          "department_id": "QAA",
+          "department_name": "Quality Assurance and Accreditation Office",
+          "department_type": "Parent Administrative Department",
+          "title": "Institutional Accreditation and QAA Compliance Policy",
+          "category": "Accreditation",
+          "description": "Defines the institution's commitment to participating in the UGC Nepal Quality Assurance and Accreditation (QAA) process, including Letter of Intent submission, Self-Study Report (SSR) preparation, Peer Review Team hosting, and continuous quality improvement following accreditation.",
+          "scope": "The entire institution including all academic departments and administrative offices.",
+          "key_responsibilities": {
+            "QA Office Head": "Leads QAA process; coordinates SSR preparation.",
+            "Internal Quality Assurance Cell (IQAC)": "Conducts internal audits; prepares evidence for each QAA criterion.",
+            "Department Heads": "Provide data and evidence for their respective areas.",
+            "College Principal": "Signs off the SSR; hosts the Peer Review Team (PRT) visit."
+          },
+          "related_entities": ["QA Office", "IQAC", "All Departments", "College Principal", "UGC Nepal QAAC", "Peer Review Team"],
+          "decision_context": "Initiated when the institution is eligible for first accreditation or re-accreditation (typically every 5 years). Also triggered by UGC directives or significant institutional change.",
+          "legal_regulatory_basis": ["UGC Nepal QAA Guidelines 2022", "UGC Nepal EQAAC Strategic Plan 2021-2030", "Higher Education Policy 2076", "University Grants Commission Act 2050"],
+          "constraints": [
+            "SSR must comprehensively address all eight UGC QAA criteria.",
+            "Institution must score a minimum of 60% on each criterion and an overall satisfactory total to achieve accreditation.",
+            "Non-accredited institutions cannot add new programs under current UGC policy."
+          ],
+          "outcomes": {
+            "Accredited": "UGC certificate issued; institution eligible for program expansion and additional grants.",
+            "Conditionally accredited": "Action plan with timeline required.",
+            "Not accredited": "Institution must address deficiencies; re-application allowed after 2 years."
+          },
+          "rag_chunk": "Policy QAA-POL-001: Institutional Accreditation and QAA Compliance Policy. Department: Quality Assurance and Accreditation Office (Parent Administrative Department). Category: Accreditation. Defines the institution's commitment to the UGC Nepal QAA process including Letter of Intent, Self-Study Report (SSR) preparation, Peer Review Team hosting, and continuous improvement. Scope: Entire institution including all academic and administrative offices. Key roles: QA Office Head leads and coordinates SSR; IQAC conducts internal audits; Department Heads provide evidence; College Principal signs SSR and hosts PRT. Initiated for first or re-accreditation (every 5 years) or UGC directives. Legal basis: UGC Nepal QAA Guidelines 2022, EQAAC Strategic Plan 2021-2030, Higher Education Policy 2076, UGC Act 2050. Constraints: SSR must address all eight QAA criteria; minimum 60% on each criterion; non-accredited institutions cannot add new programs. Outcomes: Accredited - UGC certificate, eligible for expansion; Conditionally accredited - action plan required; Not accredited - address deficiencies, reapply after 2 years."
+        },
+        {
+          "policy_id": "QAA-POL-002",
+          "department_id": "QAA",
+          "department_name": "Quality Assurance and Accreditation Office",
+          "department_type": "Parent Administrative Department",
+          "title": "Internal Quality Assurance Cell (IQAC) Operations Policy",
+          "category": "Quality Management",
+          "description": "Establishes the mandate, composition, meeting schedule, responsibilities, and reporting obligations of the institution's Internal Quality Assurance Cell, which serves as the primary internal mechanism for continuous quality monitoring.",
+          "scope": "All academic and administrative functions of the institution.",
+          "key_responsibilities": {
+            "IQAC Coordinator": "Chairs meetings; prepares Annual Quality Assurance Report (AQAR).",
+            "IQAC Members (faculty, students, admin, external expert)": "Participate in audits and quality initiatives.",
+            "QA Office": "Provides secretarial support; maintains IQAC records.",
+            "College Principal": "Reviews AQAR and approves quality improvement plans."
+          },
+          "related_entities": ["IQAC", "QA Office", "All Departments", "College Principal", "Student Representatives", "External Quality Expert"],
+          "decision_context": "IQAC meets at least quarterly. Special meetings convened following accreditation feedback or significant quality concerns.",
+          "legal_regulatory_basis": ["UGC Nepal QAA Guidelines - IQAC provisions", "Institutional QA Policy", "UGC EQAAC Operational Manual"],
+          "constraints": [
+            "IQAC composition must include at least one student representative and one external member from industry or academia.",
+            "AQAR must be submitted to UGC Nepal annually.",
+            "IQAC findings are binding on departments with regard to remediation timelines."
+          ],
+          "outcomes": {
+            "Quality standard met": "Positive finding recorded in AQAR.",
+            "Quality gap identified": "Improvement plan with responsible party and timeline issued.",
+            "Persistent gap": "Escalated to College Principal for institutional-level intervention."
+          },
+          "rag_chunk": "Policy QAA-POL-002: Internal Quality Assurance Cell (IQAC) Operations Policy. Department: Quality Assurance and Accreditation Office (Parent Administrative Department). Category: Quality Management. Establishes the mandate, composition, meeting schedule, responsibilities, and reporting obligations of the IQAC as the primary continuous quality monitoring mechanism. Scope: All academic and administrative functions. Key roles: IQAC Coordinator chairs meetings and prepares AQAR; IQAC Members participate in audits; QA Office provides secretarial support; College Principal reviews AQAR and approves improvement plans. IQAC meets at least quarterly; special meetings after accreditation feedback. Legal basis: UGC Nepal QAA Guidelines, EQAAC Operational Manual. Constraints: Composition must include student representative and external member; AQAR submitted to UGC annually; IQAC findings are binding on departments. Outcomes: Standard met - recorded in AQAR; Quality gap - improvement plan issued; Persistent gap - escalated to College Principal."
+        },
+        {
+          "policy_id": "QAA-POL-003",
+          "department_id": "QAA",
+          "department_name": "Quality Assurance and Accreditation Office",
+          "department_type": "Parent Administrative Department",
+          "title": "Student Learning Outcomes Assessment and Programme Review Policy",
+          "category": "Academic Quality",
+          "description": "Mandates the regular assessment of student learning outcomes (SLOs) at course and program level, and defines the programme review cycle, evidence requirements, and use of assessment results for curriculum improvement.",
+          "scope": "All academic programs across all departments.",
+          "key_responsibilities": {
+            "Program Coordinators": "Define and map SLOs; report assessment results annually.",
+            "Faculty": "Design assessments aligned with SLOs; contribute data to program review.",
+            "QA Office": "Facilitates 5-year program review; validates SLO assessment methodology.",
+            "Department Heads": "Use assessment results to drive curriculum decisions."
+          },
+          "related_entities": ["Program Coordinators", "Faculty", "QA Office", "Department Heads", "Students", "External Reviewers (for 5-year review)"],
+          "decision_context": "Annual SLO reporting required. Full program review triggered every 5 years or following significant accreditation findings.",
+          "legal_regulatory_basis": ["UGC QAA Criterion 2 - Curricular Aspects", "UGC QAA Criterion 3 - Teaching-Learning and Evaluation", "Nepal Education Act provisions on academic quality"],
+          "constraints": [
+            "All programs must have documented, measurable SLOs at course and program level.",
+            "At least 70% of assessed SLOs must be achieved at the acceptable performance level.",
+            "Programs failing to meet this threshold must implement and report on improvement plans."
+          ],
+          "outcomes": {
+            "SLOs met": "Annual report filed; no additional action.",
+            "SLOs partially met": "Targeted improvement plan developed; reviewed at next cycle.",
+            "SLOs not met": "Program placed on enhanced monitoring; QA Office oversight increased; external review may be commissioned."
+          },
+          "rag_chunk": "Policy QAA-POL-003: Student Learning Outcomes Assessment and Programme Review Policy. Department: Quality Assurance and Accreditation Office (Parent Administrative Department). Category: Academic Quality. Mandates regular assessment of student learning outcomes (SLOs) at course and program level, defines program review cycle, evidence requirements, and use of results for curriculum improvement. Scope: All academic programs across all departments. Key roles: Program Coordinators define and map SLOs; Faculty design aligned assessments; QA Office facilitates 5-year review; Department Heads use results for curriculum decisions. Annual SLO reporting required; full program review every 5 years or after significant accreditation findings. Legal basis: UGC QAA Criteria 2 and 3, Nepal Education Act. Constraints: Documented measurable SLOs required; at least 70% of SLOs must be achieved; failing programs must implement improvement plans. Outcomes: SLOs met - annual report filed; Partially met - improvement plan; Not met - enhanced monitoring and possible external review."
+        },
+        {
+          "policy_id": "QAA-POL-004",
+          "department_id": "QAA",
+          "department_name": "Quality Assurance and Accreditation Office",
+          "department_type": "Parent Administrative Department",
+          "title": "Complaint Handling and Academic Appeals Policy",
+          "category": "Student Services & Governance",
+          "description": "Provides students and staff with a clear, fair, and accessible mechanism for raising academic and administrative complaints, and for appealing decisions related to grades, admissions, disciplinary actions, and academic standing.",
+          "scope": "All students and staff of the institution.",
+          "key_responsibilities": {
+            "Complaints Officer (QA Office or nominated administrator)": "Receives and registers complaints.",
+            "Departmental Review Panel": "Handles first-level academic appeals.",
+            "Appeals Committee": "Handles second-level appeals and formal complaints.",
+            "College Principal": "Final internal authority for unresolved matters."
+          },
+          "related_entities": ["Complaints Officer", "QA Office", "Departmental Review Panel", "Appeals Committee", "College Principal", "Students", "Faculty"],
+          "decision_context": "Activated when a student or staff member submits a formal complaint or appeal in writing within the specified timeframe.",
+          "legal_regulatory_basis": ["UGC Nepal QAA Criterion 6 - Student Support", "Consumer Protection Act 2075 (Nepal)", "Institutional Code of Conduct"],
+          "constraints": [
+            "Complaints must be submitted within 14 days of the triggering event.",
+            "Acknowledgment within 3 working days.",
+            "First-level response: within 21 days.",
+            "Second-level appeal: within 30 days of first-level decision.",
+            "All decisions must be provided in writing."
+          ],
+          "outcomes": {
+            "Complaint upheld": "Remedy applied (grade amendment, policy revision, apology, compensation).",
+            "Complaint partially upheld": "Partial remedy with explanation.",
+            "Complaint not upheld": "Detailed written explanation provided; complainant informed of external escalation options if applicable."
+          },
+          "rag_chunk": "Policy QAA-POL-004: Complaint Handling and Academic Appeals Policy. Department: Quality Assurance and Accreditation Office (Parent Administrative Department). Category: Student Services & Governance. Provides students and staff with a mechanism to raise academic and administrative complaints, and appeal decisions on grades, admissions, disciplinary actions, and academic standing. Scope: All students and staff. Key roles: Complaints Officer receives and registers; Departmental Review Panel handles first-level appeals; Appeals Committee handles second-level; College Principal is final internal authority. Activated when a formal complaint or appeal is submitted in writing within the timeframe. Legal basis: UGC QAA Criterion 6, Consumer Protection Act 2075, Institutional Code of Conduct. Constraints: Complaints within 14 days of triggering event; acknowledgment in 3 days; first-level response in 21 days; second-level in 30 days; all decisions in writing. Outcomes: Upheld - remedy applied; Partially upheld - partial remedy; Not upheld - written explanation provided."
+        }
+      ]
+    }
+  ]
+}
