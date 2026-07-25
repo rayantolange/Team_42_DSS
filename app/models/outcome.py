@@ -19,3 +19,4 @@ class Outcome(Base):
 
     # Relationships
     decision = relationship("Decision", back_populates="outcomes")
+    embeddings = relationship("Embedding", back_populates="outcome")

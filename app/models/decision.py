@@ -28,3 +28,4 @@ class Decision(Base):
     outcomes = relationship("Outcome", back_populates="decision")
     decision_strategies = relationship("DecisionStrategy", back_populates="decision")
     decision_constraints = relationship("DecisionConstraint", back_populates="decision")
+    embeddings = relationship("Embedding", back_populates="decision")
