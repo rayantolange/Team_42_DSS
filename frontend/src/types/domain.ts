@@ -23,7 +23,7 @@ export type EntityType =
   | "role"
   | "outcome";
 
-export type UserRole = "admin" | "department_head";
+export type UserRole = "admin" | "principal" | "hod" | "faculty" | "staff";
 
 export interface User {
   id: string;

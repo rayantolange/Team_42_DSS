@@ -1,8 +1,21 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { HelpCircle, Sparkles, Menu, X, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  HelpCircle,
+  Sparkles,
+  Menu,
+  X,
+  LogOut,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 import { useAuth } from "@hooks/useAuth";
-import { NAV_ITEMS, SUPPORT_NAV_ITEMS, type NavItem } from "./navItems";
+import {
+  NAV_ITEMS,
+  ADMIN_NAV_ITEMS,
+  SUPPORT_NAV_ITEMS,
+  type NavItem,
+} from "./navItems";
 import { Logo } from "@components/ui/Logo";
 import { Button } from "@components/ui/Button";
 import { ProfileMenu } from "./ProfileMenu";
@@ -18,7 +31,7 @@ function navLinkClass({ isActive }: { isActive: boolean }, collapsed: boolean) {
     isActive
       ? "bg-primary text-primary-foreground shadow-sm"
       : "text-foreground/80 hover:translate-x-0.5 hover:bg-accent hover:text-accent-foreground",
-    collapsed && !isActive && "hover:translate-x-0"
+    collapsed && !isActive && "hover:translate-x-0",
   );
 }
 
@@ -47,7 +60,9 @@ function NavList({
               className="h-4 w-4 shrink-0 transition-transform duration-150 group-hover/nav:scale-110"
               aria-hidden="true"
             />
-            {!collapsed && <span className="animate-fade-in">{item.label}</span>}
+            {!collapsed && (
+              <span className="animate-fade-in">{item.label}</span>
+            )}
           </NavLink>
         </li>
       ))}
@@ -73,15 +88,21 @@ function NavList({
  */
 export function AppLayout() {
   const { user, logout, isAdmin } = useAuth();
+  const primaryNavItems = isAdmin ? ADMIN_NAV_ITEMS : NAV_ITEMS;
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileNavOpen, setMobileNavOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem("nirnaya-sidebar-collapsed") === "1"
+    () =>
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("nirnaya-sidebar-collapsed") === "1",
   );
 
   useEffect(() => {
-    window.localStorage.setItem("nirnaya-sidebar-collapsed", isCollapsed ? "1" : "0");
+    window.localStorage.setItem(
+      "nirnaya-sidebar-collapsed",
+      isCollapsed ? "1" : "0",
+    );
   }, [isCollapsed]);
 
   // Close the mobile drawer whenever the route changes.
@@ -102,17 +123,23 @@ export function AppLayout() {
   const desktopSidebarBody: ReactNode = (
     <>
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        <NavList items={NAV_ITEMS} collapsed={isCollapsed} />
-
-        <Button
-          onClick={() => navigate("/query")}
-          className={cn("mt-5 w-full", isCollapsed ? "justify-center px-0" : "justify-start")}
-          size="default"
-          title={isCollapsed ? "New Analysis" : undefined}
-        >
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
-          {!isCollapsed && <span className="animate-fade-in">New Analysis</span>}
-        </Button>
+        <NavList items={primaryNavItems} collapsed={isCollapsed} />
+        {!isAdmin && (
+          <Button
+            onClick={() => navigate("/query")}
+            className={cn(
+              "mt-5 w-full",
+              isCollapsed ? "justify-center px-0" : "justify-start",
+            )}
+            size="default"
+            title={isCollapsed ? "New Analysis" : undefined}
+          >
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            {!isCollapsed && (
+              <span className="animate-fade-in">New Analysis</span>
+            )}
+          </Button>
+        )}
       </div>
 
       <div className="border-t border-border px-3 py-4">
@@ -122,7 +149,7 @@ export function AppLayout() {
           title={isCollapsed ? "Log out" : undefined}
           className={cn(
             "mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-destructive/10 hover:text-destructive",
-            isCollapsed && "justify-center px-0"
+            isCollapsed && "justify-center px-0",
           )}
           aria-label="Log out"
         >
@@ -136,23 +163,30 @@ export function AppLayout() {
   const mobileSidebarBody: ReactNode = (
     <>
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        <NavList items={NAV_ITEMS} onNavigate={() => setMobileNavOpen(false)} />
-
-        <Button
-          onClick={() => {
-            navigate("/query");
-            setMobileNavOpen(false);
-          }}
-          className="mt-5 w-full justify-start"
-          size="default"
-        >
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
-          New Analysis
-        </Button>
+        <NavList
+          items={primaryNavItems}
+          onNavigate={() => setMobileNavOpen(false)}
+        />
+        {!isAdmin && (
+          <Button
+            onClick={() => {
+              navigate("/query");
+              setMobileNavOpen(false);
+            }}
+            className="mt-5 w-full justify-start"
+            size="default"
+          >
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            New Analysis
+          </Button>
+        )}
       </div>
 
       <div className="border-t border-border px-3 py-4">
-        <NavList items={SUPPORT_NAV_ITEMS} onNavigate={() => setMobileNavOpen(false)} />
+        <NavList
+          items={SUPPORT_NAV_ITEMS}
+          onNavigate={() => setMobileNavOpen(false)}
+        />
         <button
           onClick={logout}
           className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-destructive/10 hover:text-destructive"
@@ -177,13 +211,13 @@ export function AppLayout() {
           aria-label="Primary navigation"
           className={cn(
             "hidden shrink-0 flex-col border-r border-border bg-muted/30 transition-[width] duration-300 ease-in-out md:flex",
-            isCollapsed ? "w-[76px]" : "w-64"
+            isCollapsed ? "w-[76px]" : "w-64",
           )}
         >
           <div
             className={cn(
               "flex h-16 items-center border-b border-border",
-              isCollapsed ? "justify-center px-2" : "justify-between px-5"
+              isCollapsed ? "justify-center px-2" : "justify-between px-5",
             )}
           >
             <Logo iconOnly={isCollapsed} />
@@ -216,7 +250,9 @@ export function AppLayout() {
         <div
           className={cn(
             "fixed inset-0 z-50 bg-navy-950/50 backdrop-blur-[2px] transition-opacity duration-200 md:hidden",
-            isMobileNavOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+            isMobileNavOpen
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0",
           )}
           onClick={() => setMobileNavOpen(false)}
           aria-hidden={!isMobileNavOpen}
@@ -226,7 +262,7 @@ export function AppLayout() {
           aria-hidden={!isMobileNavOpen}
           className={cn(
             "fixed inset-y-0 left-0 z-50 flex w-72 max-w-[80vw] flex-col border-r border-border bg-card shadow-popover transition-transform duration-300 ease-out md:hidden",
-            isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
+            isMobileNavOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           <div className="flex h-16 items-center justify-between border-b border-border px-5">
@@ -270,7 +306,11 @@ export function AppLayout() {
 
               {user && (
                 <div className="border-l border-border pl-2.5 sm:pl-3">
-                  <ProfileMenu user={user} isAdmin={isAdmin} onLogout={logout} />
+                  <ProfileMenu
+                    user={user}
+                    isAdmin={isAdmin}
+                    onLogout={logout}
+                  />
                 </div>
               )}
             </div>

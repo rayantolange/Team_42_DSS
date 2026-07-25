@@ -43,5 +43,17 @@ export { register, type RegisterRequest } from "./authService";
 
 export { requestPasswordReset, resetPassword } from "./authService";
 
-export { POLICIES, DEPARTMENTS, getPolicyById, getPoliciesByDepartment, getDepartmentById } from "@/data/datasetLoader";
-export { DECISIONS, getDecisionsByPolicy, getDecisionById } from "@/data/decisionGenerator";
+export {
+  POLICIES,
+  DEPARTMENTS,
+  getPolicyById,
+  getPoliciesByDepartment,
+  getDepartmentById,
+} from "@/data/datasetLoader";
+export {
+  DECISIONS,
+  getDecisionsByPolicy,
+  getDecisionById,
+} from "@/data/decisionGenerator";
+
+export { fetchAllUsers, updateUserRole, deleteUser, type AdminUser } from "./adminService";

@@ -164,6 +164,17 @@ class UserRepository(BaseRepository[User]):
 
         return self.save(user)
 
+    def deactivate_user(self, user: User) -> User:
+        """
+        Soft-deletes a user: revokes access and anonymizes their
+        identifying info, while preserving the row so their past
+        decisions/documents remain intact and correctly attributed.
+        """
+        user.is_active = False
+        user.full_name = f"Deleted User #{user.user_id}"
+        user.email = f"deleted-user-{user.user_id}@deactivated.local"
+        return self.save(user)
+
     # -------------------------------------------------------
     # DELETE
     # -------------------------------------------------------

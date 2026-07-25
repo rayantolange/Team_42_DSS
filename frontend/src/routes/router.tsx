@@ -21,6 +21,7 @@ const NotAuthorizedPage = lazy(() => import("@pages/NotAuthorizedPage"));
 const NotFoundPage = lazy(() => import("@pages/NotFoundPage"));
 const VerifyEmailPage = lazy(() => import("@pages/VerifyEmailPage"));
 const ResetPasswordPage = lazy(() => import("@pages/ResetPasswordPage"));
+const AdminUsersPage = lazy(() => import("@pages/AdminUsersPage"));
 
 /** Wraps a lazy page in Suspense with a consistent loading skeleton. */
 function withSuspense(element: ReactNode) {
@@ -62,16 +63,34 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
-          { path: "/dashboard", element: withSuspense(<DashboardPage />) },
-          { path: "/query", element: withSuspense(<QueryPage />) },
-          { path: "/graph", element: withSuspense(<GraphExplorerPage />) },
           {
-            path: "/history",
-            element: withSuspense(<DecisionHistoryPage />),
+            element: (
+              <ProtectedRoute
+                allowedRoles={["principal", "hod", "faculty", "staff"]}
+              />
+            ),
+            children: [
+              { path: "/dashboard", element: withSuspense(<DashboardPage />) },
+              { path: "/query", element: withSuspense(<QueryPage />) },
+              { path: "/graph", element: withSuspense(<GraphExplorerPage />) },
+              {
+                path: "/history",
+                element: withSuspense(<DecisionHistoryPage />),
+              },
+              {
+                path: "/documents",
+                element: withSuspense(<UploadDocumentsPage />),
+              },
+            ],
           },
           {
-            path: "/documents",
-            element: withSuspense(<UploadDocumentsPage />),
+            element: <ProtectedRoute allowedRoles={["admin"]} />,
+            children: [
+              {
+                path: "/admin/users",
+                element: withSuspense(<AdminUsersPage />),
+              },
+            ],
           },
           { path: "/help", element: withSuspense(<HelpCenterPage />) },
           { path: "/settings", element: withSuspense(<SettingsPage />) },
