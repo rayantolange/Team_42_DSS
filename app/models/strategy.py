@@ -15,7 +15,7 @@ class Strategy(Base):
 
     # Relationships
     decision_strategies = relationship("DecisionStrategy", back_populates="strategy")
-
+    embeddings = relationship("Embedding", back_populates="strategy")
 
 class ConstraintMaster(Base):
     __tablename__ = "constraints_master"
@@ -27,3 +27,4 @@ class ConstraintMaster(Base):
 
     # Relationships
     decision_constraints = relationship("DecisionConstraint", back_populates="constraint")
+    embeddings = relationship("Embedding", back_populates="constraint")

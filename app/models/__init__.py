@@ -8,6 +8,7 @@ from app.models.strategy import Strategy, ConstraintMaster
 from app.models.junction import DecisionStrategy, DecisionConstraint
 from app.models.document import Document
 from app.models.outcome import Outcome
+from app.models.embedding import Embedding
 
 __all__ = [
     "Base",
@@ -23,4 +24,5 @@ __all__ = [
     "DecisionConstraint",
     "Document",
     "Outcome",
+    "Embedding",
 ]
