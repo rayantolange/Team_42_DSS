@@ -49,6 +49,7 @@ export interface ApiError {
 export interface LoginRequest {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface LoginResponse {
@@ -57,7 +58,7 @@ export interface LoginResponse {
     id: string;
     name: string;
     email: string;
-    role: "admin" | "department_head";
+    role: "admin" | "principal" | "hod" | "faculty" | "staff";
     departmentId?: string;
   };
 }

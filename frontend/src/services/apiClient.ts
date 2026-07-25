@@ -11,12 +11,14 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
  * Central Axios instance for all backend calls.
  *
  * - Injects the Authorization header from the auth store on every request.
+ * - Sends credentials (cookies) alongside cross-site/same-site requests.
  * - On a 401 response, clears auth state and redirects to /login so the
  *   user is automatically logged out (token expired/invalid).
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

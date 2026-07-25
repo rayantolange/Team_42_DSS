@@ -1,13 +1,13 @@
 # routers/auth.py
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie, Form
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.dependencies import get_db, get_current_user
 from app.models.user import User
 # from app.schemas.user import UserCreate, UserLogin, UserResponse
 from app.schemas.user import UserCreate, UserResponse
+from app.schemas.auth import LoginRequest, Token, ForgotPasswordRequest, ResetPasswordRequest
 from app.services.user_service import UserService
-from app.schemas.auth import LoginRequest, Token
 from app.services.auth_services import AuthService
 from pydantic import ValidationError
 
@@ -53,6 +53,7 @@ def register(
 def login(
     response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
+    remember_me: bool = Form(default=False),
     db: Session = Depends(get_db)
 ):
     service = AuthService(db)
@@ -73,7 +74,6 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e)
         )
-
     refresh_token = result.pop("refresh_token")
     response.set_cookie(
         key=REFRESH_COOKIE_NAME,
@@ -81,7 +81,7 @@ def login(
         httponly=True,
         secure=False,   # set True once you're serving over HTTPS
         samesite="lax",
-        max_age=60 * 60 * 24 * 30,
+        max_age=60 * 60 * 24 * 30 if remember_me else None,
         path="/auth",
     )
     return result
@@ -183,3 +183,40 @@ def resend_verification(email: str, db: Session = Depends(get_db)):
     service = AuthService(db)
     service.resend_verification(email)
     return {"message": "If that account exists and isn't verified, a new link has been sent."}
+
+
+# -------------------------------------------------------
+# PASSWORD RESET
+# -------------------------------------------------------
+
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+def forgot_password(
+    data: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Sends a password-reset link if the account exists.
+    Always returns the same message regardless of outcome.
+    """
+    service = AuthService(db)
+    service.request_password_reset(data.email)
+    return {"message": "If that account exists, a password reset link has been sent."}
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+def reset_password(
+    data: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Resets the user's password using a valid reset token.
+    """
+    service = AuthService(db)
+    try:
+        service.reset_password(data.token, data.new_password)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    return {"message": "Password reset successfully. You can now log in."}
