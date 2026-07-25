@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Color system note: the primary hue (201°) is sampled directly from
+ * the Nirnaya logo mark (#7acbf6, the icon's dominant color). Every
+ * blue in this file — primary, accent tints, focus rings, and the
+ * navy hero-panel scale — is derived from that same hue so the whole
+ * product reads as one consistent brand rather than a generic
+ * "template blue". Lightness values were chosen/checked to keep
+ * text-on-primary contrast at or above WCAG AA (4.5:1).
+ */
+@layer base {
+  :root {
+    --background: 204 45% 98%;
+    --foreground: 213 42% 11%;
+
+    --card: 204 40% 99%;
+    --card-foreground: 213 42% 11%;
+
+    --popover: 204 40% 99%;
+    --popover-foreground: 213 42% 11%;
+
+    /* Brand azure — sampled from the logo mark, deepened for AA contrast */
+    --primary: 201 88% 36%;
+    --primary-foreground: 204 45% 98%;
+
+    --secondary: 204 30% 95%;
+    --secondary-foreground: 213 42% 11%;
+
+    --muted: 204 28% 95%;
+    --muted-foreground: 210 15% 43%;
+
+    --accent: 201 85% 95%;
+    --accent-foreground: 201 88% 30%;
+
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 152 65% 28%;
+    --success-foreground: 210 40% 98%;
+
+    --warning: 32 92% 40%;
+    --warning-foreground: 210 40% 98%;
+
+    /* Secondary brand accent — reserved for "exploration / knowledge graph" motifs only */
+    --violet: 262 60% 54%;
+    --violet-foreground: 210 40% 98%;
+
+    /* Deep navy scale, same 201° hue, used for hero panels and dark surfaces */
+    --navy-50: 204 40% 97%;
+    --navy-100: 204 35% 92%;
+    --navy-700: 205 45% 22%;
+    --navy-800: 207 50% 14%;
+    --navy-900: 209 58% 9%;
+    --navy-950: 211 65% 6%;
+
+    --border: 204 22% 90%;
+    --input: 204 22% 90%;
+    --ring: 201 88% 36%;
+
+    --radius: 0.65rem;
+  }
+
+  .dark {
+    --background: 209 47% 8%;
+    --foreground: 204 40% 98%;
+
+    --card: 209 47% 10%;
+    --card-foreground: 204 40% 98%;
+
+    --popover: 209 47% 10%;
+    --popover-foreground: 204 40% 98%;
+
+    --primary: 201 91% 58%;
+    --primary-foreground: 209 47% 11%;
+
+    --secondary: 207 33% 17%;
+    --secondary-foreground: 204 40% 98%;
+
+    --muted: 207 33% 17%;
+    --muted-foreground: 205 20% 65%;
+
+    --accent: 207 33% 20%;
+    --accent-foreground: 204 40% 98%;
+
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 152 65% 45%;
+    --success-foreground: 209 47% 11%;
+
+    --warning: 32 92% 55%;
+    --warning-foreground: 209 47% 11%;
+
+    --violet: 262 83% 68%;
+    --violet-foreground: 209 55% 11%;
+
+    --navy-50: 204 40% 97%;
+    --navy-100: 204 35% 92%;
+    --navy-700: 205 45% 22%;
+    --navy-800: 207 50% 14%;
+    --navy-900: 209 58% 9%;
+    --navy-950: 211 65% 6%;
+
+    --border: 207 33% 20%;
+    --input: 207 33% 20%;
+    --ring: 201 91% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* Accessibility: visible focus rings everywhere, never suppressed */
+@layer base {
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+/* Respect prefers-reduced-motion across the app */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Screen-reader-only utility (visually hidden but announced) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Skip-to-content link, visible on focus */
+.skip-link {
+  @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground;
+}
+
+/* ---------------------------------------------------------------- */
+/* Brand utilities — shared across marketing, auth, and app shells   */
+/* ---------------------------------------------------------------- */
+
+@layer components {
+  /* Deep navy gradient used behind auth split-screens and hero sections */
+  .bg-navy-gradient {
+    background-image:
+      radial-gradient(circle at 15% 8%, hsl(var(--primary) / 0.55), transparent 45%),
+      radial-gradient(circle at 90% 85%, hsl(var(--violet) / 0.35), transparent 50%),
+      linear-gradient(160deg, hsl(var(--navy-900)) 0%, hsl(var(--navy-950)) 100%);
+  }
+
+  /* Faint grid overlay used as texture on dark hero/auth panels */
+  .bg-grid-overlay {
+    background-image:
+      linear-gradient(hsl(0 0% 100% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Frosted glass chip, used for the feature callouts on auth/marketing panels */
+  .glass-chip {
+    @apply rounded-xl border border-white/15 bg-white/10 backdrop-blur-sm;
+  }
+
+  /* Soft radial spotlight used behind the landing hero art */
+  .bg-hero-spotlight {
+    background-image: radial-gradient(60% 60% at 50% 35%, hsl(var(--primary) / 0.14), transparent 70%);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
