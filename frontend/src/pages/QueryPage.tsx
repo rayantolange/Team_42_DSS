@@ -13,11 +13,15 @@ interface QueryPageLocationState {
 
 export default function QueryPage() {
   const submitQuery = useSubmitQuery();
-  const currentResult = useQueryStore((s) => s.currentResult);
-  const messages = useQueryStore((s) => s.messages);
-  const setCurrentResult = useQueryStore((s) => s.setCurrentResult);
+  const conversations = useQueryStore((s) => s.conversations);
+  const activeConversationId = useQueryStore((s) => s.activeConversationId);
   const location = useLocation();
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const activeConversation = conversations.find(
+    (c) => c.id === activeConversationId,
+  );
+  const messages = activeConversation?.messages ?? [];
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -30,7 +34,6 @@ export default function QueryPage() {
     submitQuery.mutate({ queryText, departmentId });
   }
 
-  // Support header's "Quick search" action
   useEffect(() => {
     if (prefillQuery) {
       submitQuery.mutate({ queryText: prefillQuery });
@@ -42,13 +45,14 @@ export default function QueryPage() {
     messages.length > 0 || submitQuery.isPending || submitQuery.isError;
 
   return (
-    <div className="relative flex w-full max-w-full gap-6 overflow-hidden">
-      {/* Centered Main Area Container */}
-      <div className="flex flex-1 min-w-0 flex-col items-center">
-        {/* Inner Content Wrapper */}
-        <div className="flex w-full max-w-3xl flex-col gap-4 px-2 sm:px-4">
-          {!hasActivity ? (
-            <div className="relative overflow-hidden rounded-3xl bg-navy-gradient p-8 shadow-popover sm:p-12">
+    <div className="relative flex h-[calc(100vh-6rem)] w-full max-w-full gap-6 overflow-hidden">
+      {" "}
+      {/* Main Chat & Input Column */}
+      <div className="flex flex-1 min-w-0 flex-col h-full items-center justify-between">
+        {!hasActivity ? (
+          /* Empty State View */
+          <div className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center px-2 sm:px-4">
+            <div className="relative w-full overflow-hidden rounded-3xl bg-navy-gradient p-8 shadow-popover sm:p-12">
               <div
                 className="absolute inset-0 bg-grid-overlay opacity-30"
                 aria-hidden="true"
@@ -90,8 +94,12 @@ export default function QueryPage() {
                 />
               </div>
             </div>
-          ) : (
-            <>
+          </div>
+        ) : (
+          /* Active Thread Layout */
+          <div className="flex flex-col h-full w-full max-w-3xl">
+            {/* Scrollable Chat Area */}
+            <div className="flex-1 overflow-y-auto px-2 sm:px-4 pr-3 scrollbar-thin">
               <ChatThread
                 messages={messages}
                 isLoading={submitQuery.isPending}
@@ -103,27 +111,21 @@ export default function QueryPage() {
                 }
               />
               <div ref={bottomRef} />
+            </div>
 
-              {/* Floating Sticky Dock: Transparent background with subtle mask blur */}
-              <div className="sticky bottom-0 z-10 w-full bg-transparent pb-4 pt-6">
-                <div className="w-full">
-                  <QueryBuilder
-                    onSubmit={handleSubmit}
-                    isSubmitting={submitQuery.isPending}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+            {/* Seamless Anchored Input Dock */}
+            <div className="shrink-0 w-full bg-transparent pt-3 pb-2 px-2 sm:px-4">
+              <QueryBuilder
+                onSubmit={handleSubmit}
+                isSubmitting={submitQuery.isPending}
+              />
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Right Collapsible History Panel Rail */}
-      <div className="hidden shrink-0 transition-all duration-300 lg:sticky lg:top-6 lg:block lg:h-[calc(100vh-7.5rem)]">
-        <QueryHistoryPanel
-          onSelect={setCurrentResult}
-          activeQueryText={currentResult?.queryText}
-        />
+      {/* Right History Panel */}
+      <div className="hidden shrink-0 h-full lg:block">
+        <QueryHistoryPanel />
       </div>
     </div>
   );
