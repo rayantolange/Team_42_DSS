@@ -2,40 +2,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field, field_validator, ConfigDict, EmailStr
 from app.core.validators import validate_college_email
 from app.models.enums import UserRoleEnum
-# ALLOWED_DOMAIN = "@randomcollege.edu.np"
-
-
-# def validate_college_email(value: str) -> str:
-#     """Ensures only institutional emails are accepted."""
-#     if not value.lower().endswith(ALLOWED_DOMAIN):
-#         raise ValueError(f"Email must belong to the domain {ALLOWED_DOMAIN}")
-#     return value
-
-
-# -------------------------------------------------------
-# LOGIN
-# -------------------------------------------------------
-
-# class UserLogin(BaseModel):
-#     """
-#     Payload for the login endpoint.
-#     Only email and raw password are needed.
-#     """
-
-#     email: EmailStr = Field(
-#         description="Institutional email address."
-#     )
-
-#     password: str = Field(
-#         min_length=8,
-#         description="Raw password provided by the user for authentication."
-#     )
-
-#     @field_validator("email")
-#     @classmethod
-#     def check_email_domain(cls, value: str) -> str:
-#         return validate_college_email(value)
-
 
 # -------------------------------------------------------
 # CREATE (Registration)
@@ -135,7 +101,13 @@ class UpdateUserRoleRequest(BaseModel):
     """
     role: UserRoleEnum
 
-# UserLogin--- POST /auth/login---- Accepts email + plain password
-# UserCreate---- POST /auth/register---- Accepts all registration fields + plain password
-# UserResponse----- Any endpoint returning user data------Safe outward-facing shape, no password
-
+class SystemStatsResponse(BaseModel):
+    """
+    Aggregate user counts for the admin system-health dashboard.
+    """
+    total_users: int
+    verified_users: int
+    unverified_users: int
+    active_users: int
+    deactivated_users: int
+    role_counts: dict[str, int]

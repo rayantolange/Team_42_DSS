@@ -25,6 +25,14 @@ export type EntityType =
 
 export type UserRole = "admin" | "principal" | "hod" | "faculty" | "staff";
 
+export const ROLE_LABELS: Record<UserRole, string> = {
+  admin: "System Administrator",
+  principal: "Principal",
+  hod: "Head of Department",
+  faculty: "Faculty",
+  staff: "Staff",
+};
+
 export interface User {
   id: string;
   name: string;
@@ -36,12 +44,13 @@ export interface User {
 export type DepartmentType = "Academic" | "Administrative";
 
 export interface Department {
-  id: string; // e.g. "BAD", "ITD", "FIN"
+  id: string;
   name: string;
   type: DepartmentType;
   description: string;
   policyCount: number;
   keyRegulations: string[];
+  isActive: boolean;
 }
 
 export interface KeyResponsibility {

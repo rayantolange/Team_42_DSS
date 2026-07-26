@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@components/ui/DropdownMenu";
+import { ROLE_LABELS } from "@/types/domain";
 import type { AuthUser } from "@store/authStore";
 
 function initials(name: string) {
@@ -47,27 +48,40 @@ export function ProfileMenu({ user, isAdmin, onLogout }: ProfileMenuProps) {
           <div className="hidden text-left leading-tight sm:block">
             <p className="text-sm font-semibold">{user.name}</p>
             <p className="text-xs text-muted-foreground">
-              {isAdmin ? "System Administrator" : "Department Head"}
+              {ROLE_LABELS[user.role]}
             </p>
           </div>
-          <ChevronDown className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" aria-hidden="true" />
+          <ChevronDown
+            className="hidden h-3.5 w-3.5 text-muted-foreground sm:block"
+            aria-hidden="true"
+          />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64">
         <DropdownMenuLabel className="flex flex-col gap-0.5 px-2.5 py-2">
-          <span className="text-sm font-semibold text-foreground">{user.name}</span>
-          <span className="truncate text-xs font-normal text-muted-foreground">{user.email}</span>
+          <span className="text-sm font-semibold text-foreground">
+            {user.name}
+          </span>
+          <span className="truncate text-xs font-normal text-muted-foreground">
+            {user.email}
+          </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/settings">
-            <Settings className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Settings
+              className="h-4 w-4 text-muted-foreground"
+              aria-hidden="true"
+            />
             Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/help">
-            <HelpCircle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <HelpCircle
+              className="h-4 w-4 text-muted-foreground"
+              aria-hidden="true"
+            />
             Help Center
           </Link>
         </DropdownMenuItem>

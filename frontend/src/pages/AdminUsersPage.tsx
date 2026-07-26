@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck, ShieldAlert, Trash2 } from "lucide-react";
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Trash2,
+  Users,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -23,17 +30,11 @@ import {
   fetchAllUsers,
   updateUserRole,
   deleteUser,
+  fetchSystemStats,
   type AdminUser,
 } from "@services/index";
 import { useAuth } from "@hooks/useAuth";
-
-const ROLE_LABELS: Record<AdminUser["role"], string> = {
-  admin: "System Administrator",
-  principal: "Principal",
-  hod: "Head of Department",
-  faculty: "Faculty",
-  staff: "Staff",
-};
+import { ROLE_LABELS } from "@/types/domain";
 
 const ASSIGNABLE_ROLES: AdminUser["role"][] = [
   "principal",
@@ -53,6 +54,11 @@ export default function AdminUsersPage() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin", "users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["admin", "stats"],
+    queryFn: fetchSystemStats,
   });
 
   const roleMutation = useMutation({
@@ -114,7 +120,84 @@ export default function AdminUsersPage() {
           View registered accounts and manage role assignments.
         </p>
       </div>
+      {stats && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
+                <Users className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold leading-none">
+                  {stats.totalUsers}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Total Users
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success">
+                <UserCheck className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold leading-none">
+                  {stats.activeUsers}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Active</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+                <UserX className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold leading-none">
+                  {stats.deactivatedUsers}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Deactivated
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
+                <ShieldAlert className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold leading-none">
+                  {stats.unverifiedUsers}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Unverified</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
+      {stats && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Users by Role</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(stats.roleCounts).map(([role, count]) => (
+                <Badge key={role} variant="soft" className="gap-1.5">
+                  <span className="capitalize">{role}</span>
+                  <span className="font-bold">{count}</span>
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">All Users</CardTitle>
