@@ -40,11 +40,11 @@ export async function fetchAllUsers(): Promise<AdminUser[]> {
 
 export async function updateUserRole(
   userId: string,
-  role: AdminUser["role"]
+  role: AdminUser["role"],
 ): Promise<AdminUser> {
   const response = await apiClient.patch<AdminUserApiResponse>(
     `/admin/users/${userId}/role`,
-    { role }
+    { role },
   );
 
   const u = response.data;
@@ -61,7 +61,36 @@ export async function updateUserRole(
 }
 
 export async function deleteUser(userId: string): Promise<{ message: string }> {
-  const response = await apiClient.delete<{ message: string }>(`/admin/users/${userId}`);
+  const response = await apiClient.delete<{ message: string }>(
+    `/admin/users/${userId}`,
+  );
+  return response.data;
+}
+
+export async function activateUser(userId: string): Promise<AdminUser> {
+  const response = await apiClient.patch<AdminUserApiResponse>(
+    `/admin/users/${userId}/activate`,
+  );
+
+  const u = response.data;
+  return {
+    id: String(u.user_id),
+    fullName: u.full_name,
+    email: u.email,
+    role: u.role as AdminUser["role"],
+    departmentId: String(u.department_id),
+    isVerified: u.is_verified,
+    isActive: u.is_active,
+    createdAt: u.created_at,
+  };
+}
+
+export async function permanentlyDeleteUser(
+  userId: string,
+): Promise<{ message: string }> {
+  const response = await apiClient.delete<{ message: string }>(
+    `/admin/users/${userId}/permanent`,
+  );
   return response.data;
 }
 

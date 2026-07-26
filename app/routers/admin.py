@@ -73,6 +73,32 @@ def update_user_role(
 
     return repo.update_role(user, data.role.value)
 
+# -------------------------------------------------------
+# ACTIVATE A USER
+# -------------------------------------------------------
+@router.patch("/users/{user_id}/activate", response_model=AdminUserResponse)
+def activate_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Reinstates a deactivated user's access. Admin-only.
+    """
+    repo = UserRepository(db)
+    user = repo.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found."
+        )
+    if user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already active."
+        )
+
+    return repo.activate_user(user)
 
 # -------------------------------------------------------
 # DELETE A USER
@@ -105,3 +131,33 @@ def delete_user(
 
     repo.deactivate_user(user)
     return {"message": "User account deactivated."}
+
+# -------------------------------------------------------
+# PERMANENTLY DELETE A USER
+# -------------------------------------------------------
+@router.delete("/users/{user_id}/permanent", status_code=status.HTTP_200_OK)
+def permanently_delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """
+    Permanently anonymizes a user (right-to-erasure). Irreversible.
+    Admin-only.
+    """
+    if user_id == admin.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot delete your own account."
+        )
+
+    repo = UserRepository(db)
+    user = repo.get_by_id(user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found."
+        )
+
+    repo.permanently_delete_user(user)
+    return {"message": "User account permanently anonymized. Historical records remain attributed to this account."}

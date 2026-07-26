@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@components/ui/Button";
 import { Logo } from "@components/ui/Logo";
+import { ThemeToggle } from "@components/ui/ThemeToggle";
 import lectureImg from "@/assets/classroom-lecture.jpg";
 import libraryImg from "@/assets/campus-library.jpg";
 
@@ -43,7 +44,8 @@ const EDGE_POINTS = [
   {
     icon: ShieldCheck,
     title: "Institutional Trust",
-    description: "Secure, private, and compliant with academic data regulations.",
+    description:
+      "Secure, private, and compliant with academic data regulations.",
   },
   {
     icon: GitBranch,
@@ -80,7 +82,10 @@ export default function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Logo />
-          <nav aria-label="Primary" className="hidden items-center gap-8 md:flex">
+          <nav
+            aria-label="Primary"
+            className="hidden items-center gap-8 md:flex"
+          >
             {NAV_LINKS.map((link) => (
               <a
                 key={link.label}
@@ -92,13 +97,17 @@ export default function LandingPage() {
             ))}
           </nav>
           <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             <Button asChild variant="ghost" size="sm">
               <Link to="/login">Log in</Link>
             </Button>
             <Button asChild size="sm">
               <Link to="/register">
                 Get Started
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
               </Link>
             </Button>
           </div>
@@ -118,14 +127,17 @@ export default function LandingPage() {
               <span className="text-foreground">Decide Better.</span>
             </h1>
             <p className="mt-5 max-w-lg text-lg leading-relaxed text-muted-foreground">
-              Advanced university decision support powered by Knowledge Graphs and
-              Retrieval-Augmented Generation (RAG).
+              Advanced university decision support powered by Knowledge Graphs
+              and Retrieval-Augmented Generation (RAG).
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Button asChild size="lg" className="group">
                 <Link to="/register">
                   Get Started
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -166,8 +178,12 @@ export default function LandingPage() {
                 <TrendingUp className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-sm font-bold leading-none">+18% positive outcomes</p>
-                <p className="mt-1 text-xs text-muted-foreground">Since adopting Nirnaya</p>
+                <p className="text-sm font-bold leading-none">
+                  +18% positive outcomes
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Since adopting Nirnaya
+                </p>
               </div>
             </div>
           </div>
@@ -175,7 +191,10 @@ export default function LandingPage() {
       </section>
 
       {/* Feature grid */}
-      <section id="features" className="border-t border-border bg-muted/30 py-20 sm:py-24">
+      <section
+        id="features"
+        className="border-t border-border bg-muted/30 py-20 sm:py-24"
+      >
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <div className="flex justify-center gap-2">
@@ -186,8 +205,8 @@ export default function LandingPage() {
               Engineered for Academic Rigor
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Nirnaya bridges the gap between massive institutional data silos and actionable
-              leadership insights.
+              Nirnaya bridges the gap between massive institutional data silos
+              and actionable leadership insights.
             </p>
           </div>
 
@@ -202,7 +221,9 @@ export default function LandingPage() {
                 >
                   <feature.icon className="h-5 w-5" aria-hidden="true" />
                 </div>
-                <h3 className="mt-4 text-base font-semibold">{feature.title}</h3>
+                <h3 className="mt-4 text-base font-semibold">
+                  {feature.title}
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {feature.description}
                 </p>
@@ -227,16 +248,22 @@ export default function LandingPage() {
               Enlightened Intelligence for University Leaders
             </h2>
             <p className="mt-4 max-w-md text-muted-foreground">
-              Built alongside registrars, provosts, and department heads to fit how institutions
-              actually make decisions — not a generic analytics dashboard.
+              Built alongside registrars, provosts, and department heads to fit
+              how institutions actually make decisions — not a generic analytics
+              dashboard.
             </p>
             <ul className="mt-8 flex flex-col gap-6">
               {EDGE_POINTS.map((point) => (
                 <li key={point.title} className="flex gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                  <CheckCircle2
+                    className="mt-0.5 h-5 w-5 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
                   <div>
                     <p className="font-semibold">{point.title}</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{point.description}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      {point.description}
+                    </p>
                   </div>
                 </li>
               ))}
@@ -255,9 +282,17 @@ export default function LandingPage() {
             />
             <div className="absolute inset-x-0 bottom-0 grid grid-cols-2 gap-3 p-5">
               {EDGE_POINTS.map((point) => (
-                <div key={point.title} className="glass-chip flex flex-col gap-2 p-4">
-                  <point.icon className="h-5 w-5 text-white" aria-hidden="true" />
-                  <p className="text-sm font-semibold text-white">{point.title}</p>
+                <div
+                  key={point.title}
+                  className="glass-chip flex flex-col gap-2 p-4"
+                >
+                  <point.icon
+                    className="h-5 w-5 text-white"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm font-semibold text-white">
+                    {point.title}
+                  </p>
                 </div>
               ))}
             </div>
@@ -272,8 +307,9 @@ export default function LandingPage() {
             <div>
               <Logo />
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-                Institutional intelligence for university leaders — knowledge graphs and
-                retrieval-augmented decision support in one secure platform.
+                Institutional intelligence for university leaders — knowledge
+                graphs and retrieval-augmented decision support in one secure
+                platform.
               </p>
             </div>
             {FOOTER_COLUMNS.map((col) => (
@@ -282,7 +318,10 @@ export default function LandingPage() {
                 <ul className="mt-3.5 flex flex-col gap-2.5">
                   {col.links.map((link) => (
                     <li key={link}>
-                      <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                      <a
+                        href="#"
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
                         {link}
                       </a>
                     </li>
@@ -294,7 +333,8 @@ export default function LandingPage() {
 
           <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Nirnaya University Systems. All rights reserved.
+              © {new Date().getFullYear()} Nirnaya University Systems. All
+              rights reserved.
             </p>
             <div className="flex gap-5 text-xs text-muted-foreground">
               <a href="#" className="hover:text-foreground">
