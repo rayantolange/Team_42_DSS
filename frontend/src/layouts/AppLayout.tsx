@@ -35,7 +35,6 @@ function navLinkClass({ isActive }: { isActive: boolean }, collapsed: boolean) {
   );
 }
 
-/** Shared nav-item list, rendered identically in the desktop rail and the mobile drawer. */
 function NavList({
   items,
   onNavigate,
@@ -70,22 +69,6 @@ function NavList({
   );
 }
 
-/**
- * Shared shell for all authenticated pages: skip link, top header with
- * global search + user menu, and a primary sidebar navigation styled to
- * match the Nirnaya product design (icon rail, active pill, "New
- * Analysis" call-to-action, support links pinned to the bottom). Below
- * the `md` breakpoint the rail becomes a slide-out drawer triggered
- * from the header, so navigation is never unreachable on phones.
- *
- * Accessibility:
- * - Skip link lets keyboard users jump past nav to main content.
- * - Sidebar nav is a <nav> with aria-label; current route gets
- *   aria-current="page" (handled by NavLink automatically).
- * - The mobile drawer closes on Escape and on route change.
- * - Heading hierarchy: this shell does not render an <h1>; each
- *   page is responsible for its own single <h1>.
- */
 export function AppLayout() {
   const { user, logout, isAdmin } = useAuth();
   const primaryNavItems = isAdmin ? ADMIN_NAV_ITEMS : NAV_ITEMS;
@@ -97,20 +80,15 @@ export function AppLayout() {
       typeof window !== "undefined" &&
       window.localStorage.getItem("nirnaya-sidebar-collapsed") === "1",
   );
-
   useEffect(() => {
     window.localStorage.setItem(
       "nirnaya-sidebar-collapsed",
       isCollapsed ? "1" : "0",
     );
   }, [isCollapsed]);
-
-  // Close the mobile drawer whenever the route changes.
   useEffect(() => {
     setMobileNavOpen(false);
   }, [location.pathname]);
-
-  // Close on Escape while the drawer is open.
   useEffect(() => {
     if (!isMobileNavOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -141,7 +119,6 @@ export function AppLayout() {
           </Button>
         )}
       </div>
-
       <div className="border-t border-border px-3 py-4">
         <NavList items={SUPPORT_NAV_ITEMS} collapsed={isCollapsed} />
         <button
@@ -181,7 +158,6 @@ export function AppLayout() {
           </Button>
         )}
       </div>
-
       <div className="border-t border-border px-3 py-4">
         <NavList
           items={SUPPORT_NAV_ITEMS}
@@ -204,7 +180,6 @@ export function AppLayout() {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-
       <div className="flex flex-1">
         {/* Desktop sidebar */}
         <nav
@@ -245,7 +220,6 @@ export function AppLayout() {
             </button>
           )}
         </nav>
-
         {/* Mobile drawer + backdrop */}
         <div
           className={cn(
@@ -278,10 +252,9 @@ export function AppLayout() {
           </div>
           {mobileSidebarBody}
         </nav>
-
         <div className="flex min-h-screen flex-1 flex-col">
           {/* Top header */}
-          <header className="flex h-16 items-center justify-between gap-3 border-b border-border bg-background px-4 sm:px-6">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-4 sm:px-6">
             <button
               type="button"
               onClick={() => setMobileNavOpen(true)}
@@ -290,9 +263,7 @@ export function AppLayout() {
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </button>
-
             <HeaderSearch />
-
             <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
               <ThemeToggle />
               <NotificationPanel />
@@ -303,7 +274,6 @@ export function AppLayout() {
               >
                 <HelpCircle className="h-[18px] w-[18px]" aria-hidden="true" />
               </NavLink>
-
               {user && (
                 <div className="border-l border-border pl-2.5 sm:pl-3">
                   <ProfileMenu
@@ -315,7 +285,6 @@ export function AppLayout() {
               )}
             </div>
           </header>
-
           <main
             id="main-content"
             key={location.pathname}

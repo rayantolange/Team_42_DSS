@@ -31,14 +31,14 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       {/* Message Body & Metadata Container */}
       <div
         className={cn(
-          "flex flex-col gap-2.5",
+          "flex min-w-0 flex-col gap-2.5",
           isUser ? "items-end max-w-[80%]" : "max-w-[88%]",
         )}
       >
         {/* Main Text Content */}
         <div
           className={cn(
-            "text-[15px] leading-relaxed transition-all",
+            "break-words text-[15px] leading-relaxed transition-all",
             isUser
               ? "rounded-2xl bg-zinc-800/80 px-4 py-2.5 text-zinc-100 shadow-sm" // Subtle user pill
               : "bg-transparent p-0 text-foreground", // Completely borderless, background-blended AI response

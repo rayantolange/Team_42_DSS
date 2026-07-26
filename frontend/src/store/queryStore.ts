@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { QueryResult, QuerySource, ConfidenceLevel } from "@/types/api";
+import type { QuerySource, ConfidenceLevel } from "@/types/api";
 
 export type QueryMode = "search" | "chat";
 
@@ -14,53 +14,104 @@ export interface ChatMessage {
   confidenceLevel?: ConfidenceLevel;
 }
 
+export interface ChatConversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface QueryState {
   currentQueryText: string;
-  currentResult: QueryResult | null;
-  queryHistory: QueryResult[];
   mode: QueryMode;
-  messages: ChatMessage[];
+  conversations: ChatConversation[];
+  activeConversationId: string | null;
 }
 
 interface QueryActions {
   setCurrentQueryText: (text: string) => void;
-  setCurrentResult: (result: QueryResult) => void;
-  clearCurrentResult: () => void;
-  addToHistory: (result: QueryResult) => void;
-  clearHistory: () => void;
   setMode: (mode: QueryMode) => void;
-  addMessage: (message: ChatMessage) => void;
-  clearThread: () => void;
+  /** Deselects the active conversation so the next message starts a fresh one. */
+  startNewConversation: () => void;
+  selectConversation: (id: string) => void;
+  /** Appends a message to the active conversation, creating one first if none is active. */
+  addMessageToActive: (message: ChatMessage) => void;
+  deleteConversation: (id: string) => void;
+  clearAllConversations: () => void;
 }
 
-const MAX_HISTORY = 50;
+const MAX_CONVERSATIONS = 50;
 
 function makeMessageId() {
   return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function makeConversationId() {
+  return `conv-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function titleFromText(text: string): string {
+  const trimmed = text.trim();
+  return trimmed.length > 48 ? `${trimmed.slice(0, 48)}…` : trimmed;
+}
+
 export const useQueryStore = create<QueryState & QueryActions>((set) => ({
   currentQueryText: "",
-  currentResult: null,
-  queryHistory: [],
   mode: "search",
-  messages: [],
+  conversations: [],
+  activeConversationId: null,
 
   setCurrentQueryText: (text) => set({ currentQueryText: text }),
-  setCurrentResult: (result) => set({ currentResult: result }),
-  clearCurrentResult: () => set({ currentResult: null }),
-  addToHistory: (result) =>
-    set((state) => ({
-      queryHistory: [result, ...state.queryHistory].slice(0, MAX_HISTORY),
-    })),
-  clearHistory: () => set({ queryHistory: [] }),
-
   setMode: (mode) => set({ mode }),
-  addMessage: (message) =>
+
+  startNewConversation: () => set({ activeConversationId: null }),
+
+  selectConversation: (id) => set({ activeConversationId: id }),
+
+  addMessageToActive: (message) =>
+    set((state) => {
+      const now = new Date().toISOString();
+      const { conversations, activeConversationId } = state;
+
+      // No active conversation yet — create one, seeded with this message,
+      // and title it from the first user message.
+      if (!activeConversationId) {
+        const newConversation: ChatConversation = {
+          id: makeConversationId(),
+          title:
+            message.role === "user" ? titleFromText(message.text) : "New chat",
+          messages: [message],
+          createdAt: now,
+          updatedAt: now,
+        };
+        return {
+          conversations: [newConversation, ...conversations].slice(
+            0,
+            MAX_CONVERSATIONS,
+          ),
+          activeConversationId: newConversation.id,
+        };
+      }
+
+      // Append to the existing active conversation.
+      const updated = conversations.map((c) =>
+        c.id === activeConversationId
+          ? { ...c, messages: [...c.messages, message], updatedAt: now }
+          : c,
+      );
+      return { conversations: updated };
+    }),
+
+  deleteConversation: (id) =>
     set((state) => ({
-      messages: [...state.messages, message],
+      conversations: state.conversations.filter((c) => c.id !== id),
+      activeConversationId:
+        state.activeConversationId === id ? null : state.activeConversationId,
     })),
-  clearThread: () => set({ messages: [] }),
+
+  clearAllConversations: () =>
+    set({ conversations: [], activeConversationId: null }),
 }));
 
 export { makeMessageId };

@@ -4,20 +4,25 @@ import { useQueryStore, makeMessageId } from "@store/queryStore";
 
 /**
  * Query submission is modeled as a mutation (not a query) because
- * it's a user-triggered action with side effects (added to history),
- * not idempotent data fetching keyed by stable params. staleTime: 0
- * per the spec is naturally satisfied since mutations never cache.
+ * it's a user-triggered action with side effects (appended to the
+ * active conversation), not idempotent data fetching keyed by stable
+ * params. staleTime: 0 per the spec is naturally satisfied since
+ * mutations never cache.
  */
 export function useSubmitQuery() {
-  const setCurrentResult = useQueryStore((s) => s.setCurrentResult);
-  const addToHistory = useQueryStore((s) => s.addToHistory);
-  const addMessage = useQueryStore((s) => s.addMessage);
+  const addMessageToActive = useQueryStore((s) => s.addMessageToActive);
   const mode = useQueryStore((s) => s.mode);
 
   return useMutation({
-    mutationFn: async ({ queryText, departmentId }: { queryText: string; departmentId?: string }) => {
+    mutationFn: async ({
+      queryText,
+      departmentId,
+    }: {
+      queryText: string;
+      departmentId?: string;
+    }) => {
       // Always record the user's message immediately, regardless of mode.
-      addMessage({
+      addMessageToActive({
         id: makeMessageId(),
         role: "user",
         text: queryText,
@@ -41,9 +46,7 @@ export function useSubmitQuery() {
     },
     onSuccess: (data) => {
       if (data.type === "search") {
-        setCurrentResult(data.result);
-        addToHistory(data.result);
-        addMessage({
+        addMessageToActive({
           id: makeMessageId(),
           role: "assistant",
           text: data.result.answer,
@@ -53,7 +56,7 @@ export function useSubmitQuery() {
           confidenceLevel: data.result.confidenceLevel,
         });
       } else {
-        addMessage({
+        addMessageToActive({
           id: makeMessageId(),
           role: "assistant",
           text: data.text,
