@@ -69,6 +69,8 @@ export {
   fetchAllUsers,
   updateUserRole,
   deleteUser,
+  activateUser,
+  permanentlyDeleteUser,
   fetchSystemStats,
   type AdminUser,
   type SystemStats,

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ShieldCheck,
   ShieldAlert,
+  ShieldX,
   Trash2,
   Users,
   UserCheck,
@@ -30,6 +31,8 @@ import {
   fetchAllUsers,
   updateUserRole,
   deleteUser,
+  activateUser,
+  permanentlyDeleteUser,
   fetchSystemStats,
   type AdminUser,
 } from "@services/index";
@@ -49,7 +52,12 @@ export default function AdminUsersPage() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingActivateId, setPendingActivateId] = useState<string | null>(
+    null,
+  );
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [userToPermanentlyDelete, setUserToPermanentlyDelete] =
+    useState<AdminUser | null>(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin", "users"],
@@ -72,6 +80,7 @@ export default function AdminUsersPage() {
     onMutate: ({ userId }) => setPendingUserId(userId),
     onSuccess: (updatedUser) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
       showToast({
         title: "Role updated",
         description: `${updatedUser.fullName} is now ${ROLE_LABELS[updatedUser.role]}.`,
@@ -93,6 +102,7 @@ export default function AdminUsersPage() {
     mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
       showToast({
         title: "Account deactivated",
         description:
@@ -109,6 +119,52 @@ export default function AdminUsersPage() {
         variant: "error",
       });
       setUserToDelete(null);
+    },
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: (userId: string) => activateUser(userId),
+    onMutate: (userId) => setPendingActivateId(userId),
+    onSuccess: (updatedUser) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+      showToast({
+        title: "Account reactivated",
+        description: `${updatedUser.fullName}'s access has been restored.`,
+        variant: "success",
+      });
+    },
+    onError: (err) => {
+      showToast({
+        title: "Couldn't reactivate account",
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
+        variant: "error",
+      });
+    },
+    onSettled: () => setPendingActivateId(null),
+  });
+
+  const permanentDeleteMutation = useMutation({
+    mutationFn: (userId: string) => permanentlyDeleteUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+      showToast({
+        title: "Account permanently deleted",
+        description: "The user's identifying information has been erased.",
+        variant: "success",
+      });
+      setUserToPermanentlyDelete(null);
+    },
+    onError: (err) => {
+      showToast({
+        title: "Couldn't delete account",
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
+        variant: "error",
+      });
+      setUserToPermanentlyDelete(null);
     },
   });
 
@@ -180,7 +236,6 @@ export default function AdminUsersPage() {
           </Card>
         </div>
       )}
-
       {stats && (
         <Card>
           <CardHeader>
@@ -314,6 +369,35 @@ export default function AdminUsersPage() {
                               Deactivate
                             </Button>
                           )}
+                          {!isSelf && !u.isActive && (
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => activateMutation.mutate(u.id)}
+                                isLoading={pendingActivateId === u.id}
+                                className="gap-1.5 text-success hover:bg-success/10 hover:text-success"
+                              >
+                                <UserCheck
+                                  className="h-3.5 w-3.5"
+                                  aria-hidden="true"
+                                />
+                                Reactivate
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setUserToPermanentlyDelete(u)}
+                                className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <ShieldX
+                                  className="h-3.5 w-3.5"
+                                  aria-hidden="true"
+                                />
+                                Delete Permanently
+                              </Button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -324,7 +408,6 @@ export default function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
-
       <Dialog
         open={userToDelete !== null}
         onOpenChange={(open) => !open && setUserToDelete(null)}
@@ -337,8 +420,8 @@ export default function AdminUsersPage() {
                 <>
                   This will revoke <strong>{userToDelete.fullName}</strong>'s
                   access to Nirnaya. Their past decisions and uploaded documents
-                  will remain on record, but their name and email will be
-                  anonymized. This action cannot be undone from here.
+                  will remain on record. You can reactivate this account at any
+                  time.
                 </>
               )}
             </DialogDescription>
@@ -358,6 +441,45 @@ export default function AdminUsersPage() {
               }
             >
               Deactivate Account
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={userToPermanentlyDelete !== null}
+        onOpenChange={(open) => !open && setUserToPermanentlyDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Permanently delete this account?</DialogTitle>
+            <DialogDescription>
+              {userToPermanentlyDelete && (
+                <>
+                  This will permanently erase{" "}
+                  <strong>{userToPermanentlyDelete.fullName}</strong>'s name and
+                  email. Their past decisions and uploaded documents will remain
+                  on record but will no longer be linked to a real identity.{" "}
+                  <strong>This cannot be undone.</strong>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-2">
+            <DialogClose asChild>
+              <Button variant="outline" size="sm">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              size="sm"
+              variant="destructive"
+              isLoading={permanentDeleteMutation.isPending}
+              onClick={() =>
+                userToPermanentlyDelete &&
+                permanentDeleteMutation.mutate(userToPermanentlyDelete.id)
+              }
+            >
+              Delete Permanently
             </Button>
           </div>
         </DialogContent>
