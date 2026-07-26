@@ -20,3 +20,4 @@ class Document(Base):
     decision = relationship("Decision", back_populates="documents")
     uploader = relationship("User", back_populates="documents_uploaded", foreign_keys=[uploaded_by])
     embeddings = relationship("Embedding", back_populates="document")
+    pages = relationship("DocumentPage", back_populates="document")

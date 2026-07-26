@@ -13,16 +13,15 @@ class Embedding(Base):
     """
     Stores vector embeddings for text drawn from multiple source tables.
 
-    Each row represents ONE embeddable chunk:
-      - Short structured fields (Decision.problem_statement,
-        Decision.decision_desc, Outcome.outcome_desc,
-        Strategy.description, ConstraintMaster.description) are embedded
-        whole — one row per field, chunk_index stays NULL.
-      - Document content is chunked before embedding — one row per
-        chunk, chunk_index tracks order within the doc.
+    One row per entity for structured sources — the entity's title and
+    description fields are combined into a single chunk:
+      - source_type="decision": Decision.title + problem_statement + decision_desc
+      - source_type="strategy": Strategy.strategy_name + description
+      - source_type="constraint": ConstraintMaster.constraint_type + description
+      - source_type="outcome": Outcome.outcome_desc (+ parent Decision.title as prefix)
 
-    Exactly one of decision_id / document_id / outcome_id / strategy_id /
-    constraint_id is populated per row, matching source_type.
+    Multiple rows per document for document_chunk — each row is one
+    child chunk of a DocumentPage (parent), linked via page_id.
     """
 
     __tablename__ = "embeddings"
@@ -55,6 +54,14 @@ class Embedding(Base):
         nullable=True,
     )
 
+    # Only set for source_type="document_chunk" — links a child chunk
+    # back to its parent page for parent-child retrieval.
+    page_id = Column(
+        Integer,
+        ForeignKey("document_pages.page_id", ondelete="CASCADE"),
+        nullable=True,
+    )
+
     source_type = Column(Enum(SourceTypeEnum), nullable=False)
     chunk_index = Column(Integer, nullable=True)
 
@@ -69,3 +76,4 @@ class Embedding(Base):
     outcome = relationship("Outcome", back_populates="embeddings")
     strategy = relationship("Strategy", back_populates="embeddings")
     constraint = relationship("ConstraintMaster", back_populates="embeddings")
+    page = relationship("DocumentPage", back_populates="chunks")
