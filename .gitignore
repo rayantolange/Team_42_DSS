@@ -35,5 +35,5 @@ cookies.txt
 # Vite cache
 frontend/.vite/
 
-# Vite cache
-frontend/.vite/
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
