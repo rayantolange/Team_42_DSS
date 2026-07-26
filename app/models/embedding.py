@@ -1,6 +1,7 @@
 # app/models/embedding.py
 
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Enum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from pgvector.sqlalchemy import Vector
@@ -13,53 +14,42 @@ class Embedding(Base):
     """
     Stores vector embeddings for text drawn from multiple source tables.
 
-    Each row represents ONE embeddable chunk:
-      - Short structured fields (Decision.problem_statement,
-        Decision.decision_desc, Outcome.outcome_desc,
-        Strategy.description, ConstraintMaster.description) are embedded
-        whole — one row per field, chunk_index stays NULL.
-      - Document content is chunked before embedding — one row per
-        chunk, chunk_index tracks order within the doc.
+    One row per entity for structured sources (title + description
+    fields combined into a single chunk). Multiple rows per document
+    for document_chunk, linked to a parent DocumentPage via page_id.
 
-    Exactly one of decision_id / document_id / outcome_id / strategy_id /
-    constraint_id is populated per row, matching source_type.
+    department_id is denormalized here (not just reachable via a join)
+    so retrieval queries can filter by department access at the database
+    level without joining out to five different parent tables per query.
+
+    metadata stores display-ready fields captured at embedding time, so
+    a chat citation can be rendered without re-querying the source table.
+    Frozen at embed time — if the source record is edited later, existing
+    citations keep showing what was true when they were generated.
     """
 
     __tablename__ = "embeddings"
 
     embedding_id = Column(Integer, primary_key=True, autoincrement=True)
 
-    decision_id = Column(
-        Integer,
-        ForeignKey("decisions.decision_id", ondelete="CASCADE"),
-        nullable=True,
-    )
-    document_id = Column(
-        Integer,
-        ForeignKey("documents.document_id", ondelete="CASCADE"),
-        nullable=True,
-    )
-    outcome_id = Column(
-        Integer,
-        ForeignKey("outcomes.outcome_id", ondelete="CASCADE"),
-        nullable=True,
-    )
-    strategy_id = Column(
-        Integer,
-        ForeignKey("strategies.strategy_id", ondelete="CASCADE"),
-        nullable=True,
-    )
-    constraint_id = Column(
-        Integer,
-        ForeignKey("constraints_master.constraint_id", ondelete="CASCADE"),
-        nullable=True,
-    )
+    decision_id = Column(Integer, ForeignKey("decisions.decision_id", ondelete="CASCADE"), nullable=True)
+    document_id = Column(Integer, ForeignKey("documents.document_id", ondelete="CASCADE"), nullable=True)
+    outcome_id = Column(Integer, ForeignKey("outcomes.outcome_id", ondelete="CASCADE"), nullable=True)
+    strategy_id = Column(Integer, ForeignKey("strategies.strategy_id", ondelete="CASCADE"), nullable=True)
+    constraint_id = Column(Integer, ForeignKey("constraints_master.constraint_id", ondelete="CASCADE"), nullable=True)
+    page_id = Column(Integer, ForeignKey("document_pages.page_id", ondelete="CASCADE"), nullable=True)
+
+    # Denormalized for efficient access-control filtering at query time.
+    department_id = Column(Integer, ForeignKey("departments.department_id", ondelete="CASCADE"), nullable=True)
 
     source_type = Column(Enum(SourceTypeEnum), nullable=False)
     chunk_index = Column(Integer, nullable=True)
 
     content = Column(Text, nullable=False)
     embedding = Column(Vector(768), nullable=False)
+
+    # Display-ready citation fields, shape varies by source_type.
+    embedding_metadata = Column(JSONB, nullable=True)
 
     created_at = Column(DateTime(timezone=False), server_default=func.now())
 
@@ -69,3 +59,5 @@ class Embedding(Base):
     outcome = relationship("Outcome", back_populates="embeddings")
     strategy = relationship("Strategy", back_populates="embeddings")
     constraint = relationship("ConstraintMaster", back_populates="embeddings")
+    page = relationship("DocumentPage", back_populates="chunks")
+    department = relationship("Department")

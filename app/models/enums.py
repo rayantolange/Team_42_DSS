@@ -22,9 +22,17 @@ class UserRoleEnum(str, enum.Enum):
     staff = "staff"
 
 class SourceTypeEnum(str, enum.Enum):
-    problem_statement = "problem_statement"
-    decision_desc = "decision_desc"
+    decision = "decision"
+    strategy = "strategy"
+    constraint = "constraint"
+    outcome = "outcome"
     document_chunk = "document_chunk"
-    outcome_desc = "outcome_desc"
-    strategy_description = "strategy_description"
-    constraint_description = "constraint_description"
+
+class ChatRoleEnum(str, enum.Enum):
+    user = "user"
+    assistant = "assistant"
+
+
+class ChatModeEnum(str, enum.Enum):
+    chat = "chat"
+    rag_search = "rag_search"
