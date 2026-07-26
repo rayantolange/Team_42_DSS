@@ -29,3 +29,4 @@ class User(Base):
     department = relationship("Department", back_populates="users")
     decisions_created = relationship("Decision", back_populates="creator", foreign_keys="Decision.created_by")
     documents_uploaded = relationship("Document", back_populates="uploader", foreign_keys="Document.uploaded_by")
+    chat_threads = relationship("ChatThread", back_populates="user")
