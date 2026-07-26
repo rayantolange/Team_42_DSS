@@ -32,6 +32,8 @@ build/
 coverage/
 .coverage
 cookies.txt
+# Vite cache
+frontend/.vite/
 
 # Vite cache
 frontend/.vite/
