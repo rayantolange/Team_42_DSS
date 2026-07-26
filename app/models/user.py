@@ -22,7 +22,8 @@ class User(Base):
     nullable=False,
 )
     password_hash = Column(String(255), nullable=False)
-    is_verified = Column(Boolean, nullable=False, server_default="false") 
+    is_verified = Column(Boolean, nullable=False, server_default="false")
+    is_active = Column(Boolean, nullable=False, server_default="true")
     created_at = Column(DateTime(timezone=False), server_default=func.now())
 
     # Relationships
