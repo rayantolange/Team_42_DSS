@@ -32,3 +32,6 @@ build/
 coverage/
 .coverage
 cookies.txt
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
