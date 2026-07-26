@@ -64,3 +64,35 @@ export async function deleteUser(userId: string): Promise<{ message: string }> {
   const response = await apiClient.delete<{ message: string }>(`/admin/users/${userId}`);
   return response.data;
 }
+
+export interface SystemStats {
+  totalUsers: number;
+  verifiedUsers: number;
+  unverifiedUsers: number;
+  activeUsers: number;
+  deactivatedUsers: number;
+  roleCounts: Record<string, number>;
+}
+
+interface SystemStatsApiResponse {
+  total_users: number;
+  verified_users: number;
+  unverified_users: number;
+  active_users: number;
+  deactivated_users: number;
+  role_counts: Record<string, number>;
+}
+
+export async function fetchSystemStats(): Promise<SystemStats> {
+  const response = await apiClient.get<SystemStatsApiResponse>("/admin/stats");
+  const s = response.data;
+
+  return {
+    totalUsers: s.total_users,
+    verifiedUsers: s.verified_users,
+    unverifiedUsers: s.unverified_users,
+    activeUsers: s.active_users,
+    deactivatedUsers: s.deactivated_users,
+    roleCounts: s.role_counts,
+  };
+}

@@ -98,6 +98,27 @@ class UserRepository(BaseRepository[User]):
         user.is_verified = True
         return self.save(user)
 
+    def get_stats(self) -> dict:
+        """
+        Aggregate counts for the admin system-health view.
+        """
+        total = self.db.query(User).count()
+        verified = self.db.query(User).filter(User.is_verified == True).count()
+        active = self.db.query(User).filter(User.is_active == True).count()
+
+        role_counts = {}
+        for role in ["admin", "principal", "hod", "faculty", "staff"]:
+            role_counts[role] = self.db.query(User).filter(User.role == role).count()
+
+        return {
+            "total_users": total,
+            "verified_users": verified,
+            "unverified_users": total - verified,
+            "active_users": active,
+            "deactivated_users": total - active,
+            "role_counts": role_counts,
+        }
+
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------

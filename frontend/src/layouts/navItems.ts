@@ -7,6 +7,7 @@ import {
   Upload,
   HelpCircle,
   Users,
+  Building2,
 } from "lucide-react";
 
 export interface NavItem {
@@ -49,7 +50,8 @@ export const NAV_ITEMS: NavItem[] = [
     to: "/graph",
     label: "Graph Explorer",
     icon: Network,
-    description: "Visually explore how decisions connect across the institution",
+    description:
+      "Visually explore how decisions connect across the institution",
   },
   {
     to: "/history",
@@ -70,6 +72,12 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     label: "User Management",
     icon: Users,
     description: "View accounts and manage role assignments",
+  },
+  {
+    to: "/admin/departments",
+    label: "Department Management",
+    icon: Building2,
+    description: "Add and edit institutional departments",
   },
 ];
 

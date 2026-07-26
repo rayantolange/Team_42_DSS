@@ -22,6 +22,7 @@ const NotFoundPage = lazy(() => import("@pages/NotFoundPage"));
 const VerifyEmailPage = lazy(() => import("@pages/VerifyEmailPage"));
 const ResetPasswordPage = lazy(() => import("@pages/ResetPasswordPage"));
 const AdminUsersPage = lazy(() => import("@pages/AdminUsersPage"));
+const AdminDepartmentsPage = lazy(() => import("@pages/AdminDepartmentsPage"));
 
 /** Wraps a lazy page in Suspense with a consistent loading skeleton. */
 function withSuspense(element: ReactNode) {
@@ -89,6 +90,10 @@ export const router = createBrowserRouter([
               {
                 path: "/admin/users",
                 element: withSuspense(<AdminUsersPage />),
+              },
+              {
+                path: "/admin/departments",
+                element: withSuspense(<AdminDepartmentsPage />),
               },
             ],
           },

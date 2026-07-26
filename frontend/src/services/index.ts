@@ -11,7 +11,16 @@
  * rather than reaching into services/mock directly.
  */
 
-export { fetchDepartments } from "./departmentService";
+export {
+  fetchDepartments,
+  fetchAllDepartments,
+  createDepartment,
+  updateDepartment,
+  toggleDepartmentActive,
+  type CreateDepartmentRequest,
+  type UpdateDepartmentRequest,
+} from "./departmentService";
+
 export { fetchDepartmentById } from "./mock/departmentService";
 
 export {
@@ -56,4 +65,11 @@ export {
   getDecisionById,
 } from "@/data/decisionGenerator";
 
-export { fetchAllUsers, updateUserRole, deleteUser, type AdminUser } from "./adminService";
+export {
+  fetchAllUsers,
+  updateUserRole,
+  deleteUser,
+  fetchSystemStats,
+  type AdminUser,
+  type SystemStats,
+} from "./adminService";

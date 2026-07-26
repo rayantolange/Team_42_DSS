@@ -12,16 +12,10 @@ import { Badge } from "@components/ui/Badge";
 import { useAuth } from "@hooks/useAuth";
 import { useTheme } from "@hooks/useTheme";
 import { useToast } from "@components/ui/Toast";
-import { DEPARTMENTS } from "@services/index";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDepartments } from "@services/index";
 import { cn } from "@utils/cn";
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: "System Administrator",
-  principal: "Principal",
-  hod: "Head of Department",
-  faculty: "Faculty",
-  staff: "Staff",
-};
+import { ROLE_LABELS } from "@/types/domain";
 
 interface ToggleRowProps {
   icon: typeof Bell;
@@ -75,6 +69,10 @@ function ToggleRow({
 export default function SettingsPage() {
   const { user, isAdmin, scopedDepartmentId } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartments,
+  });
   const { showToast } = useToast();
 
   const [notifyDecisions, setNotifyDecisions] = useState(true);
@@ -83,7 +81,7 @@ export default function SettingsPage() {
   const [notifyConflicts, setNotifyConflicts] = useState(true);
 
   const departmentName = scopedDepartmentId
-    ? DEPARTMENTS.find((d) => d.id === scopedDepartmentId)?.name
+    ? departments.find((d) => d.id === scopedDepartmentId)?.name
     : "All Departments";
 
   function handleSavePreferences() {
@@ -139,11 +137,18 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-2.5 text-sm">
               <Building2
-                className="h-4 w-4 text-muted-foreground"
+                className="h-4 w-4 shrink-0 text-muted-foreground"
                 aria-hidden="true"
               />
-              <span className="text-muted-foreground">Department</span>
-              <span className="ml-auto font-medium">{departmentName}</span>
+              <span className="shrink-0 text-muted-foreground">Department</span>
+              <div className="group relative ml-auto max-w-[60%]">
+                <span className="block truncate text-right font-medium">
+                  {departmentName}
+                </span>
+                <div className="pointer-events-none absolute bottom-full right-0 z-10 mb-1.5 whitespace-nowrap rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100">
+                  {departmentName}
+                </div>
+              </div>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
               <User

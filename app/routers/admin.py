@@ -5,7 +5,7 @@ from typing import List
 from app.core.dependencies import get_db, require_admin
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import AdminUserResponse, UpdateUserRoleRequest
+from app.schemas.user import AdminUserResponse, UpdateUserRoleRequest, SystemStatsResponse
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -23,6 +23,23 @@ def list_users(
     """
     repo = UserRepository(db)
     return repo.get_all()
+
+
+# -------------------------------------------------------
+# SYSTEM STATS
+# -------------------------------------------------------
+@router.get("/stats", response_model=SystemStatsResponse)
+def get_system_stats(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    """
+    Returns aggregate user counts for the admin dashboard.
+    Admin-only.
+    """
+    repo = UserRepository(db)
+    return repo.get_stats()
+
 
 
 # -------------------------------------------------------
