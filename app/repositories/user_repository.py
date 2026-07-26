@@ -98,6 +98,27 @@ class UserRepository(BaseRepository[User]):
         user.is_verified = True
         return self.save(user)
 
+    def get_stats(self) -> dict:
+        """
+        Aggregate counts for the admin system-health view.
+        """
+        total = self.db.query(User).count()
+        verified = self.db.query(User).filter(User.is_verified == True).count()
+        active = self.db.query(User).filter(User.is_active == True).count()
+
+        role_counts = {}
+        for role in ["admin", "principal", "hod", "faculty", "staff"]:
+            role_counts[role] = self.db.query(User).filter(User.role == role).count()
+
+        return {
+            "total_users": total,
+            "verified_users": verified,
+            "unverified_users": total - verified,
+            "active_users": active,
+            "deactivated_users": total - active,
+            "role_counts": role_counts,
+        }
+
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -162,6 +183,35 @@ class UserRepository(BaseRepository[User]):
         if department_id is not None:
             user.department_id = department_id
 
+        return self.save(user)
+
+    def deactivate_user(self, user: User) -> User:
+        """
+        Soft-deletes a user: revokes access while preserving all
+        identifying info, so the account can be safely reactivated
+        and their past decisions/documents remain correctly attributed.
+        """
+        user.is_active = False
+        return self.save(user)
+
+    def activate_user(self, user: User) -> User:
+        """
+        Reinstates a previously deactivated user's access.
+        """
+        user.is_active = True
+        return self.save(user)
+
+    def permanently_delete_user(self, user: User) -> User:
+        """
+        Irreversibly anonymizes a user's identifying info (GDPR-style
+        erasure). Unlike deactivate_user, this cannot be undone via
+        activate_user — the real name/email are gone. Row is kept so
+        past decisions/documents remain attributed, just no longer to
+        a real identity.
+        """
+        user.is_active = False
+        user.full_name = f"Deleted User #{user.user_id}"
+        user.email = f"deleted-user-{user.user_id}@deactivated.local"
         return self.save(user)
 
     # -------------------------------------------------------

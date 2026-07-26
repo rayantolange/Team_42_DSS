@@ -36,3 +36,17 @@ class TokenPayload(BaseModel):
 
     sub: int
     exp: datetime
+
+class ForgotPasswordRequest(BaseModel):
+    """
+    Payload for requesting a password reset email.
+    """
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """
+    Payload for actually resetting the password using a valid token.
+    """
+    token: str
+    new_password: str = Field(min_length=8)

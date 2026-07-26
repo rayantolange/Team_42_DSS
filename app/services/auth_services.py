@@ -8,11 +8,18 @@ from app.services.email_service import send_verification_email
 from app.core.password import hash_password, verify_password
 from app.core.jwt import create_access_token, decode_access_token
 from app.core.email_tokens import create_email_verification_token, decode_email_verification_token
+from app.services.email_service import send_verification_email, send_password_reset_email
 from app.core.refresh_tokens import (
     create_refresh_token,
     verify_refresh_token,
     rotate_refresh_token,
     revoke_refresh_token,
+)
+from app.core.email_tokens import (
+    create_email_verification_token,
+    decode_email_verification_token,
+    create_password_reset_token,
+    decode_password_reset_token,
 )
 
 
@@ -35,22 +42,22 @@ class AuthService:
         Full login flow:
         1. Check user exists by email
         2. Verify the plain password against the stored hash
-        3. Create and return a JWT access token + refresh token
+        3. Reject deactivated accounts
+        4. Create and return a JWT access token + refresh token
         """
-
         # Step 1 — find user
         user = self.user_repo.get_by_email(data.email)
-
         if not user:
             # deliberately vague — don't reveal whether
             # email exists or password is wrong
             raise ValueError("Invalid email or password.")
-
         # Step 2 — verify password
         password_valid = verify_password(data.password, user.password_hash)
-
         if not password_valid:
             raise ValueError("Invalid email or password.")
+        # Step 3 — reject deactivated accounts
+        if not user.is_active:
+            raise ValueError("This account has been deactivated.")
 
         # Step 3 — create JWT + refresh token
         access_token = create_access_token(
@@ -149,3 +156,29 @@ class AuthService:
         if user and not user.is_verified:
             token = create_email_verification_token(user.user_id)
             send_verification_email(user.email, user.full_name, token)
+
+    def request_password_reset(self, email: str) -> None:
+        """
+        Sends a password-reset email if the account exists. Always
+        succeeds silently regardless of outcome, to avoid leaking
+        which emails are registered.
+        """
+        user = self.user_repo.get_by_email(email)
+        if user:
+            token = create_password_reset_token(user.user_id)
+            send_password_reset_email(user.email, user.full_name, token)
+
+    def reset_password(self, token: str, new_password: str) -> User:
+        """
+        Validates the reset token and updates the user's password.
+        """
+        user_id = decode_password_reset_token(token)
+        if user_id is None:
+            raise ValueError("Invalid or expired reset link.")
+
+        user = self.user_repo.get_by_id(user_id)
+        if user is None:
+            raise ValueError("User not found.")
+
+        new_password_hash = hash_password(new_password)
+        return self.user_repo.update_password(user, new_password_hash)
