@@ -37,3 +37,5 @@ frontend/.vite/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+
+/.venv
