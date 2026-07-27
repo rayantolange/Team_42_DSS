@@ -11,7 +11,7 @@ from app.schemas.strategy import (
     StrategyUpdate,
     DecisionStrategyLink,
 )
-
+from app.services.embedding_service import EmbeddingService
 
 class StrategyService:
     """
@@ -26,7 +26,7 @@ class StrategyService:
 
     def __init__(self, db: Session):
         self.strategy_repo = StrategyRepository(db)
-
+        self.embedding_service = EmbeddingService(db)
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -51,10 +51,14 @@ class StrategyService:
                 "A strategy with this name already exists."
             )
 
-        return self.strategy_repo.create(
+        strategy = self.strategy_repo.create(
             strategy_name=data.strategy_name,
             description=data.description,
         )
+
+        self.embedding_service.embed_strategy(strategy)
+
+        return strategy
 
     # -------------------------------------------------------
     # READ
@@ -130,11 +134,15 @@ class StrategyService:
                     "A strategy with this name already exists."
                 )
 
-        return self.strategy_repo.update(
+        updated_strategy = self.strategy_repo.update(
             strategy=strategy,
             strategy_name=data.strategy_name,
             description=data.description,
         )
+
+        self.embedding_service.embed_strategy(updated_strategy)
+
+        return updated_strategy
 
     # -------------------------------------------------------
     # LINK
