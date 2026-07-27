@@ -41,6 +41,7 @@ class EmbeddingService:
             "decision_type": decision.decision_type,
             "status": decision.status.value,
             "decision_date": decision.decision_date.isoformat() if decision.decision_date else None,
+            "created_by_name": decision.creator.full_name if decision.creator else None,
         }
 
         self.embedding_repo.delete_by_source(
