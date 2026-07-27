@@ -8,6 +8,7 @@ from app.models.decision import Decision
 from app.models.enums import DecisionStatusEnum
 from app.repositories.decision_repository import DecisionRepository
 from app.schemas.decision import DecisionCreate, DecisionUpdate
+from app.services.embedding_service import EmbeddingService
 
 class DecisionService:
     """
@@ -22,6 +23,7 @@ class DecisionService:
 
     def __init__(self, db: Session):
         self.decision_repo = DecisionRepository(db)
+        self.embedding_service = EmbeddingService(db)
 
     # -------------------------------------------------------
     # CREATE
@@ -43,7 +45,7 @@ class DecisionService:
         - Notifications
         """
 
-        return self.decision_repo.create(
+        decision = self.decision_repo.create(
             department_id=department_id,
             created_by=created_by,
             title=data.title,
@@ -52,6 +54,10 @@ class DecisionService:
             decision_type=data.decision_type,
             decision_date=data.decision_date,
         )
+
+        self.embedding_service.embed_decision(decision)
+
+        return decision
 
     # -------------------------------------------------------
     # READ
@@ -197,7 +203,7 @@ class DecisionService:
         if not update_data:
             raise ValueError("No fields provided to update.")
 
-        return self.decision_repo.update(
+        updated_decision = self.decision_repo.update(
             decision,
             title=update_data.get("title"),
             problem_statement=update_data.get("problem_statement"),
@@ -205,6 +211,10 @@ class DecisionService:
             decision_type=update_data.get("decision_type"),
             decision_date=update_data.get("decision_date"),
         )
+
+        self.embedding_service.embed_decision(updated_decision)
+
+        return updated_decision
 # -------------------------------------------------------
 # Dependency
 # -------------------------------------------------------

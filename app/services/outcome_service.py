@@ -9,7 +9,7 @@ from app.models.enums import OutcomeStatusEnum, DecisionStatusEnum
 from app.repositories.outcome_repository import OutcomeRepository
 from app.repositories.decision_repository import DecisionRepository
 from app.schemas.outcome import OutcomeCreate, OutcomeUpdate
-
+from app.services.embedding_service import EmbeddingService
 
 class OutcomeService:
     """
@@ -25,7 +25,7 @@ class OutcomeService:
     def __init__(self, db: Session):
         self.outcome_repo = OutcomeRepository(db)
         self.decision_repo = DecisionRepository(db)
-
+        self.embedding_service = EmbeddingService(db)
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -58,13 +58,17 @@ class OutcomeService:
                 "have been implemented or completed."
             )
 
-        return self.outcome_repo.create(
+        outcome = self.outcome_repo.create(
             decision_id=decision_id,
             outcome_status=data.outcome_status,
             outcome_desc=data.outcome_desc,
             success_score=data.success_score,
             evaluation_date=data.evaluation_date,
         )
+
+        self.embedding_service.embed_outcome(outcome)
+
+        return outcome
 
     # -------------------------------------------------------
     # READ
@@ -147,13 +151,17 @@ class OutcomeService:
         if not update_data:
             raise ValueError("No fields provided to update.")
 
-        return self.outcome_repo.update(
+        updated_outcome = self.outcome_repo.update(
             outcome,
             outcome_status=update_data.get("outcome_status"),
             outcome_desc=update_data.get("outcome_desc"),
             success_score=update_data.get("success_score"),
             evaluation_date=update_data.get("evaluation_date"),
         )
+
+        self.embedding_service.embed_outcome(updated_outcome)
+
+        return updated_outcome
 
     # -------------------------------------------------------
     # DELETE
