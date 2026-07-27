@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 from pgvector.sqlalchemy import Vector
 
 # revision identifiers, used by Alembic.
@@ -20,8 +21,21 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.drop_table('embeddings')
+    op.execute("DROP TABLE IF EXISTS embeddings")
     op.execute("DROP TYPE IF EXISTS sourcetypeenum")
+
+    source_type_enum = postgresql.ENUM(
+        'decision', 'strategy', 'constraint', 'outcome', 'document_chunk',
+        name='sourcetypeenum'
+    )
+    source_type_enum.create(op.get_bind(), checkfirst=True)
+
+    # Prevent create_table from trying to create the type again
+    source_type_enum_no_create = postgresql.ENUM(
+        'decision', 'strategy', 'constraint', 'outcome', 'document_chunk',
+        name='sourcetypeenum',
+        create_type=False
+    )
 
     op.create_table('document_pages',
         sa.Column('page_id', sa.Integer(), autoincrement=True, nullable=False),
@@ -32,7 +46,6 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['document_id'], ['documents.document_id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('page_id')
     )
-
     op.create_table('embeddings',
         sa.Column('embedding_id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('decision_id', sa.Integer(), nullable=True),
@@ -41,10 +54,7 @@ def upgrade() -> None:
         sa.Column('strategy_id', sa.Integer(), nullable=True),
         sa.Column('constraint_id', sa.Integer(), nullable=True),
         sa.Column('page_id', sa.Integer(), nullable=True),
-        sa.Column('source_type', sa.Enum(
-            'decision', 'strategy', 'constraint', 'outcome', 'document_chunk',
-            name='sourcetypeenum'
-        ), nullable=False),
+        sa.Column('source_type', source_type_enum_no_create, nullable=False),
         sa.Column('chunk_index', sa.Integer(), nullable=True),
         sa.Column('content', sa.Text(), nullable=False),
         sa.Column('embedding', Vector(768), nullable=False),
@@ -61,9 +71,23 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_table('embeddings')
+    op.execute("DROP TABLE IF EXISTS embeddings")
     op.execute("DROP TYPE IF EXISTS sourcetypeenum")
-    op.drop_table('document_pages')
+    op.execute("DROP TABLE IF EXISTS document_pages")
+
+    source_type_enum = postgresql.ENUM(
+        'problem_statement', 'decision_desc', 'document_chunk',
+        'outcome_desc', 'strategy_description', 'constraint_description',
+        name='sourcetypeenum'
+    )
+    source_type_enum.create(op.get_bind(), checkfirst=True)
+
+    source_type_enum_no_create = postgresql.ENUM(
+        'problem_statement', 'decision_desc', 'document_chunk',
+        'outcome_desc', 'strategy_description', 'constraint_description',
+        name='sourcetypeenum',
+        create_type=False
+    )
 
     op.create_table('embeddings',
         sa.Column('embedding_id', sa.Integer(), autoincrement=True, nullable=False),
@@ -72,11 +96,7 @@ def downgrade() -> None:
         sa.Column('outcome_id', sa.Integer(), nullable=True),
         sa.Column('strategy_id', sa.Integer(), nullable=True),
         sa.Column('constraint_id', sa.Integer(), nullable=True),
-        sa.Column('source_type', sa.Enum(
-            'problem_statement', 'decision_desc', 'document_chunk',
-            'outcome_desc', 'strategy_description', 'constraint_description',
-            name='sourcetypeenum'
-        ), nullable=False),
+        sa.Column('source_type', source_type_enum_no_create, nullable=False),
         sa.Column('chunk_index', sa.Integer(), nullable=True),
         sa.Column('content', sa.Text(), nullable=False),
         sa.Column('embedding', Vector(768), nullable=False),
