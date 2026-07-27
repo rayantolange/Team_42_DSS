@@ -131,3 +131,19 @@ class EmbeddingRepository(BaseRepository[Embedding]):
         )
         if existing:
             self.delete(existing)
+    def delete_all_by_document(self, document_id: int) -> None:
+        """
+        Bulk-deletes every document_chunk embedding for a document.
+        Needed before re-processing a document — unlike structured
+        entities (≤1 row each), a document can have many chunk rows,
+        so delete_by_source's single-row assumption doesn't apply here.
+        """
+        (
+            self.db.query(Embedding)
+            .filter(
+                Embedding.document_id == document_id,
+                Embedding.source_type == SourceTypeEnum.document_chunk,
+            )
+            .delete(synchronize_session=False)
+        )
+        self.db.commit()
