@@ -8,7 +8,6 @@ from app.models.outcome import Outcome
 from app.models.enums import OutcomeStatusEnum
 from app.repositories.base import BaseRepository
 
-
 class OutcomeRepository(BaseRepository[Outcome]):
     """
     Handles all database operations for the Outcome model.
