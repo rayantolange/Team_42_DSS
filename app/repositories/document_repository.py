@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.document import Document
 from app.repositories.base import BaseRepository
-
+from app.models.document_page import DocumentPage
 
 class DocumentRepository(BaseRepository[Document]):
     """
@@ -132,4 +132,50 @@ class DocumentRepository(BaseRepository[Document]):
         self.db.query(Document).filter(
             Document.decision_id == decision_id
         ).delete()
+        self.db.commit()
+    # -------------------------------------------------------
+    # DOCUMENT PAGE (parent-child chunking)
+    # -------------------------------------------------------
+
+    def create_page(
+        self,
+        document_id: int,
+        page_number: int,
+        page_content: str,
+    ) -> DocumentPage:
+        page = DocumentPage(
+            document_id=document_id,
+            page_number=page_number,
+            page_content=page_content,
+        )
+        self.db.add(page)
+        self.db.commit()
+        self.db.refresh(page)
+        return page
+
+    def get_pages_for_document(self, document_id: int) -> List[DocumentPage]:
+        return (
+            self.db.query(DocumentPage)
+            .filter(DocumentPage.document_id == document_id)
+            .order_by(DocumentPage.page_number.asc())
+            .all()
+        )
+    def get_page_by_id(self, page_id: int) -> Optional[DocumentPage]:
+        return (
+            self.db.query(DocumentPage)
+            .filter(DocumentPage.page_id == page_id)
+            .first()
+        )
+
+    def delete_pages_for_document(self, document_id: int) -> None:
+        """
+        Bulk-deletes pages ahead of reprocessing a document.
+        ondelete="CASCADE" on Embedding.page_id cleans up their
+        chunk embeddings automatically.
+        """
+        (
+            self.db.query(DocumentPage)
+            .filter(DocumentPage.document_id == document_id)
+            .delete(synchronize_session=False)
+        )
         self.db.commit()

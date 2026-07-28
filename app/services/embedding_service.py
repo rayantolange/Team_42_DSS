@@ -1,15 +1,17 @@
 # app/services/embedding_service.py
 
 from sqlalchemy.orm import Session
-
+from typing import List, Optional
 from app.models.decision import Decision
 from app.models.strategy import Strategy, ConstraintMaster
 from app.models.outcome import Outcome
 from app.models.embedding import Embedding
 from app.models.enums import SourceTypeEnum
 from app.repositories.embedding_repository import EmbeddingRepository
-from app.ai.embedding_client import embed_document
-
+from app.ai.embedding_client import embed_document, embed_query
+from app.repositories.document_repository import DocumentRepository
+from app.models.user import User
+from app.models.enums import UserRoleEnum
 
 class EmbeddingService:
     """
@@ -149,6 +151,99 @@ class EmbeddingService:
             department_id=decision.department_id if decision else None,
             embedding_metadata=metadata,
         )
+    from app.models.document_page import DocumentPage
+
+    # -------------------------------------------------------
+    # DOCUMENT CHUNK
+    # -------------------------------------------------------
+
+    def embed_document_chunk(
+        self,
+        page: DocumentPage,
+        chunk_text: str,
+        chunk_index: int,
+    ) -> Embedding:
+        """
+        Embeds one paragraph-level chunk from a page. Unlike the four
+        structured embed_* methods, this does NOT delete-before-create
+        per call — for a document with many chunks, deleting once up
+        front (via clear_document_chunks) and re-creating all of them
+        is correct; deleting per-chunk here would be redundant.
+        """
+        metadata = {
+            "document_id": page.document_id,
+            "page_number": page.page_number,
+            "chunk_index": chunk_index,
+        }
+
+        vector = embed_document(chunk_text)
+
+        department_id = None
+        if page.document and page.document.decision:
+            department_id = page.document.decision.department_id
+
+        return self.embedding_repo.create(
+            source_type=SourceTypeEnum.document_chunk,
+            content=chunk_text,
+            embedding=vector,
+            document_id=page.document_id,
+            page_id=page.page_id,
+            chunk_index=chunk_index,
+            department_id=department_id,
+            embedding_metadata=metadata,
+        )
+
+    def clear_document_chunks(self, document_id: int) -> None:
+        """
+        Deletes all existing chunk embeddings for a document — call
+        once before re-embedding during a reprocess.
+        """
+        self.embedding_repo.delete_all_by_document(document_id)
+    
+    def search(
+        self,
+        query_text: str,
+        current_user: User,
+        source_types: Optional[List[SourceTypeEnum]] = None,
+        top_k: int = 5,
+    ) -> List[dict]:
+        """
+        The actual retrieve_vector logic: embed the query, run similarity
+        search, and shape results into citation-ready dicts. For document_chunk
+        hits, also pulls the parent page's full text (parent-child retrieval —
+        the chunk is what matched, but the LLM gets the whole page for context).
+        """
+        query_vector = embed_query(query_text)
+
+        is_admin = current_user.role == UserRoleEnum.admin
+        rows = self.embedding_repo.search_by_vector(
+            query_vector=query_vector,
+            source_types=source_types,
+            department_id=current_user.department_id,
+            is_admin=is_admin,
+            top_k=top_k,
+        )
+
+        results = []
+        for row in rows:
+            result = {
+                "embedding_id": row.embedding_id,
+                "source_type": row.source_type,
+                "content": row.content,
+                "metadata": row.embedding_metadata,
+                "decision_id": row.decision_id,
+                "document_id": row.document_id,
+            }
+
+            if row.source_type == SourceTypeEnum.document_chunk and row.page_id:
+                page = self.document_repo.get_page_by_id(row.page_id)  # add this tiny helper if missing
+                if page:
+                    result["parent_page_content"] = page.page_content
+                    result["page_number"] = page.page_number
+
+            results.append(result)
+
+        return results
 
 
 # -------------------------------------------------------
