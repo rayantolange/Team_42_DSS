@@ -16,3 +16,4 @@ pgvector
 sentence-transformers
 einops
 pymupdf
+langgraph
