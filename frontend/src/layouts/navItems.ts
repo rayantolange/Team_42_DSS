@@ -4,10 +4,11 @@ import {
   MessageCircleQuestion,
   Network,
   History,
-  Upload,
+  Vault,
   HelpCircle,
   Users,
   Building2,
+  FileText,
 } from "lucide-react";
 
 export interface NavItem {
@@ -35,6 +36,12 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Overview of decisions, departments, and outcomes",
   },
   {
+    to: "/decisions",
+    label: "Decisions",
+    icon: FileText,
+    description: "Create and manage institutional decisions",
+  },
+  {
     to: "/query",
     label: "Query",
     icon: MessageCircleQuestion,
@@ -42,9 +49,9 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     to: "/documents",
-    label: "Documents",
-    icon: Upload,
-    description: "Add supporting documents for decision context",
+    label: "My Vault",
+    icon: Vault,
+    description: "Browse documents, strategies, constraints, and outcomes",
   },
   {
     to: "/graph",

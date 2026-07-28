@@ -140,3 +140,114 @@ export interface UploadedDocument {
   linkedDecisionId?: string;
   linkedPolicyId?: string;
 }
+
+export type DecisionRecordStatus =
+  | "draft"
+  | "approved"
+  | "implemented"
+  | "completed"
+  | "cancelled";
+
+export interface DecisionRecord {
+  decisionId: number;
+  departmentId: number;
+  createdBy: number;
+  title: string;
+  problemStatement: string;
+  decisionDesc: string;
+  decisionType?: string;
+  status: DecisionRecordStatus;
+  decisionDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DecisionRecordSummary {
+  decisionId: number;
+  title: string;
+  decisionType?: string;
+  status: DecisionRecordStatus;
+  decisionDate?: string;
+  createdAt: string;
+}
+
+export interface DecisionCreateInput {
+  title: string;
+  problemStatement: string;
+  decisionDesc: string;
+  decisionType?: string;
+  decisionDate?: string;
+}
+
+export interface DecisionUpdateInput {
+  title?: string;
+  problemStatement?: string;
+  decisionDesc?: string;
+  decisionType?: string;
+  status?: DecisionRecordStatus;
+  decisionDate?: string;
+}
+
+export interface Strategy {
+  strategyId: number;
+  strategyName: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface StrategyCreateInput {
+  strategyName: string;
+  description?: string;
+}
+
+export const CONSTRAINT_TYPES = [
+  "financial",
+  "regulatory",
+  "operational",
+  "technical",
+  "human_resource",
+  "time",
+  "infrastructure",
+] as const;
+export type ConstraintType = (typeof CONSTRAINT_TYPES)[number];
+
+export interface ConstraintItem {
+  constraintId: number;
+  constraintType: ConstraintType;
+  description?: string;
+  createdAt: string;
+}
+
+export interface ConstraintCreateInput {
+  constraintType: ConstraintType;
+  description?: string;
+}
+
+export interface DecisionDocument {
+  documentId: number;
+  decisionId: number;
+  uploadedBy: number;
+  fileName: string;
+  filePath?: string;
+  uploadDate?: string;
+  createdAt: string;
+}
+
+export type OutcomeStatus = "successful" | "partially_successful" | "failed";
+
+export interface Outcome {
+  outcomeId: number;
+  decisionId: number;
+  outcomeStatus: OutcomeStatus;
+  outcomeDesc?: string;
+  successScore?: number;
+  evaluationDate?: string;
+  createdAt: string;
+}
+
+export interface OutcomeCreateInput {
+  outcomeStatus: OutcomeStatus;
+  outcomeDesc?: string;
+  successScore?: number;
+  evaluationDate?: string;
+}

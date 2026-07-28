@@ -14,7 +14,7 @@ const DashboardPage = lazy(() => import("@pages/DashboardPage"));
 const QueryPage = lazy(() => import("@pages/QueryPage"));
 const GraphExplorerPage = lazy(() => import("@pages/GraphExplorerPage"));
 const DecisionHistoryPage = lazy(() => import("@pages/DecisionHistoryPage"));
-const UploadDocumentsPage = lazy(() => import("@pages/UploadDocumentsPage"));
+const MyVaultPage = lazy(() => import("@pages/MyVaultPage"));
 const SettingsPage = lazy(() => import("@pages/SettingsPage"));
 const HelpCenterPage = lazy(() => import("@pages/HelpCenterPage"));
 const NotAuthorizedPage = lazy(() => import("@pages/NotAuthorizedPage"));
@@ -23,6 +23,18 @@ const VerifyEmailPage = lazy(() => import("@pages/VerifyEmailPage"));
 const ResetPasswordPage = lazy(() => import("@pages/ResetPasswordPage"));
 const AdminUsersPage = lazy(() => import("@pages/AdminUsersPage"));
 const AdminDepartmentsPage = lazy(() => import("@pages/AdminDepartmentsPage"));
+const DecisionsListPage = lazy(() => import("@pages/DecisionsListPage"));
+const DecisionFormPage = lazy(() => import("@pages/DecisionFormPage"));
+const DecisionWizardDocumentsPage = lazy(
+  () => import("@pages/DecisionWizardDocumentsPage"),
+);
+const DecisionWizardStrategiesPage = lazy(
+  () => import("@pages/DecisionWizardStrategiesPage"),
+);
+const DecisionWizardConstraintsPage = lazy(
+  () => import("@pages/DecisionWizardConstraintsPage"),
+);
+const DecisionDetailPage = lazy(() => import("@pages/DecisionDetailPage"));
 
 /** Wraps a lazy page in Suspense with a consistent loading skeleton. */
 function withSuspense(element: ReactNode) {
@@ -79,8 +91,32 @@ export const router = createBrowserRouter([
                 element: withSuspense(<DecisionHistoryPage />),
               },
               {
+                path: "/decisions/new",
+                element: withSuspense(<DecisionFormPage />),
+              },
+              {
+                path: "/decisions",
+                element: withSuspense(<DecisionsListPage />),
+              },
+              {
+                path: "/decisions/:id",
+                element: withSuspense(<DecisionDetailPage />),
+              },
+              {
+                path: "/decisions/:id/new/documents",
+                element: withSuspense(<DecisionWizardDocumentsPage />),
+              },
+              {
+                path: "/decisions/:id/new/strategies",
+                element: withSuspense(<DecisionWizardStrategiesPage />),
+              },
+              {
+                path: "/decisions/:id/new/constraints",
+                element: withSuspense(<DecisionWizardConstraintsPage />),
+              },
+              {
                 path: "/documents",
-                element: withSuspense(<UploadDocumentsPage />),
+                element: withSuspense(<MyVaultPage />),
               },
             ],
           },

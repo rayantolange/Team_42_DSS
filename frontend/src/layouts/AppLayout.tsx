@@ -191,34 +191,28 @@ export function AppLayout() {
         >
           <div
             className={cn(
-              "flex h-16 items-center border-b border-border",
-              isCollapsed ? "justify-center px-2" : "justify-between px-5",
+              "flex h-16 shrink-0 items-center border-b border-border",
+              isCollapsed
+                ? "flex-col justify-center gap-2 px-2 py-2"
+                : "justify-between px-5",
             )}
           >
             <Logo iconOnly={isCollapsed} />
-            {!isCollapsed && (
-              <button
-                type="button"
-                onClick={() => setIsCollapsed(true)}
-                aria-label="Collapse sidebar"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
-              </button>
-            )}
-          </div>
-          {desktopSidebarBody}
-          {isCollapsed && (
             <button
               type="button"
-              onClick={() => setIsCollapsed(false)}
-              aria-label="Expand sidebar"
-              title="Expand sidebar"
-              className="flex items-center justify-center border-t border-border py-3 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              onClick={() => setIsCollapsed((c) => !c)}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+              {isCollapsed ? (
+                <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+              )}
             </button>
-          )}
+          </div>
+          {desktopSidebarBody}
         </nav>
         {/* Mobile drawer + backdrop */}
         <div

@@ -46,6 +46,32 @@ class DocumentRepository(BaseRepository[Document]):
             .all()
         )
 
+    def get_all_scoped(
+        self,
+        department_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[Document]:
+        """
+        Fetch documents across all decisions, optionally scoped to
+        a single department. Pass department_id=None for admins to
+        see everything; pass a department_id for everyone else.
+        Primary query for GET /documents (vault view).
+        """
+        from app.models.decision import Decision
+
+        query = self.db.query(Document).join(
+            Decision, Document.decision_id == Decision.decision_id
+        )
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+        return (
+            query.order_by(Document.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
     def get_all_by_uploader(
         self,
         uploaded_by: int,

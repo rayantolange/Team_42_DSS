@@ -50,6 +50,32 @@ class OutcomeRepository(BaseRepository[Outcome]):
             .all()
         )
 
+    def get_all_scoped(
+        self,
+        department_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[Outcome]:
+        """
+        Fetch outcomes across all decisions, optionally scoped to
+        a single department. Pass department_id=None for admins to
+        see everything; pass a department_id for everyone else.
+        Primary query for GET /outcomes (vault view).
+        """
+        from app.models.decision import Decision
+
+        query = self.db.query(Outcome).join(
+            Decision, Outcome.decision_id == Decision.decision_id
+        )
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+        return (
+            query.order_by(Outcome.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
     def get_latest_by_decision(self, decision_id: int) -> Optional[Outcome]:
         """
         Fetch only the most recent outcome for a decision.
