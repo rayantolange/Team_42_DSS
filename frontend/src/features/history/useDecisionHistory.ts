@@ -1,31 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchDecisions, fetchDecisionById, fetchDecisionPolicyContext } from "@services/index";
-import type { DecisionFilters } from "@services/index";
-import { queryKeys, STALE_TIME } from "@app/queryClient";
+import { fetchDecisions, fetchDecisionById } from "@services/decisionService";
+import type { DecisionFilters } from "@services/decisionService";
 
 export function useDecisionsList(filters: DecisionFilters) {
   return useQuery({
-    queryKey: queryKeys.decisions.list(filters),
+    queryKey: ["decisions", "history-list", filters],
     queryFn: () => fetchDecisions(filters),
-    staleTime: STALE_TIME.decisionDetail,
-    placeholderData: (previousData) => previousData, // smooth pagination, no flash-to-empty
+    placeholderData: (previousData) => previousData,
   });
 }
 
-export function useDecisionDetail(id: string | null) {
+export function useDecisionDetail(id: number | null) {
   return useQuery({
-    queryKey: queryKeys.decisions.detail(id ?? ""),
-    queryFn: () => fetchDecisionById(id as string),
-    staleTime: STALE_TIME.decisionDetail,
-    enabled: Boolean(id),
-  });
-}
-
-export function useDecisionPolicyContext(id: string | null) {
-  return useQuery({
-    queryKey: [...queryKeys.decisions.detail(id ?? ""), "policy-context"],
-    queryFn: () => fetchDecisionPolicyContext(id as string),
-    staleTime: STALE_TIME.decisionDetail,
-    enabled: Boolean(id),
+    queryKey: ["decisions", "detail", id],
+    queryFn: () => fetchDecisionById(id as number),
+    enabled: id !== null,
   });
 }

@@ -142,6 +142,30 @@ def get_latest_outcome(
 
 
 # -------------------------------------------------------
+# LIST ALL (vault view — across all decisions in scope)
+# -------------------------------------------------------
+@router.get(
+    "/outcomes",
+    response_model=List[OutcomeSummary],
+    status_code=status.HTTP_200_OK
+)
+def list_all_outcomes(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(allow_academics)
+):
+    """
+    Lists outcomes across all decisions the current user can access.
+    """
+    outcome_service = OutcomeService(db)
+    return outcome_service.list_all_outcomes_scoped(
+        current_user=current_user,
+        skip=skip,
+        limit=limit,
+    )
+
+# -------------------------------------------------------
 # GET BY ID
 # -------------------------------------------------------
 
