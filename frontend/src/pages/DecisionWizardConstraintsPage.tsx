@@ -27,9 +27,11 @@ export default function DecisionWizardConstraintsPage() {
   const [newType, setNewType] = useState<ConstraintType | "">("");
   const [newDesc, setNewDesc] = useState("");
 
-  const linkedIds = new Set((linkedConstraints ?? []).map((c) => c.constraintId));
+  const linkedIds = new Set(
+    (linkedConstraints ?? []).map((c) => c.constraintId),
+  );
   const availableConstraints = (allConstraints ?? []).filter(
-    (c) => !linkedIds.has(c.constraintId)
+    (c) => !linkedIds.has(c.constraintId),
   );
 
   function handleAttachExisting() {
@@ -60,8 +62,10 @@ export default function DecisionWizardConstraintsPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">New Decision</h1>
-        <p className="text-muted-foreground">Step 4 of 4 — Constraints (optional)</p>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Supporting Constraints
+        </h1>
+        <p className="text-muted-foreground">Step 4 of 4</p>
       </div>
 
       <div className="flex gap-1.5">
@@ -71,7 +75,10 @@ export default function DecisionWizardConstraintsPage() {
       </div>
 
       {anyError && (
-        <div role="alert" className="flex items-center gap-2 rounded-md bg-destructive/10 p-4 text-sm text-destructive">
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-md bg-destructive/10 p-4 text-sm text-destructive"
+        >
           <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>Something went wrong. Please try again.</span>
         </div>
@@ -109,11 +116,15 @@ export default function DecisionWizardConstraintsPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground">No constraints attached yet.</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            No constraints attached yet.
+          </p>
         )}
 
         <div className="mt-5 border-t border-border pt-5">
-          <label className="text-sm font-medium">Attach an existing constraint</label>
+          <label className="text-sm font-medium">
+            Attach an existing constraint
+          </label>
           <div className="mt-2 flex gap-2">
             <select
               value={selectedId}
@@ -175,7 +186,9 @@ export default function DecisionWizardConstraintsPage() {
                   disabled={!newType || createConstraint.isPending}
                   className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
                 >
-                  {createConstraint.isPending ? "Creating..." : "Create & Attach"}
+                  {createConstraint.isPending
+                    ? "Creating..."
+                    : "Create & Attach"}
                 </button>
                 <button
                   onClick={() => setShowCreateForm(false)}
@@ -199,7 +212,11 @@ export default function DecisionWizardConstraintsPage() {
         </button>
         <button
           onClick={() => navigate(`/decisions/${decisionId}`)}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-transform duration-200 hover:scale-[1.02] hover:shadow-glow active:scale-95"
+          className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+            linkedConstraints && linkedConstraints.length > 0
+              ? "bg-primary text-primary-foreground shadow-sm hover:scale-[1.02] hover:shadow-glow"
+              : "border border-border bg-transparent text-foreground hover:bg-accent"
+          }`}
         >
           Finish
           <ArrowRight className="h-4 w-4" aria-hidden="true" />

@@ -113,6 +113,7 @@ class DocumentSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     document_id: int
+    decision_id: int
     file_name: str
     uploaded_by: int
     upload_date: Optional[date] = None

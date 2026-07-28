@@ -150,7 +150,12 @@ export default function DecisionDetailPage() {
         {activeTab === "Constraints" && (
           <ConstraintsTab decisionId={decisionId} />
         )}
-        {activeTab === "Outcomes" && <OutcomesTab decisionId={decisionId} />}
+        {activeTab === "Outcomes" && (
+          <OutcomesTab
+            decisionId={decisionId}
+            decisionStatus={decision.status}
+          />
+        )}
       </div>
     </div>
   );
@@ -576,7 +581,15 @@ const OUTCOME_STATUSES: OutcomeStatus[] = [
   "failed",
 ];
 
-function OutcomesTab({ decisionId }: { decisionId: number }) {
+function OutcomesTab({
+  decisionId,
+  decisionStatus,
+}: {
+  decisionId: number;
+  decisionStatus: DecisionRecordStatus;
+}) {
+  const canRecordOutcome =
+    decisionStatus === "implemented" || decisionStatus === "completed";
   const { data: outcomes, isLoading } = useOutcomesForDecision(decisionId);
   const createOutcome = useCreateOutcome(decisionId);
   const deleteOutcome = useDeleteOutcome(decisionId);
@@ -605,7 +618,12 @@ function OutcomesTab({ decisionId }: { decisionId: number }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-xl border border-border bg-card p-6 shadow-card">
-        {!showForm ? (
+        {!canRecordOutcome ? (
+          <p className="text-sm text-muted-foreground">
+            Outcomes can only be recorded once this decision is Implemented or
+            Completed. Advance the status from the Overview tab first.
+          </p>
+        ) : !showForm ? (
           <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"

@@ -14,7 +14,7 @@ const DashboardPage = lazy(() => import("@pages/DashboardPage"));
 const QueryPage = lazy(() => import("@pages/QueryPage"));
 const GraphExplorerPage = lazy(() => import("@pages/GraphExplorerPage"));
 const DecisionHistoryPage = lazy(() => import("@pages/DecisionHistoryPage"));
-const UploadDocumentsPage = lazy(() => import("@pages/UploadDocumentsPage"));
+const MyVaultPage = lazy(() => import("@pages/MyVaultPage"));
 const SettingsPage = lazy(() => import("@pages/SettingsPage"));
 const HelpCenterPage = lazy(() => import("@pages/HelpCenterPage"));
 const NotAuthorizedPage = lazy(() => import("@pages/NotAuthorizedPage"));
@@ -116,7 +116,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: "/documents",
-                element: withSuspense(<UploadDocumentsPage />),
+                element: withSuspense(<MyVaultPage />),
               },
             ],
           },
