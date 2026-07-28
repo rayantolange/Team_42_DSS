@@ -74,16 +74,15 @@ class EmbeddingRepository(BaseRepository[Embedding]):
         department_id: Optional[int] = None,
         is_admin: bool = False,
         top_k: int = 5,
-    ) -> List[Embedding]:
+    ) -> List[tuple[Embedding, float]]:
         """
-            Cosine-similarity search over embeddings using pgvector's <=> operator
-            (exposed by pgvector.sqlalchemy as .cosine_distance()).
+        Returns (Embedding, distance) pairs instead of bare Embedding rows,
+        since the service layer needs the distance to apply a relevance
+        threshold before synthesis.
+        """
+        distance = Embedding.embedding.cosine_distance(query_vector)
 
-            Access control is enforced here, not in the caller: non-admins only
-            see rows where department_id is NULL (shared master data — strategies,
-            constraints) or matches their own department. Admins see everything.
-        """
-        query = self.db.query(Embedding)
+        query = self.db.query(Embedding, distance.label("distance"))
 
         if source_types:
             query = query.filter(Embedding.source_type.in_(source_types))
@@ -95,7 +94,7 @@ class EmbeddingRepository(BaseRepository[Embedding]):
             )
 
         return (
-            query.order_by(Embedding.embedding.cosine_distance(query_vector))
+            query.order_by(distance)
             .limit(top_k)
             .all()
         )

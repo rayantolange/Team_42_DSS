@@ -13,6 +13,7 @@ from app.repositories.document_repository import DocumentRepository
 from app.models.user import User
 from app.models.enums import UserRoleEnum
 
+
 class EmbeddingService:
     """
     Builds and stores embeddings for structured entities:
@@ -25,8 +26,9 @@ class EmbeddingService:
     """
 
     def __init__(self, db: Session):
+        self.db = db
         self.embedding_repo = EmbeddingRepository(db)
-
+        self.document_repo = DocumentRepository(db)
     # -------------------------------------------------------
     # DECISION
     # -------------------------------------------------------
@@ -170,17 +172,20 @@ class EmbeddingService:
         front (via clear_document_chunks) and re-creating all of them
         is correct; deleting per-chunk here would be redundant.
         """
+        document = page.document
+        decision = document.decision if document else None
+
         metadata = {
             "document_id": page.document_id,
+            "file_name": document.file_name if document else None,
             "page_number": page.page_number,
             "chunk_index": chunk_index,
+            "decision_title": decision.title if decision else None,
         }
 
         vector = embed_document(chunk_text)
 
-        department_id = None
-        if page.document and page.document.decision:
-            department_id = page.document.decision.department_id
+        department_id = decision.department_id if decision else None
 
         return self.embedding_repo.create(
             source_type=SourceTypeEnum.document_chunk,
@@ -200,6 +205,7 @@ class EmbeddingService:
         """
         self.embedding_repo.delete_all_by_document(document_id)
     
+    DISTANCE_THRESHOLD = 0.5  # tune this after eyeballing real distances
     def search(
         self,
         query_text: str,
@@ -207,12 +213,6 @@ class EmbeddingService:
         source_types: Optional[List[SourceTypeEnum]] = None,
         top_k: int = 5,
     ) -> List[dict]:
-        """
-        The actual retrieve_vector logic: embed the query, run similarity
-        search, and shape results into citation-ready dicts. For document_chunk
-        hits, also pulls the parent page's full text (parent-child retrieval —
-        the chunk is what matched, but the LLM gets the whole page for context).
-        """
         query_vector = embed_query(query_text)
 
         is_admin = current_user.role == UserRoleEnum.admin
@@ -225,7 +225,10 @@ class EmbeddingService:
         )
 
         results = []
-        for row in rows:
+        for row, distance in rows:
+            if distance > self.DISTANCE_THRESHOLD:
+                continue  # too dissimilar, drop before it reaches synthesis
+
             result = {
                 "embedding_id": row.embedding_id,
                 "source_type": row.source_type,
@@ -233,10 +236,14 @@ class EmbeddingService:
                 "metadata": row.embedding_metadata,
                 "decision_id": row.decision_id,
                 "document_id": row.document_id,
+                "strategy_id": row.strategy_id,
+                "constraint_id": row.constraint_id,
+                "outcome_id": row.outcome_id,
+                "distance": distance,
             }
 
             if row.source_type == SourceTypeEnum.document_chunk and row.page_id:
-                page = self.document_repo.get_page_by_id(row.page_id)  # add this tiny helper if missing
+                page = self.document_repo.get_page_by_id(row.page_id)
                 if page:
                     result["parent_page_content"] = page.page_content
                     result["page_number"] = page.page_number
