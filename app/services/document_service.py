@@ -1,7 +1,11 @@
 # app/services/document_service.py
 
-from typing import List
+from typing import List, Optional
+import re
+import fitz  # PyMuPDF
 
+
+from app.services.embedding_service import EmbeddingService
 from sqlalchemy.orm import Session
 
 from app.models.document import Document
@@ -22,7 +26,7 @@ class DocumentService:
 
     def __init__(self, db: Session):
         self.document_repo = DocumentRepository(db)
-
+        self.embedding_service = EmbeddingService(db)
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -32,13 +36,16 @@ class DocumentService:
         decision_id: int,
         uploaded_by: int,
         data: DocumentCreate,
+        file_bytes: Optional[bytes] = None,
     ) -> Document:
         """
         Creates a new document record.
 
         Business Rules:
         - A decision cannot contain two files with the same name.
-        - The physical file should already exist before calling this.
+        - The physical file should already exist in storage before
+          calling this (file_bytes here is only used for extraction,
+          not for the upload itself).
         """
 
         if self.document_repo.file_exists_on_decision(
@@ -49,13 +56,82 @@ class DocumentService:
                 "A document with this file name already exists for this decision."
             )
 
-        return self.document_repo.create(
+        document = self.document_repo.create(
             decision_id=decision_id,
             uploaded_by=uploaded_by,
             file_name=data.file_name,
             file_path=data.file_path,
             upload_date=data.upload_date,
         )
+
+        if file_bytes is not None:
+            self._extract_and_embed(document, file_bytes)
+
+        return document
+
+    # -------------------------------------------------------
+    # EXTRACTION + CHUNKING (PDFs only)
+    # -------------------------------------------------------
+
+    def _extract_and_embed(self, document: Document, file_bytes: bytes) -> None:
+        """
+        Parent-child chunking: one DocumentPage per PDF page (full text,
+        used for citation context), one Embedding row per paragraph
+        within that page (source_type=document_chunk, what's actually
+        searched). Non-PDF uploads are stored but not chunked.
+        """
+        if not document.file_name.lower().endswith(".pdf"):
+            return
+
+        pdf = fitz.open(stream=file_bytes, filetype="pdf")
+        try:
+            for page_number, pdf_page in enumerate(pdf, start=1):
+                page_text = pdf_page.get_text().strip()
+                if not page_text:
+                    continue
+
+                page = self.document_repo.create_page(
+                    document_id=document.document_id,
+                    page_number=page_number,
+                    page_content=page_text,
+                )
+
+                for chunk_index, paragraph in enumerate(self._split_paragraphs(page_text)):
+                    self.embedding_service.embed_document_chunk(
+                        page=page,
+                        chunk_text=paragraph,
+                        chunk_index=chunk_index,
+                    )
+        finally:
+            pdf.close()
+
+    @staticmethod
+    def _split_paragraphs(page_text: str) -> List[str]:
+        """
+        Splits on blank lines; drops fragments under 20 chars
+        (usually stray headers/footers/page numbers, not real content).
+        """
+        raw_parts = re.split(r"\n\s*\n", page_text)
+        return [p.strip() for p in raw_parts if len(p.strip()) >= 20]
+
+    # -------------------------------------------------------
+    # REPROCESS
+    # -------------------------------------------------------
+
+    def reprocess_document(self, document_id: int, file_bytes: bytes) -> Document:
+        """
+        Re-runs extraction on an already-uploaded PDF without creating
+        a duplicate Document row (e.g. corrected file, chunking-logic
+        change).
+        """
+        document = self.get_document(document_id)
+
+        self.embedding_service.clear_document_chunks(document_id)
+        self.document_repo.delete_pages_for_document(document_id)
+
+        self._extract_and_embed(document, file_bytes)
+
+        return document
 
     # -------------------------------------------------------
     # READ

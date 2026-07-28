@@ -60,6 +60,7 @@ async def upload_document(
             decision_id=decision_id,
             uploaded_by=current_user.user_id,
             data=doc_data,
+            file_bytes=contents,
         )
     except ValueError as e:
         raise HTTPException(
