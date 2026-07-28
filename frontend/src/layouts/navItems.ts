@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Users,
   Building2,
+  FileText,
 } from "lucide-react";
 
 export interface NavItem {
@@ -33,6 +34,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
     description: "Overview of decisions, departments, and outcomes",
+  },
+  {
+    to: "/decisions",
+    label: "Decisions",
+    icon: FileText,
+    description: "Create and manage institutional decisions",
   },
   {
     to: "/query",
