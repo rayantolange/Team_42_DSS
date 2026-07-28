@@ -21,7 +21,7 @@ router = APIRouter(tags=["Strategies"])
 from app.core.permissions import allow_admin, allow_academics
 
 # -------------------------------------------------------
-# CREATE (admin only — master list)
+# CREATE 
 # -------------------------------------------------------
 
 @router.post(
@@ -32,8 +32,7 @@ from app.core.permissions import allow_admin, allow_academics
 def create_strategy(
     data: StrategyCreate,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_current_user)
-    current_user: User = Depends(allow_admin)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Adds a new strategy to the master list.
@@ -115,8 +114,7 @@ def update_strategy(
     strategy_id: int,
     data: StrategyUpdate,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_current_user)
-    current_user: User = Depends(allow_admin)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Updates a strategy's name or description.
@@ -144,8 +142,7 @@ def update_strategy(
 def delete_strategy(
     strategy_id: int,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_current_user)
-    current_user: User = Depends(allow_admin)
+    current_user: User = Depends(allow_academics)
 ):
     """
     Removes a strategy from the master list.
