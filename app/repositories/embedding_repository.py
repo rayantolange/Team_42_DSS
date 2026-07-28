@@ -67,6 +67,38 @@ class EmbeddingRepository(BaseRepository[Embedding]):
             .order_by(Embedding.chunk_index)
             .all()
         )
+    def search_by_vector(
+        self,
+        query_vector: list[float],
+        source_types: Optional[List[SourceTypeEnum]] = None,
+        department_id: Optional[int] = None,
+        is_admin: bool = False,
+        top_k: int = 5,
+    ) -> List[Embedding]:
+        """
+            Cosine-similarity search over embeddings using pgvector's <=> operator
+            (exposed by pgvector.sqlalchemy as .cosine_distance()).
+
+            Access control is enforced here, not in the caller: non-admins only
+            see rows where department_id is NULL (shared master data — strategies,
+            constraints) or matches their own department. Admins see everything.
+        """
+        query = self.db.query(Embedding)
+
+        if source_types:
+            query = query.filter(Embedding.source_type.in_(source_types))
+
+        if not is_admin:
+            query = query.filter(
+                (Embedding.department_id.is_(None))
+                | (Embedding.department_id == department_id)
+            )
+
+        return (
+            query.order_by(Embedding.embedding.cosine_distance(query_vector))
+            .limit(top_k)
+            .all()
+        )
 
     # -------------------------------------------------------
     # CREATE
@@ -147,3 +179,4 @@ class EmbeddingRepository(BaseRepository[Embedding]):
             .delete(synchronize_session=False)
         )
         self.db.commit()
+    
