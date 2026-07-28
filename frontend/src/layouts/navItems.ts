@@ -4,7 +4,7 @@ import {
   MessageCircleQuestion,
   Network,
   History,
-  Upload,
+  Vault,
   HelpCircle,
   Users,
   Building2,
@@ -49,9 +49,9 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     to: "/documents",
-    label: "Documents",
-    icon: Upload,
-    description: "Add supporting documents for decision context",
+    label: "My Vault",
+    icon: Vault,
+    description: "Browse documents, strategies, constraints, and outcomes",
   },
   {
     to: "/graph",

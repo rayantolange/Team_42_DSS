@@ -8,6 +8,15 @@ import {
   useLinkStrategy,
   useUnlinkStrategy,
 } from "@features/decisions/useStrategies";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@components/ui/Dialog";
+import { Button } from "@components/ui/Button";
 
 export default function DecisionWizardStrategiesPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,10 +34,11 @@ export default function DecisionWizardStrategiesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [showRequiredDialog, setShowRequiredDialog] = useState(false);
 
   const linkedIds = new Set((linkedStrategies ?? []).map((s) => s.strategyId));
   const availableStrategies = (allStrategies ?? []).filter(
-    (s) => !linkedIds.has(s.strategyId)
+    (s) => !linkedIds.has(s.strategyId),
   );
 
   function handleAttachExisting() {
@@ -36,6 +46,16 @@ export default function DecisionWizardStrategiesPage() {
     linkStrategy.mutate(Number(selectedId), {
       onSuccess: () => setSelectedId(""),
     });
+  }
+
+  const hasStrategies = (linkedStrategies?.length ?? 0) > 0;
+
+  function handleNext() {
+    if (!hasStrategies) {
+      setShowRequiredDialog(true);
+      return;
+    }
+    navigate(`/decisions/${decisionId}/new/constraints`);
   }
 
   async function handleCreateAndAttach() {
@@ -59,8 +79,10 @@ export default function DecisionWizardStrategiesPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">New Decision</h1>
-        <p className="text-muted-foreground">Step 3 of 4 — Strategies (optional)</p>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Supporting Strategies
+        </h1>
+        <p className="text-muted-foreground">Step 3 of 4</p>
       </div>
 
       <div className="flex gap-1.5">
@@ -73,7 +95,10 @@ export default function DecisionWizardStrategiesPage() {
       </div>
 
       {anyError && (
-        <div role="alert" className="flex items-center gap-2 rounded-md bg-destructive/10 p-4 text-sm text-destructive">
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-md bg-destructive/10 p-4 text-sm text-destructive"
+        >
           <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span>Something went wrong. Please try again.</span>
         </div>
@@ -102,11 +127,15 @@ export default function DecisionWizardStrategiesPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground">No strategies attached yet.</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            No strategies attached yet.
+          </p>
         )}
 
         <div className="mt-5 border-t border-border pt-5">
-          <label className="text-sm font-medium">Attach an existing strategy</label>
+          <label className="text-sm font-medium">
+            Attach an existing strategy
+          </label>
           <div className="mt-2 flex gap-2">
             <select
               value={selectedId}
@@ -144,13 +173,13 @@ export default function DecisionWizardStrategiesPage() {
             <div className="flex flex-col gap-3">
               <input
                 type="text"
-                placeholder="Strategy name"
+                placeholder="Name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <textarea
-                placeholder="Description (optional)"
+                placeholder="Description"
                 rows={2}
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
@@ -159,7 +188,9 @@ export default function DecisionWizardStrategiesPage() {
               <div className="flex gap-2">
                 <button
                   onClick={handleCreateAndAttach}
-                  disabled={newName.trim().length < 3 || createStrategy.isPending}
+                  disabled={
+                    newName.trim().length < 3 || createStrategy.isPending
+                  }
                   className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
                 >
                   {createStrategy.isPending ? "Creating..." : "Create & Attach"}
@@ -185,13 +216,33 @@ export default function DecisionWizardStrategiesPage() {
           Back
         </button>
         <button
-          onClick={() => navigate(`/decisions/${decisionId}/new/constraints`)}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-transform duration-200 hover:scale-[1.02] hover:shadow-glow active:scale-95"
+          onClick={handleNext}
+          className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+            hasStrategies
+              ? "bg-primary text-primary-foreground shadow-sm hover:scale-[1.02] hover:shadow-glow"
+              : "border border-border bg-transparent text-foreground hover:bg-accent"
+          }`}
         >
           Next
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
+      <Dialog open={showRequiredDialog} onOpenChange={setShowRequiredDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>At least one strategy is required</DialogTitle>
+            <DialogDescription>
+              Please attach or create a strategy before continuing to the next
+              step.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end pt-2">
+            <DialogClose asChild>
+              <Button size="sm">Got it</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

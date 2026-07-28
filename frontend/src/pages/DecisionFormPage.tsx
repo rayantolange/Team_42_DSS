@@ -48,7 +48,7 @@ export default function DecisionFormPage() {
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">New Decision</h1>
-        <p className="text-muted-foreground">Step 1 of 4 — Decision details</p>
+        <p className="text-muted-foreground">Step 1 of 4</p>
       </div>
 
       <div className="flex gap-1.5">
@@ -68,7 +68,9 @@ export default function DecisionFormPage() {
           className="flex items-center gap-2 rounded-md bg-destructive/10 p-4 text-sm text-destructive"
         >
           <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span>Failed to create decision. Please check the fields and try again.</span>
+          <span>
+            Failed to create decision. Please check the fields and try again.
+          </span>
         </div>
       )}
 
@@ -82,7 +84,6 @@ export default function DecisionFormPage() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Switch to Cloud-Based Event Management System"
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
@@ -96,7 +97,6 @@ export default function DecisionFormPage() {
             rows={3}
             value={problemStatement}
             onChange={(e) => setProblemStatement(e.target.value)}
-            placeholder="Describe the problem being addressed..."
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
@@ -110,7 +110,6 @@ export default function DecisionFormPage() {
             rows={3}
             value={decisionDesc}
             onChange={(e) => setDecisionDesc(e.target.value)}
-            placeholder="Describe the decision being made..."
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>

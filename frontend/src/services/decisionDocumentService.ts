@@ -14,7 +14,10 @@ interface DocumentResponseWire extends DocumentSummaryWire {
   file_path: string;
 }
 
-function toDocSummary(w: DocumentSummaryWire, decisionId: number): DecisionDocument {
+function toDocSummary(
+  w: DocumentSummaryWire,
+  decisionId: number,
+): DecisionDocument {
   return {
     documentId: w.document_id,
     decisionId,
@@ -38,24 +41,24 @@ function toDocResponse(w: DocumentResponseWire): DecisionDocument {
 }
 
 export async function fetchDocumentsForDecision(
-  decisionId: number
+  decisionId: number,
 ): Promise<DecisionDocument[]> {
   const { data } = await apiClient.get<DocumentSummaryWire[]>(
-    `/decisions/${decisionId}/documents`
+    `/decisions/${decisionId}/documents`,
   );
   return data.map((w) => toDocSummary(w, decisionId));
 }
 
 export async function uploadDocumentToDecision(
   decisionId: number,
-  file: File
+  file: File,
 ): Promise<DecisionDocument> {
   const formData = new FormData();
   formData.append("file", file);
   const { data } = await apiClient.post<DocumentResponseWire>(
     `/decisions/${decisionId}/documents`,
     formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return toDocResponse(data);
 }
@@ -64,9 +67,33 @@ export async function deleteDocument(documentId: number): Promise<void> {
   await apiClient.delete(`/documents/${documentId}`);
 }
 
-export async function getDocumentDownloadUrl(documentId: number): Promise<string> {
+export async function getDocumentDownloadUrl(
+  documentId: number,
+): Promise<string> {
   const { data } = await apiClient.get<{ url: string }>(
-    `/documents/${documentId}/download-url`
+    `/documents/${documentId}/download-url`,
   );
   return data.url;
+}
+
+export async function fetchAllDocuments(): Promise<DecisionDocument[]> {
+  const { data } = await apiClient.get<
+    Array<{
+      document_id: number;
+      file_name: string;
+      uploaded_by: number;
+      upload_date?: string | null;
+      created_at: string;
+      decision_id: number;
+    }>
+  >("/documents");
+
+  return data.map((w) => ({
+    documentId: w.document_id,
+    decisionId: w.decision_id,
+    uploadedBy: w.uploaded_by,
+    fileName: w.file_name,
+    uploadDate: w.upload_date ?? undefined,
+    createdAt: w.created_at,
+  }));
 }

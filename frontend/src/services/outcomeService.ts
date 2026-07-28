@@ -49,3 +49,8 @@ export async function createOutcome(
 export async function deleteOutcome(outcomeId: number): Promise<void> {
   await apiClient.delete(`/outcomes/${outcomeId}`);
 }
+
+export async function fetchAllOutcomes(): Promise<Outcome[]> {
+  const { data } = await apiClient.get<OutcomeWire[]>("/outcomes");
+  return data.map(toOutcome);
+}

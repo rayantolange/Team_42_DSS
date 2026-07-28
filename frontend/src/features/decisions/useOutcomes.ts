@@ -3,8 +3,16 @@ import {
   fetchOutcomesForDecision,
   createOutcome,
   deleteOutcome,
+  fetchAllOutcomes,
 } from "@services/outcomeService";
 import type { OutcomeCreateInput } from "@/types/domain";
+
+export function useAllOutcomes() {
+  return useQuery({
+    queryKey: ["outcomes", "all"],
+    queryFn: fetchAllOutcomes,
+  });
+}
 
 export function useOutcomesForDecision(decisionId: number) {
   return useQuery({
@@ -19,7 +27,9 @@ export function useCreateOutcome(decisionId: number) {
   return useMutation({
     mutationFn: (input: OutcomeCreateInput) => createOutcome(decisionId, input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["decisions", decisionId, "outcomes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["decisions", decisionId, "outcomes"],
+      });
     },
   });
 }
@@ -29,7 +39,9 @@ export function useDeleteOutcome(decisionId: number) {
   return useMutation({
     mutationFn: (outcomeId: number) => deleteOutcome(outcomeId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["decisions", decisionId, "outcomes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["decisions", decisionId, "outcomes"],
+      });
     },
   });
 }
