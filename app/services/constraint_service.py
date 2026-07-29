@@ -3,7 +3,7 @@
 from typing import List
 
 from sqlalchemy.orm import Session
-
+from app.services.graph_sync_service import GraphSyncService
 from app.models.strategy import ConstraintMaster
 from app.repositories.constraint_repository import ConstraintRepository
 from app.schemas.constraint import (
@@ -27,7 +27,7 @@ class ConstraintService:
     def __init__(self, db: Session):
         self.constraint_repo = ConstraintRepository(db)
         self.embedding_service = EmbeddingService(db)
-
+        self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -46,7 +46,7 @@ class ConstraintService:
         )
 
         self.embedding_service.embed_constraint(constraint)
-
+        self.graph_sync_service.sync_constraint(constraint)
         return constraint
 
     # -------------------------------------------------------
@@ -116,7 +116,7 @@ class ConstraintService:
         )
 
         self.embedding_service.embed_constraint(updated_constraint)
-
+        self.graph_sync_service.sync_constraint(updated_constraint)
         return updated_constraint
 
     # -------------------------------------------------------
@@ -162,6 +162,9 @@ class ConstraintService:
             decision_id=decision_id,
             constraint_id=constraint_id,
         )
+        self.graph_sync_service.unlink_decision_constraint(  # add
+            decision_id=decision_id, constraint_id=constraint_id
+        )
 
     # -------------------------------------------------------
     # DELETE
@@ -178,7 +181,7 @@ class ConstraintService:
         constraint = self.get_constraint(constraint_id)
 
         self.constraint_repo.delete_by_id(constraint)
-
+        self.graph_sync_service.delete_constraint(constraint_id)
 
 # -------------------------------------------------------
 # FastAPI Dependency

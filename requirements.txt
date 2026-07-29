@@ -17,3 +17,4 @@ sentence-transformers
 einops
 pymupdf
 langgraph
+neo4j

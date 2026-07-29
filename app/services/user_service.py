@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
-
+from app.services.graph_sync_service import GraphSyncService
 
 class UserService:
     """
@@ -11,7 +11,7 @@ class UserService:
     """
     def __init__(self, db: Session):
         self.user_repo = UserRepository(db)
-
+        self.graph_sync_service = GraphSyncService()
     def create_user(
         self,
         data: UserCreate,
@@ -27,10 +27,14 @@ class UserService:
         if self.user_repo.email_exists(data.email):
             raise ValueError("A user with this email already exists.")
 
-        return self.user_repo.create(
+        user = self.user_repo.create(
             department_id=data.department_id,
             full_name=data.full_name,
             email=data.email,
             role=data.role,
             password_hash=password_hash,
         )
+
+        self.graph_sync_service.sync_user(user)  # add
+
+        return user

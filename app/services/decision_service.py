@@ -3,7 +3,7 @@
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-
+from app.services.graph_sync_service import GraphSyncService
 from app.models.decision import Decision
 from app.models.enums import DecisionStatusEnum
 from app.repositories.decision_repository import DecisionRepository
@@ -24,7 +24,7 @@ class DecisionService:
     def __init__(self, db: Session):
         self.decision_repo = DecisionRepository(db)
         self.embedding_service = EmbeddingService(db)
-
+        self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -56,7 +56,7 @@ class DecisionService:
         )
 
         self.embedding_service.embed_decision(decision)
-
+        self.graph_sync_service.sync_decision(decision)
         return decision
 
     # -------------------------------------------------------
@@ -137,10 +137,12 @@ class DecisionService:
 
         # Allow cancelling at any time
         if new_status == DecisionStatusEnum.cancelled:
-            return self.decision_repo.update_status(
+            cancelled = self.decision_repo.update_status(
                 decision,
                 new_status,
             )
+            self.graph_sync_service.sync_decision(cancelled)  # add
+            return cancelled
 
         status_order = [
             DecisionStatusEnum.draft,
@@ -166,10 +168,9 @@ class DecisionService:
                 f"{expected_next.value}."
             )
 
-        return self.decision_repo.update_status(
-            decision,
-            new_status,
-        )
+        updated = self.decision_repo.update_status(decision, new_status)
+        self.graph_sync_service.sync_decision(updated)  # add
+        return updated
 
 # -------------------------------------------------------
     # UPDATE (partial, non-status fields)
@@ -213,7 +214,7 @@ class DecisionService:
         )
 
         self.embedding_service.embed_decision(updated_decision)
-
+        self.graph_sync_service.sync_decision(updated_decision)
         return updated_decision
 # -------------------------------------------------------
 # Dependency

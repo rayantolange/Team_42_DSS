@@ -3,7 +3,7 @@
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
-
+from app.services.graph_sync_service import GraphSyncService
 from app.models.outcome import Outcome
 from app.models.enums import OutcomeStatusEnum, DecisionStatusEnum
 from app.repositories.outcome_repository import OutcomeRepository
@@ -26,6 +26,7 @@ class OutcomeService:
         self.outcome_repo = OutcomeRepository(db)
         self.decision_repo = DecisionRepository(db)
         self.embedding_service = EmbeddingService(db)
+        self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -67,7 +68,7 @@ class OutcomeService:
         )
 
         self.embedding_service.embed_outcome(outcome)
-
+        self.graph_sync_service.sync_outcome(outcome)
         return outcome
 
     # -------------------------------------------------------
@@ -183,6 +184,7 @@ class OutcomeService:
         )
 
         self.embedding_service.embed_outcome(updated_outcome)
+        self.graph_sync_service.sync_outcome(updated_outcome)
 
         return updated_outcome
 
@@ -197,7 +199,7 @@ class OutcomeService:
 
         outcome = self.get_outcome(outcome_id)
         self.outcome_repo.delete_by_id(outcome)
-
+        self.graph_sync_service.delete_outcome(outcome_id)
 
 # -------------------------------------------------------
 # Dependency

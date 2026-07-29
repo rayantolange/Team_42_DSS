@@ -3,7 +3,7 @@
 from typing import List
 
 from sqlalchemy.orm import Session
-
+from app.services.graph_sync_service import GraphSyncService
 from app.models.strategy import Strategy
 from app.repositories.strategy_repository import StrategyRepository
 from app.schemas.strategy import (
@@ -27,6 +27,7 @@ class StrategyService:
     def __init__(self, db: Session):
         self.strategy_repo = StrategyRepository(db)
         self.embedding_service = EmbeddingService(db)
+        self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
@@ -57,6 +58,7 @@ class StrategyService:
         )
 
         self.embedding_service.embed_strategy(strategy)
+        self.graph_sync_service.sync_strategy(strategy)
 
         return strategy
 
@@ -141,6 +143,7 @@ class StrategyService:
         )
 
         self.embedding_service.embed_strategy(updated_strategy)
+        self.graph_sync_service.sync_strategy(updated_strategy)
 
         return updated_strategy
 
@@ -165,7 +168,9 @@ class StrategyService:
             decision_id=decision_id,
             strategy_id=data.strategy_id,
         )
-
+        self.graph_sync_service.link_decision_strategy(  # add
+            decision_id=decision_id, strategy_id=data.strategy_id
+        )
         return strategy
 
     # -------------------------------------------------------
@@ -187,6 +192,9 @@ class StrategyService:
             decision_id=decision_id,
             strategy_id=strategy_id,
         )
+        self.graph_sync_service.unlink_decision_strategy(  # add
+            decision_id=decision_id, strategy_id=strategy_id
+        )
 
     # -------------------------------------------------------
     # DELETE
@@ -203,7 +211,7 @@ class StrategyService:
         strategy = self.get_strategy(strategy_id)
 
         self.strategy_repo.delete_by_id(strategy)
-
+        self.graph_sync_service.delete_strategy(strategy_id)
 
 # -------------------------------------------------------
 # FastAPI Dependency
