@@ -65,6 +65,7 @@ def _build_citation(result: dict) -> dict:
     return {
         "source_type": source_type,
         "reference_id": reference_id,
+        "embedding_id": result["embedding_id"],
         "snippet": result["content"][:300],
         "metadata": metadata,
     }
