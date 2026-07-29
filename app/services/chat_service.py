@@ -155,6 +155,8 @@ class ChatService:
             content=assistant_message.content,
             created_at=assistant_message.created_at,
             citations=citations,
+            confidence_score=result.get("confidence_score"),   
+            confidence_level=result.get("confidence_level"),   
         )
 
     # -------------------------------------------------------
@@ -205,6 +207,8 @@ class ChatService:
             content=assistant_message.content,
             created_at=assistant_message.created_at,
             citations=[],
+            confidence_score=None, 
+            confidence_level=None, 
         )
 
     
