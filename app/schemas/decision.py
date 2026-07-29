@@ -1,9 +1,8 @@
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, Dict, List
 from pydantic import BaseModel, Field, ConfigDict
 
-from app.models.enums import DecisionStatusEnum
-
+from app.models.enums import DecisionStatusEnum, OutcomeStatusEnum
 
 # -------------------------------------------------------
 # CREATE
@@ -170,8 +169,28 @@ class DecisionSummary(BaseModel):
     decision_date: Optional[date] = None
     created_at: datetime
 
+class GraphStrategyLink(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    strategy_id: int
+    strategy_name: str
 
-# DecisionCreate POST /decisions Only what the client should provide
-# DecisionUpdate PATCH /decisions/{id} All optional, for partial edits
-# DecisionResponse GET /decisions/{id}, POST response Full detail of one decision
-# DecisionSummary GET /decisions (list) Lightweight, no heavy text fields
+class GraphConstraintLink(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    constraint_id: int
+    constraint_type: str
+
+class GraphOutcomeLink(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    outcome_id: int
+    outcome_status: OutcomeStatusEnum
+
+class GraphLinks(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    strategies: List[GraphStrategyLink]
+    constraints: List[GraphConstraintLink]
+    outcomes: List[GraphOutcomeLink]
+
+class GraphResponse(BaseModel):
+    decisions: List[DecisionSummary]
+    links_by_decision: Dict[int, GraphLinks]
+

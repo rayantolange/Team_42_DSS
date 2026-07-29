@@ -1,9 +1,6 @@
 // src/features/graph/useGraphData.ts
 import { useQuery } from "@tanstack/react-query";
-import { fetchDecisions } from "@services/decisionService";
-import { fetchStrategiesForDecision } from "@services/strategyService";
-import { fetchConstraintsForDecision } from "@services/constraintService";
-import { fetchOutcomesForDecision } from "@services/outcomeService";
+import { fetchGraphData } from "@services/decisionService";
 import type { DecisionRecordStatus } from "@/types/domain";
 
 export interface GraphNodeData {
@@ -36,46 +33,6 @@ export interface RawGraphData {
 export function useGraphData(statusFilter?: DecisionRecordStatus) {
   return useQuery({
     queryKey: ["graph-data", statusFilter],
-    queryFn: async (): Promise<RawGraphData> => {
-      const decisions = (await fetchDecisions({ statusFilter, limit: 200 })) ?? [];
-
-      const linksByDecision: RawGraphData["linksByDecision"] = {};
-
-      // Fetch each decision's links in parallel. Fine for a project
-      // this size; would need a bulk backend endpoint at real scale.
-      await Promise.all(
-        decisions.map(async (d) => {
-          const [strategies, constraints, outcomes] = await Promise.all([
-            fetchStrategiesForDecision(d.decisionId),
-            fetchConstraintsForDecision(d.decisionId),
-            fetchOutcomesForDecision(d.decisionId),
-          ]);
-          linksByDecision[d.decisionId] = {
-            strategies: strategies.map((s) => ({
-              strategyId: s.strategyId,
-              strategyName: s.strategyName,
-            })),
-            constraints: constraints.map((c) => ({
-              constraintId: c.constraintId,
-              constraintType: c.constraintType,
-            })),
-            outcomes: outcomes.map((o) => ({
-              outcomeId: o.outcomeId,
-              outcomeStatus: o.outcomeStatus,
-            })),
-          };
-        })
-      );
-
-      return {
-        decisions: decisions.map((d) => ({
-          decisionId: d.decisionId,
-          title: d.title,
-          decisionType: d.decisionType,
-          status: d.status,
-        })),
-        linksByDecision,
-      };
-    },
+    queryFn: () => fetchGraphData(statusFilter),
   });
 }
