@@ -2,7 +2,8 @@
 
 from fastapi import FastAPI
 
-from app.routers import auth, decision , document, outcome, strategy, department, admin, constraints, chat_router
+from app.routers import auth, decision , document, outcome, strategy, department, admin, constraints
+from app.routers.chat_router import router as chat_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
