@@ -105,6 +105,30 @@ def list_documents_for_decision(
     )
 
 # -------------------------------------------------------
+# LIST ALL (vault view — across all decisions in scope)
+# -------------------------------------------------------
+@router.get(
+    "/documents",
+    response_model=List[DocumentSummary],
+    status_code=status.HTTP_200_OK
+)
+def list_all_documents(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(allow_academics)
+):
+    """
+    Lists documents across all decisions the current user can access.
+    """
+    document_service = DocumentService(db)
+    return document_service.list_all_documents_scoped(
+        current_user=current_user,
+        skip=skip,
+        limit=limit,
+    )
+
+# -------------------------------------------------------
 # GET BY ID
 # -------------------------------------------------------
 @router.get(

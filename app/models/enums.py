@@ -8,7 +8,6 @@ class DecisionStatusEnum(str, enum.Enum):
     completed = "completed"
     cancelled = "cancelled"
 
-
 class OutcomeStatusEnum(str, enum.Enum):
     successful = "successful"
     partially_successful = "partially_successful"

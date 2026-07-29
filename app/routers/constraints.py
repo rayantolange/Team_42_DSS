@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db, get_current_user
+from app.core.access import check_decision_access
+from app.core.permissions import allow_academics
 from app.models.user import User
 from app.schemas.constraint import (
     ConstraintCreate,
@@ -13,13 +15,14 @@ from app.schemas.constraint import (
     DecisionConstraintLink,
 )
 from app.services.constraint_service import ConstraintService
+from app.services.decision_service import DecisionService
 
 
 router = APIRouter(prefix="/constraints", tags=["Constraints"])
 
 
 # -------------------------------------------------------
-# LIST
+# LIST (master list — any authenticated user, reference data)
 # -------------------------------------------------------
 
 @router.get(
@@ -38,7 +41,7 @@ def list_constraints(
 
 
 # -------------------------------------------------------
-# GET FOR A DECISION
+# GET FOR A DECISION (nested under a decision)
 # -------------------------------------------------------
 
 @router.get(
@@ -51,12 +54,27 @@ def list_constraints_for_decision(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """
+    Lists all constraints linked to a decision.
+    """
+    decision_service = DecisionService(db)
     service = ConstraintService(db)
+
+    try:
+        decision = decision_service.get_decision(decision_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+
+    check_decision_access(decision, current_user)
+
     return service.list_constraints_for_decision(decision_id)
 
 
 # -------------------------------------------------------
-# GET SINGLE
+# GET SINGLE (master list — any authenticated user)
 # -------------------------------------------------------
 
 @router.get(
@@ -81,7 +99,7 @@ def get_constraint(
 
 
 # -------------------------------------------------------
-# CREATE
+# CREATE (master list — academics only, matches Strategy)
 # -------------------------------------------------------
 
 @router.post(
@@ -92,7 +110,7 @@ def get_constraint(
 def create_constraint(
     data: ConstraintCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     service = ConstraintService(db)
 
@@ -106,7 +124,7 @@ def create_constraint(
 
 
 # -------------------------------------------------------
-# UPDATE
+# UPDATE (master list — academics only)
 # -------------------------------------------------------
 
 @router.patch(
@@ -118,7 +136,7 @@ def update_constraint(
     constraint_id: int,
     data: ConstraintUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     service = ConstraintService(db)
 
@@ -132,7 +150,7 @@ def update_constraint(
 
 
 # -------------------------------------------------------
-# LINK TO DECISION
+# LINK TO DECISION (academics only + decision access check)
 # -------------------------------------------------------
 
 @router.post(
@@ -144,9 +162,20 @@ def link_constraint_to_decision(
     decision_id: int,
     data: DecisionConstraintLink,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
+    decision_service = DecisionService(db)
     service = ConstraintService(db)
+
+    try:
+        decision = decision_service.get_decision(decision_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+
+    check_decision_access(decision, current_user)
 
     try:
         return service.link_constraint_to_decision(decision_id, data)
@@ -158,7 +187,7 @@ def link_constraint_to_decision(
 
 
 # -------------------------------------------------------
-# UNLINK FROM DECISION
+# UNLINK FROM DECISION (academics only + decision access check)
 # -------------------------------------------------------
 
 @router.delete(
@@ -169,9 +198,20 @@ def unlink_constraint_from_decision(
     decision_id: int,
     constraint_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
+    decision_service = DecisionService(db)
     service = ConstraintService(db)
+
+    try:
+        decision = decision_service.get_decision(decision_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+
+    check_decision_access(decision, current_user)
 
     try:
         service.unlink_constraint_from_decision(decision_id, constraint_id)
@@ -180,10 +220,11 @@ def unlink_constraint_from_decision(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
+    return None
 
 
 # -------------------------------------------------------
-# DELETE
+# DELETE (master list — academics only)
 # -------------------------------------------------------
 
 @router.delete(
@@ -193,7 +234,7 @@ def unlink_constraint_from_decision(
 def delete_constraint(
     constraint_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(allow_academics)
 ):
     service = ConstraintService(db)
 
@@ -204,3 +245,4 @@ def delete_constraint(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
+    return None
