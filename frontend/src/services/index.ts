@@ -21,7 +21,7 @@ export {
   type UpdateDepartmentRequest,
 } from "./departmentService";
 
-export { fetchDepartmentById } from "./mock/departmentService";
+export { fetchDepartmentById } from "./departmentService";
 
 export {
   fetchDashboardMetrics,

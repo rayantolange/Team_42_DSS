@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { EntityType } from "@/types/domain";
+import type { GraphEntityType } from "@features/graph/useGraphData";
 
 export interface GraphViewport {
   x: number;
@@ -8,8 +8,7 @@ export interface GraphViewport {
 }
 
 export interface GraphFilters {
-  entityTypes: EntityType[]; // which entity types are visible
-  departmentId: string | null;
+  entityTypes: GraphEntityType[];
   searchTerm: string;
 }
 
@@ -27,8 +26,7 @@ interface GraphActions {
 }
 
 const defaultFilters: GraphFilters = {
-  entityTypes: ["department", "policy"],
-  departmentId: null,
+  entityTypes: ["decision", "strategy", "constraint", "outcome"],
   searchTerm: "",
 };
 
@@ -38,13 +36,9 @@ export const useGraphStore = create<GraphState & GraphActions>((set, get) => ({
   selectedNodeId: null,
   viewport: defaultViewport,
   filters: defaultFilters,
-
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
-
   setViewport: (viewport) => set({ viewport }),
-
   setFilters: (filters) =>
     set({ filters: { ...get().filters, ...filters } }),
-
   resetFilters: () => set({ filters: defaultFilters }),
 }));

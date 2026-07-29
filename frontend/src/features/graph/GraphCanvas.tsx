@@ -11,11 +11,12 @@ import ReactFlow, {
   type OnConnect,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { nodeTypes } from "./EntityNode";
+import { nodeTypes } from "./nodeTypes";
 import { getRelationshipStyle } from "./edgeStyles";
 import { GraphLegend } from "./GraphLegend";
 import type { DSSNode, DSSEdge } from "./graphDataBuilder";
-import type { GraphNodeData } from "@/types/domain";
+import type { GraphNodeData } from "@/features/graph/useGraphData";
+import { useTheme } from "@hooks/useTheme";
 
 interface GraphCanvasProps {
   initialNodes: DSSNode[];
@@ -53,7 +54,7 @@ export function GraphCanvas({
     (_event, node) => {
       onNodeSelect(node as Node<GraphNodeData>);
     },
-    [onNodeSelect]
+    [onNodeSelect],
   );
 
   const handlePaneClick = useCallback(() => {
@@ -69,11 +70,15 @@ export function GraphCanvas({
     () =>
       nodes.map((node) => ({
         ...node,
-        className: node.id === selectedNodeId ? "selected-graph-node" : undefined,
+        className:
+          node.id === selectedNodeId ? "selected-graph-node" : undefined,
         selected: node.id === selectedNodeId,
       })),
-    [nodes, selectedNodeId]
+    [nodes, selectedNodeId],
   );
+
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const styledEdges = useMemo(
     () =>
@@ -86,11 +91,11 @@ export function GraphCanvas({
             strokeWidth: 1.75,
             strokeDasharray: relStyle.dashed ? "4 4" : undefined,
           },
-          labelStyle: { fontSize: 10, fill: "var(--muted-foreground, #64748b)" },
+          labelStyle: { fontSize: 10, fill: isDark ? "#ffffff" : "#64748b" },
           labelBgStyle: { fill: "hsl(var(--card))", fillOpacity: 0.9 },
         };
       }),
-    [edges]
+    [edges, isDark],
   );
 
   return (
@@ -113,9 +118,19 @@ export function GraphCanvas({
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="hsl(var(--border))" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="hsl(var(--border))"
+        />
         <Controls aria-label="Zoom and pan controls" showInteractive={false} />
-        <MiniMap pannable zoomable aria-label="Graph overview minimap" className="!bg-card" />
+        <MiniMap
+          pannable
+          zoomable
+          aria-label="Graph overview minimap"
+          className="!bg-card"
+        />
       </ReactFlow>
       <GraphLegend />
     </div>
