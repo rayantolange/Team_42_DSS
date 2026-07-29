@@ -29,3 +29,22 @@ def generate_answer(system_prompt: str, user_prompt: str) -> str:
     )
 
     return response.choices[0].message.content
+
+def generate_chat_completion(messages: list[dict]) -> str:
+    """
+    Like generate_answer, but takes a full messages list (system + real
+    multi-turn history) instead of a single system/user pair. Needed for
+    chat mode, which has actual conversational history to send — unlike
+    synthesis, which is a single-shot grounded Q&A with no prior turns.
+    """
+    client = get_client()
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=messages,
+        temperature=0.4,  # a bit higher than synthesis's 0.2 — conversational
+                          # replies are allowed some natural looseness; still
+                          # low enough to stay grounded when context is present
+    )
+
+    return response.choices[0].message.content
