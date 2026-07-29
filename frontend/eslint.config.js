@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import globals from "globals";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -15,6 +16,9 @@ export default [
         ecmaVersion: 2022,
         sourceType: "module",
         ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        ...globals.browser,
       },
     },
     plugins: {

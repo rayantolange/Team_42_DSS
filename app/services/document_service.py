@@ -168,6 +168,29 @@ class DocumentService:
             limit=limit,
         )
 
+    def list_all_documents_scoped(
+        self,
+        current_user,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> List[Document]:
+        """
+        Returns documents across all decisions the user can see —
+        every decision for admins, only their own department's
+        decisions for everyone else.
+        """
+        from app.models.enums import UserRoleEnum
+
+        department_id = (
+            None if current_user.role == UserRoleEnum.admin
+            else current_user.department_id
+        )
+        return self.document_repo.get_all_scoped(
+            department_id=department_id,
+            skip=skip,
+            limit=limit,
+        )
+
     def list_documents_uploaded_by(
         self,
         uploaded_by: int,

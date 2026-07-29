@@ -31,13 +31,6 @@ export {
   type TrendPoint,
 } from "./mock/dashboardService";
 
-export {
-  fetchDecisions,
-  fetchDecisionById,
-  fetchDecisionPolicyContext,
-  type DecisionFilters,
-} from "./mock/decisionService";
-
 export { submitQuery } from "./mock/queryService";
 
 export {
@@ -75,3 +68,16 @@ export {
   type AdminUser,
   type SystemStats,
 } from "./adminService";
+
+export {
+  fetchDecisionPolicyContext,
+} from "./mock/decisionService";
+
+export {
+  fetchDecisions,
+  fetchDecisionById,
+  createDecision,
+  updateDecision,
+  updateDecisionStatus,
+  type DecisionFilters,
+} from "./decisionService";

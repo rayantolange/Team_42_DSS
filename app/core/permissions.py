@@ -76,4 +76,5 @@ allow_academics = RoleChecker(
     UserRoleEnum.principal,
     UserRoleEnum.hod,
     UserRoleEnum.faculty,
+    UserRoleEnum.staff,
 )
