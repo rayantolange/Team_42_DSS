@@ -1,10 +1,10 @@
 /**
  * Maps the raw relationship labels produced by graphDataBuilder
- * ("governs", "required by", …) onto a small, consistent visual
- * language of edge colors/styles, and gives each a plain-language
- * category name for the on-canvas legend. Kept separate from
- * graphDataBuilder so that file stays focused purely on graph data,
- * not presentation.
+ * ("applied via", "constrained by", "resulted in") onto a small,
+ * consistent visual language of edge colors/styles, and gives each
+ * a plain-language category name for the on-canvas legend. Kept
+ * separate from graphDataBuilder so that file stays focused purely
+ * on graph data, not presentation.
  */
 export interface RelationshipStyle {
   category: string;
@@ -13,14 +13,13 @@ export interface RelationshipStyle {
 }
 
 export const RELATIONSHIP_STYLES: Record<string, RelationshipStyle> = {
-  governs: { category: "Primary Authority", stroke: "#2563eb" },
-  "applied in": { category: "Active Collaboration", stroke: "#059669" },
-  "required by": { category: "Regulatory Oversight", stroke: "#b45309" },
-  "resulted in": { category: "Implicit Link", stroke: "#94a3b8", dashed: true },
+  "applied via": { category: "Strategy Applied", stroke: "#7c3aed" },
+  "constrained by": { category: "Constraint Imposed", stroke: "#b45309" },
+  "resulted in": { category: "Outcome Recorded", stroke: "#059669" },
 };
 
 export const DEFAULT_RELATIONSHIP_STYLE: RelationshipStyle = {
-  category: "Implicit Link",
+  category: "Other",
   stroke: "#94a3b8",
   dashed: true,
 };
@@ -32,8 +31,7 @@ export function getRelationshipStyle(relationship?: string): RelationshipStyle {
 
 /** De-duplicated list of legend entries, in a fixed, meaningful order. */
 export const LEGEND_ENTRIES: RelationshipStyle[] = [
-  RELATIONSHIP_STYLES.governs!,
-  RELATIONSHIP_STYLES["applied in"]!,
-  RELATIONSHIP_STYLES["required by"]!,
+  RELATIONSHIP_STYLES["applied via"]!,
+  RELATIONSHIP_STYLES["constrained by"]!,
   RELATIONSHIP_STYLES["resulted in"]!,
 ];
