@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Bell, Moon, Shield, User, Mail, Building2, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
+import { GitCommitVertical, FileCheck2, Flag, Moon, Shield, User, Mail, Building2, Sun } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -18,21 +18,14 @@ import { cn } from "@utils/cn";
 import { ROLE_LABELS } from "@/types/domain";
 
 interface ToggleRowProps {
-  icon: typeof Bell;
+  icon: typeof GitCommitVertical;
   title: string;
   description: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
 
-/** A single labeled on/off row, styled as an animated pill switch. */
-function ToggleRow({
-  icon: Icon,
-  title,
-  description,
-  checked,
-  onCheckedChange,
-}: ToggleRowProps) {
+function ToggleRow({ icon: Icon, title, description, checked, onCheckedChange }: ToggleRowProps) {
   return (
     <div className="flex items-start justify-between gap-4 py-4">
       <div className="flex gap-3">
@@ -66,8 +59,32 @@ function ToggleRow({
   );
 }
 
+const NOTIFICATION_PREFS_KEY = "nirnaya-notification-prefs";
+
+export interface NotificationPrefs {
+  decisions: boolean;
+  documents: boolean;
+  outcomes: boolean;
+}
+
+const defaultPrefs: NotificationPrefs = {
+  decisions: true,
+  documents: true,
+  outcomes: true,
+};
+
+export function loadNotificationPrefs(): NotificationPrefs {
+  if (typeof window === "undefined") return defaultPrefs;
+  try {
+    const raw = window.localStorage.getItem(NOTIFICATION_PREFS_KEY);
+    return raw ? { ...defaultPrefs, ...JSON.parse(raw) } : defaultPrefs;
+  } catch {
+    return defaultPrefs;
+  }
+}
+
 export default function SettingsPage() {
-  const { user, isAdmin, scopedDepartmentId } = useAuth();
+  const { user, scopedDepartmentId } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { data: departments = [] } = useQuery({
     queryKey: ["departments"],
@@ -75,16 +92,14 @@ export default function SettingsPage() {
   });
   const { showToast } = useToast();
 
-  const [notifyDecisions, setNotifyDecisions] = useState(true);
-  const [notifyDocuments, setNotifyDocuments] = useState(true);
-  const [notifyDigest, setNotifyDigest] = useState(false);
-  const [notifyConflicts, setNotifyConflicts] = useState(true);
+  const [prefs, setPrefs] = useState<NotificationPrefs>(loadNotificationPrefs);
 
   const departmentName = scopedDepartmentId
     ? departments.find((d) => d.id === scopedDepartmentId)?.name
     : "All Departments";
 
   function handleSavePreferences() {
+    window.localStorage.setItem(NOTIFICATION_PREFS_KEY, JSON.stringify(prefs));
     showToast({
       title: "Preferences saved",
       description: "Your notification settings have been updated.",
@@ -125,53 +140,35 @@ export default function SettingsPage() {
               </Badge>
             </div>
           </div>
-
           <div className="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-2">
             <div className="flex items-center gap-2.5 text-sm">
-              <Mail
-                className="h-4 w-4 text-muted-foreground"
-                aria-hidden="true"
-              />
+              <Mail className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <span className="text-muted-foreground">Email</span>
               <span className="ml-auto font-medium">{user.email}</span>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
-              <Building2
-                className="h-4 w-4 shrink-0 text-muted-foreground"
-                aria-hidden="true"
-              />
+              <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               <span className="shrink-0 text-muted-foreground">Department</span>
               <div className="group relative ml-auto max-w-[60%]">
-                <span className="block truncate text-right font-medium">
-                  {departmentName}
-                </span>
+                <span className="block truncate text-right font-medium">{departmentName}</span>
                 <div className="pointer-events-none absolute bottom-full right-0 z-10 mb-1.5 whitespace-nowrap rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100">
                   {departmentName}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
-              <User
-                className="h-4 w-4 text-muted-foreground"
-                aria-hidden="true"
-              />
+              <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <span className="text-muted-foreground">User ID</span>
               <span className="ml-auto font-mono text-xs">{user.id}</span>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
-              <Shield
-                className="h-4 w-4 text-muted-foreground"
-                aria-hidden="true"
-              />
+              <Shield className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <span className="text-muted-foreground">Access level</span>
-              <span className="ml-auto font-medium capitalize">
-                {ROLE_LABELS[user.role] ?? user.role}
-              </span>
+              <span className="ml-auto font-medium capitalize">{ROLE_LABELS[user.role] ?? user.role}</span>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Profile details are managed by your institution's administrator and
-            can't be edited here.
+            Profile details are managed by your institution's administrator and can't be edited here.
           </p>
         </CardContent>
       </Card>
@@ -179,27 +176,17 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Appearance</CardTitle>
-          <CardDescription>
-            Choose how Nirnaya looks on this device.
-          </CardDescription>
+          <CardDescription>Choose how Nirnaya looks on this device.</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex items-center justify-between rounded-lg border border-border p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-primary">
-                {theme === "dark" ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
+                {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               </div>
               <div>
-                <p className="text-sm font-medium">
-                  {theme === "dark" ? "Dark mode" : "Light mode"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Switches instantly across the app.
-                </p>
+                <p className="text-sm font-medium">{theme === "dark" ? "Dark mode" : "Light mode"}</p>
+                <p className="text-xs text-muted-foreground">Switches instantly across the app.</p>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={toggleTheme}>
@@ -212,38 +199,29 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Notifications</CardTitle>
-          <CardDescription>
-            Choose what shows up in your notification panel.
-          </CardDescription>
+          <CardDescription>Choose what shows up in your notification panel.</CardDescription>
         </CardHeader>
         <CardContent className="divide-y divide-border pt-0">
           <ToggleRow
-            icon={Bell}
+            icon={GitCommitVertical}
             title="New decisions logged"
-            description="Notify me when a decision is recorded in my department."
-            checked={notifyDecisions}
-            onCheckedChange={setNotifyDecisions}
+            description="Notify me when a decision is recorded."
+            checked={prefs.decisions}
+            onCheckedChange={(v) => setPrefs((p) => ({ ...p, decisions: v }))}
           />
           <ToggleRow
-            icon={Bell}
-            title="Document processing"
-            description="Notify me when an uploaded document finishes indexing."
-            checked={notifyDocuments}
-            onCheckedChange={setNotifyDocuments}
+            icon={FileCheck2}
+            title="Documents added"
+            description="Notify me when a document is attached to a decision."
+            checked={prefs.documents}
+            onCheckedChange={(v) => setPrefs((p) => ({ ...p, documents: v }))}
           />
           <ToggleRow
-            icon={Shield}
-            title="Policy conflict alerts"
-            description="Notify me if a new document may conflict with existing policy."
-            checked={notifyConflicts}
-            onCheckedChange={setNotifyConflicts}
-          />
-          <ToggleRow
-            icon={Bell}
-            title="Weekly digest"
-            description="A summary of decisions and documents added this week."
-            checked={notifyDigest}
-            onCheckedChange={setNotifyDigest}
+            icon={Flag}
+            title="Outcomes recorded"
+            description="Notify me when an outcome is recorded for a decision."
+            checked={prefs.outcomes}
+            onCheckedChange={(v) => setPrefs((p) => ({ ...p, outcomes: v }))}
           />
         </CardContent>
       </Card>
