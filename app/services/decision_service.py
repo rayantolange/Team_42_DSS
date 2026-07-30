@@ -10,6 +10,10 @@ from app.repositories.decision_repository import DecisionRepository
 from app.schemas.decision import DecisionCreate, DecisionUpdate
 from app.services.embedding_service import EmbeddingService
 
+from app.repositories.strategy_repository import StrategyRepository
+from app.repositories.constraint_repository import ConstraintRepository
+from app.repositories.outcome_repository import OutcomeRepository
+
 class DecisionService:
     """
     Handles all business logic for Decision operations.
@@ -22,6 +26,7 @@ class DecisionService:
     """
 
     def __init__(self, db: Session):
+        self.db = db
         self.decision_repo = DecisionRepository(db)
         self.embedding_service = EmbeddingService(db)
         self.graph_sync_service = GraphSyncService()
@@ -100,6 +105,47 @@ class DecisionService:
             skip=skip,
             limit=limit,
         )
+
+    def get_graph_data(
+        self,
+        department_id: int,
+        status: Optional[DecisionStatusEnum] = None,
+        skip: int = 0,
+        limit: int = 200,
+    ):
+        """
+        Bulk-fetches decisions plus their linked strategies, constraints,
+        and outcomes for the Graph Explorer view. 3 queries total,
+        regardless of how many decisions there are.
+        """
+        decisions = self.list_decisions_for_department(
+            department_id=department_id, status=status, skip=skip, limit=limit
+        )
+        decision_ids = [d.decision_id for d in decisions]
+
+        strategy_repo = StrategyRepository(self.db)
+        constraint_repo = ConstraintRepository(self.db)
+        outcome_repo = OutcomeRepository(self.db)
+
+        strategy_rows = strategy_repo.get_all_for_decisions(decision_ids)
+        constraint_rows = constraint_repo.get_all_for_decisions(decision_ids)
+        outcome_rows = outcome_repo.get_all_by_decisions(decision_ids)
+
+        links_by_decision = {
+            d_id: {"strategies": [], "constraints": [], "outcomes": []}
+            for d_id in decision_ids
+        }
+
+        for d_id, strategy in strategy_rows:
+            links_by_decision[d_id]["strategies"].append(strategy)
+
+        for d_id, constraint in constraint_rows:
+            links_by_decision[d_id]["constraints"].append(constraint)
+
+        for outcome in outcome_rows:
+            links_by_decision[outcome.decision_id]["outcomes"].append(outcome)
+
+        return decisions, links_by_decision
 
     # -------------------------------------------------------
     # STATUS UPDATE

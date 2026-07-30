@@ -8,6 +8,8 @@ from app.ai.llm_client import generate_answer
 from app.models.enums import SourceTypeEnum
 from app.ai.reranker_client import rerank as rerank_texts
 
+import math
+
 RERANK_TOP_N = 4  # how many results survive reranking, feeding into synthesis
 
 
@@ -128,6 +130,72 @@ def rerank_results(state: dict) -> dict:
     top_results = reranked[:RERANK_TOP_N]
 
     return {**state, "vector_results": top_results}
+
+
+def _confidence_from_score(raw_score: float) -> tuple[float, str]:
+    """
+    Converts the top result's raw cross-encoder score (an unbounded logit)
+    into a 0-1 confidence value via sigmoid, then buckets it into a level.
+    Thresholds are a starting point — worth recalibrating once you've seen
+    real query data (log a batch of raw scores + eyeball what "feels right").
+    """
+    confidence_score = 1 / (1 + math.exp(-raw_score))
+    if confidence_score >= 0.70:
+        level = "high"
+    elif confidence_score >= 0.40:
+        level = "medium"
+    else:
+        level = "low"
+    return confidence_score, level
+
+
+def _build_citation(result: dict) -> dict:
+    source_type = result["source_type"]
+    id_field = REFERENCE_ID_FIELD[source_type]
+    reference_id = result[id_field]
+    metadata = dict(result["metadata"] or {})
+    return {
+        "source_type": source_type,
+        "reference_id": reference_id,
+        "embedding_id": result["embedding_id"],
+        "snippet": result["content"][:300],
+        "metadata": metadata,
+        "rerank_score": result.get("rerank_score"),  # NEW — dropped by SourceCitation.model_validate, same as embedding_id
+    }
+
+
+def synthesize(state: dict) -> dict:
+    results = state.get("vector_results", [])
+    if not results:
+        return {
+            **state,
+            "answer": "I couldn't find any relevant information to answer that question.",
+            "citations": [],
+            "confidence_score": 0.0,      # NEW
+            "confidence_level": "low",    # NEW
+        }
+    context_blocks = []
+    for i, r in enumerate(results, 1):
+        context_blocks.append(f"[Source {i} - {r['source_type'].value}]\n{r['content']}")
+    context_text = "\n\n".join(context_blocks)
+    user_prompt = f"""Context:
+{context_text}
+Question: {state['query']}"""
+    answer = generate_answer(SYSTEM_PROMPT, user_prompt)
+    citations = [_build_citation(r) for r in results]
+
+    # results are already sorted by rerank_score (desc) in rerank_results,
+    # so results[0] is our best-matching chunk — its score anchors confidence.
+    top_score = results[0].get("rerank_score", 0.0)
+    confidence_score, confidence_level = _confidence_from_score(top_score)
+
+    return {
+        **state,
+        "answer": answer,
+        "citations": citations,
+        "confidence_score": confidence_score,   # NEW
+        "confidence_level": confidence_level,   # NEW
+    }
 
 def query_graph(state: dict, db: Session) -> dict:
     """

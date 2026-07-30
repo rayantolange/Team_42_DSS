@@ -6,6 +6,7 @@ import type {
   DecisionUpdateInput,
   DecisionRecordStatus,
 } from "@/types/domain";
+import type { RawGraphData } from "@features/graph/useGraphData";
 
 interface DecisionResponseWire {
   decision_id: number;
@@ -124,4 +125,70 @@ export async function updateDecisionStatus(
     { params: { new_status: newStatus } }
   );
   return toDecision(data);
+}
+
+interface GraphDecisionWire {
+  decision_id: number;
+  title: string;
+  decision_type?: string | null;
+  status: DecisionRecordStatus;
+}
+
+interface GraphStrategyLinkWire {
+  strategy_id: number;
+  strategy_name: string;
+}
+
+interface GraphConstraintLinkWire {
+  constraint_id: number;
+  constraint_type: string;
+}
+
+interface GraphOutcomeLinkWire {
+  outcome_id: number;
+  outcome_status: string;
+}
+
+interface GraphLinksWire {
+  strategies: GraphStrategyLinkWire[];
+  constraints: GraphConstraintLinkWire[];
+  outcomes: GraphOutcomeLinkWire[];
+}
+
+interface GraphResponseWire {
+  decisions: GraphDecisionWire[];
+  links_by_decision: Record<number, GraphLinksWire>;
+}
+
+export async function fetchGraphData(statusFilter?: DecisionRecordStatus): Promise<RawGraphData> {
+  const { data } = await apiClient.get<GraphResponseWire>("/decisions/graph", {
+    params: { status_filter: statusFilter },
+  });
+
+  const decisions = data.decisions.map((d) => ({
+    decisionId: d.decision_id,
+    title: d.title,
+    decisionType: d.decision_type ?? undefined,
+    status: d.status,
+  }));
+
+  const linksByDecision: RawGraphData["linksByDecision"] = {};
+  Object.entries(data.links_by_decision).forEach(([decisionId, links]) => {
+    linksByDecision[Number(decisionId)] = {
+      strategies: links.strategies.map((s) => ({
+        strategyId: s.strategy_id,
+        strategyName: s.strategy_name,
+      })),
+      constraints: links.constraints.map((c) => ({
+        constraintId: c.constraint_id,
+        constraintType: c.constraint_type,
+      })),
+      outcomes: links.outcomes.map((o) => ({
+        outcomeId: o.outcome_id,
+        outcomeStatus: o.outcome_status,
+      })),
+    };
+  });
+
+  return { decisions, linksByDecision };
 }

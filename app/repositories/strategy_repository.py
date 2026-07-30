@@ -174,3 +174,14 @@ class StrategyRepository(BaseRepository[Strategy]):
         """
 
         self.delete(strategy)
+
+    def get_all_for_decisions(self, decision_ids: List[int]) -> List[tuple]:
+        """Bulk fetch: (decision_id, Strategy) pairs for all given decisions."""
+        if not decision_ids:
+            return []
+        return (
+            self.db.query(DecisionStrategy.decision_id, Strategy)
+            .join(Strategy, Strategy.strategy_id == DecisionStrategy.strategy_id)
+            .filter(DecisionStrategy.decision_id.in_(decision_ids))
+            .all()
+        )
