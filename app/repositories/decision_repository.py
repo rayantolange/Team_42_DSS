@@ -109,6 +109,62 @@ class DecisionRepository(BaseRepository[Decision]):
         )
 
     # -------------------------------------------------------
+    # DASHBOARD AGGREGATES
+    # -------------------------------------------------------
+    def count_all(self) -> int:
+        return self.db.query(Decision).count()
+
+    def count_by_department(self, department_id: int) -> int:
+        return (
+            self.db.query(Decision)
+            .filter(Decision.department_id == department_id)
+            .count()
+        )
+
+    def count_pending(self, department_id: Optional[int] = None) -> int:
+        query = self.db.query(Decision).filter(
+            Decision.status == DecisionStatusEnum.draft
+        )
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+        return query.count()
+
+    def get_recent(
+        self, department_id: Optional[int] = None, limit: int = 8
+    ) -> List[Decision]:
+        query = self.db.query(Decision)
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+        return query.order_by(Decision.created_at.desc()).limit(limit).all()
+
+    def get_monthly_status_counts(
+        self, department_id: Optional[int] = None
+    ) -> List[dict]:
+        """
+        Groups decisions by month (of decision_date) and status.
+        Decisions with a null decision_date are excluded — older
+        records created before decision_date became a required
+        frontend field.
+        """
+        from sqlalchemy import func
+
+        query = self.db.query(
+            func.to_char(Decision.decision_date, "YYYY-MM").label("month"),
+            Decision.status,
+            func.count(Decision.decision_id).label("count"),
+        ).filter(Decision.decision_date.isnot(None))
+
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+
+        query = query.group_by("month", Decision.status).order_by("month")
+        rows = query.all()
+        return [
+            {"month": row.month, "status": row.status.value, "count": row.count}
+            for row in rows
+        ]
+
+    # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
 
