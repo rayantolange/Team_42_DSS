@@ -31,8 +31,6 @@ export {
   type TrendPoint,
 } from "./mock/dashboardService";
 
-export { createThread, sendMessage, type ChatMode, type SendMessageResult } from "./chatService";
-
 export {
   fetchDocuments,
   uploadDocument,
@@ -81,3 +79,14 @@ export {
   updateDecisionStatus,
   type DecisionFilters,
 } from "./decisionService";
+
+export {
+  createThread,
+  sendMessage,
+  listThreads,
+  getThreadMessages,
+  deleteThreadRemote,
+  type ChatMode,
+  type SendMessageResult,
+  type ThreadSummary,
+} from "./chatService";

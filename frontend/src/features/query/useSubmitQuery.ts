@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createThread, sendMessage } from "@services/index";
-import { useQueryStore, makeMessageId } from "@store/queryStore";
+import { useQueryStore, makeMessageId, titleFromText } from "@store/queryStore";
+
 
 const MODE_MAP = { search: "rag_search", chat: "chat" } as const;
 
@@ -31,7 +32,7 @@ export function useSubmitQuery() {
 
       let threadId = getThreadId(conversationId);
       if (threadId === undefined) {
-        threadId = await createThread();
+        threadId = await createThread(titleFromText(queryText));
         setThreadId(conversationId, threadId);
       }
 

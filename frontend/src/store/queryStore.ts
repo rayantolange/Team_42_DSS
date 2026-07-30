@@ -20,6 +20,7 @@ export interface ChatConversation {
   messages: ChatMessage[];
   createdAt: string;
   updatedAt: string;
+  messagesLoaded: boolean;
 }
 
 interface QueryState {
@@ -40,22 +41,34 @@ interface QueryActions {
   addMessageToActive: (message: ChatMessage) => void;
   deleteConversation: (id: string) => void;
   clearAllConversations: () => void;
-  ensureActiveConversation: () => string; // NEW
-  setThreadId: (conversationId: string, threadId: number) => void; // NEW
+  ensureActiveConversation: () => string;
+  setThreadId: (conversationId: string, threadId: number) => void;
   getThreadId: (conversationId: string) => number | undefined;
+  hydrateThreads: (
+    threads: {
+      threadId: number;
+      title: string;
+      createdAt: string;
+      updatedAt: string;
+    }[],
+  ) => void;
+  setMessagesForConversation: (
+    conversationId: string,
+    messages: ChatMessage[],
+  ) => void;
 }
 
 const MAX_CONVERSATIONS = 50;
 
-function makeMessageId() {
+export function makeMessageId() {
   return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function makeConversationId() {
+export function makeConversationId() {
   return `conv-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function titleFromText(text: string): string {
+export function titleFromText(text: string): string {
   const trimmed = text.trim();
   return trimmed.length > 48 ? `${trimmed.slice(0, 48)}…` : trimmed;
 }
@@ -84,6 +97,7 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
       messages: [],
       createdAt: now,
       updatedAt: now,
+      messagesLoaded: true, // Added: missing required field
     };
     set({
       conversations: [newConversation, ...conversations].slice(
@@ -100,8 +114,6 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
       const now = new Date().toISOString();
       const { conversations, activeConversationId } = state;
 
-      // No active conversation yet — create one, seeded with this message,
-      // and title it from the first user message.
       if (!activeConversationId) {
         const newConversation: ChatConversation = {
           id: makeConversationId(),
@@ -110,6 +122,7 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
           messages: [message],
           createdAt: now,
           updatedAt: now,
+          messagesLoaded: true, // Added: missing required field
         };
         return {
           conversations: [newConversation, ...conversations].slice(
@@ -122,7 +135,7 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
 
       const updated = conversations.map((c) => {
         if (c.id !== activeConversationId) return c;
-        const isFirstMessage = c.messages.length === 0; // NEW — retitle an empty conv seeded via ensureActiveConversation
+        const isFirstMessage = c.messages.length === 0;
         return {
           ...c,
           title:
@@ -139,7 +152,7 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
   deleteConversation: (id) =>
     set((state) => {
       const restThreadIds = { ...state.threadIdsByConversationId };
-      delete restThreadIds[id]; // NEW cleanup
+      delete restThreadIds[id];
       return {
         conversations: state.conversations.filter((c) => c.id !== id),
         activeConversationId:
@@ -155,7 +168,6 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
       threadIdsByConversationId: {},
     }),
 
-  // NEW
   setThreadId: (conversationId, threadId) =>
     set((state) => ({
       threadIdsByConversationId: {
@@ -164,9 +176,41 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
       },
     })),
 
-  // NEW
   getThreadId: (conversationId) =>
     get().threadIdsByConversationId[conversationId],
-}));
 
-export { makeMessageId };
+  hydrateThreads: (threads) =>
+    set((state) => {
+      const existingIds = new Set(state.conversations.map((c) => c.id));
+      const newConversations: ChatConversation[] = threads
+        .filter((t) => !existingIds.has(`thread-${t.threadId}`))
+        .map((t) => ({
+          id: `thread-${t.threadId}`,
+          title: t.title,
+          messages: [],
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt,
+          messagesLoaded: false,
+        }));
+      const newThreadIdEntries: Record<string, number> = {};
+      for (const t of threads)
+        newThreadIdEntries[`thread-${t.threadId}`] = t.threadId;
+      return {
+        conversations: [...state.conversations, ...newConversations].sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        ),
+        threadIdsByConversationId: {
+          ...newThreadIdEntries,
+          ...state.threadIdsByConversationId,
+        },
+      };
+    }),
+
+  setMessagesForConversation: (conversationId, messages) =>
+    set((state) => ({
+      conversations: state.conversations.map((c) =>
+        c.id === conversationId ? { ...c, messages, messagesLoaded: true } : c,
+      ),
+    })),
+}));
