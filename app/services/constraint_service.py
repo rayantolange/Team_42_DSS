@@ -140,7 +140,9 @@ class ConstraintService:
             decision_id=decision_id,
             constraint_id=data.constraint_id,
         )
-
+        self.graph_sync_service.link_decision_constraint(
+        decision_id=decision_id, constraint_id=data.constraint_id
+        )
         return constraint
 
     # -------------------------------------------------------
