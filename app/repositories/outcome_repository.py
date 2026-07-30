@@ -109,6 +109,69 @@ class OutcomeRepository(BaseRepository[Outcome]):
         )
 
     # -------------------------------------------------------
+    # DASHBOARD AGGREGATES
+    # -------------------------------------------------------
+    def get_status_breakdown(self, department_id: Optional[int] = None) -> List[dict]:
+        from sqlalchemy import func
+        from app.models.decision import Decision
+
+        query = self.db.query(
+            Outcome.outcome_status,
+            func.count(Outcome.outcome_id).label("count"),
+        ).join(Decision, Outcome.decision_id == Decision.decision_id)
+
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+
+        rows = query.group_by(Outcome.outcome_status).all()
+        return [{"status": row.outcome_status.value, "count": row.count} for row in rows]
+
+    def get_department_breakdown(self) -> List[dict]:
+        """
+        Outcome counts grouped by department + status.
+        Admin/principal-only — always institution-wide.
+        """
+        from sqlalchemy import func
+        from app.models.decision import Decision
+        from app.models.department import Department
+
+        rows = (
+            self.db.query(
+                Department.department_id,
+                Department.department_name,
+                Outcome.outcome_status,
+                func.count(Outcome.outcome_id).label("count"),
+            )
+            .join(Decision, Outcome.decision_id == Decision.decision_id)
+            .join(Department, Decision.department_id == Department.department_id)
+            .group_by(
+                Department.department_id,
+                Department.department_name,
+                Outcome.outcome_status,
+            )
+            .all()
+        )
+        return [
+            {
+                "department_id": r.department_id,
+                "department_name": r.department_name,
+                "status": r.outcome_status.value,
+                "count": r.count,
+            }
+            for r in rows
+        ]
+
+    def count_decisions_with_outcome(self, department_id: Optional[int] = None) -> int:
+        from app.models.decision import Decision
+
+        query = self.db.query(Decision.decision_id).join(
+            Outcome, Outcome.decision_id == Decision.decision_id
+        ).distinct()
+        if department_id is not None:
+            query = query.filter(Decision.department_id == department_id)
+        return query.count()
+
+    # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
 

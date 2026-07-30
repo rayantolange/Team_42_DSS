@@ -9,29 +9,62 @@ import { useChatHistory } from "@features/query/useChatHistory";
 import { useQueryStore } from "@store/queryStore";
 import { ChatThread } from "@features/query/ChatThread";
 import { getThreadMessages } from "@services/index";
+import { cn } from "@utils/cn";
 
 interface QueryPageLocationState {
   prefillQuery?: string;
+}
+
+function ChatSkeletonThread() {
+  return (
+    <div className="flex flex-col gap-7 py-4 w-full animate-pulse">
+      {[85, 60, 92, 45].map((widthPct, i) => (
+        <div
+          key={i}
+          className={cn(
+            "flex gap-3.5 w-full",
+            i % 2 === 0 ? "justify-end" : "justify-start",
+          )}
+        >
+          {i % 2 !== 0 && (
+            <div className="h-7 w-7 shrink-0 rounded-full bg-muted" />
+          )}
+          <div
+            className="h-16 rounded-2xl bg-muted"
+            style={{
+              width: `${widthPct}%`,
+              maxWidth: i % 2 === 0 ? "70%" : "85%",
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function QueryPage() {
   useChatHistory();
 
   const submitQuery = useSubmitQuery();
-  const { conversationId } = useParams();          // NEW — URL is now the source of truth
-  const navigate = useNavigate();                  // NEW
+  const { conversationId } = useParams(); // NEW — URL is now the source of truth
+  const navigate = useNavigate(); // NEW
 
   const conversations = useQueryStore((s) => s.conversations);
-  const ensureActiveConversation = useQueryStore((s) => s.ensureActiveConversation); // NEW
-  const selectConversation = useQueryStore((s) => s.selectConversation);             // NEW
+  const ensureActiveConversation = useQueryStore(
+    (s) => s.ensureActiveConversation,
+  ); // NEW
+  const selectConversation = useQueryStore((s) => s.selectConversation); // NEW
   const getThreadId = useQueryStore((s) => s.getThreadId);
-  const setMessagesForConversation = useQueryStore((s) => s.setMessagesForConversation);
+  const setMessagesForConversation = useQueryStore(
+    (s) => s.setMessagesForConversation,
+  );
 
   const location = useLocation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const activeConversation = conversations.find((c) => c.id === conversationId);
   const messages = activeConversation?.messages ?? [];
+  const prefillHandledRef = useRef(false);
 
   // Keep the store's activeConversationId in sync with the URL, purely
   // so other components (e.g. the history panel's highlight) stay
@@ -40,10 +73,12 @@ export default function QueryPage() {
     selectConversation(conversationId ?? null);
   }, [conversationId, selectConversation]);
 
-  const activeThreadId = conversationId ? getThreadId(conversationId) : undefined;
+  const activeThreadId = conversationId
+    ? getThreadId(conversationId)
+    : undefined;
   const shouldFetchMessages = activeConversation?.messagesLoaded === false;
 
-  const { data: fetchedMessages } = useQuery({
+  const { data: fetchedMessages, isLoading: isLoadingMessages } = useQuery({
     queryKey: ["chatMessages", activeThreadId],
     queryFn: () => getThreadMessages(activeThreadId!),
     enabled: !!activeThreadId && shouldFetchMessages,
@@ -59,35 +94,57 @@ export default function QueryPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
-  const prefillQuery = (location.state as QueryPageLocationState | null)?.prefillQuery;
+  const prefillQuery = (location.state as QueryPageLocationState | null)
+    ?.prefillQuery;
 
   function handleSubmit(queryText: string) {
     let id = conversationId;
     if (!id) {
       id = ensureActiveConversation();
-      navigate(`/query/${id}`, { replace: true });   // URL updates immediately, before the response arrives
+      navigate(`/query/${id}`, { replace: true }); // URL updates immediately, before the response arrives
     }
     submitQuery.mutate({ conversationId: id, queryText });
   }
 
   useEffect(() => {
-    if (prefillQuery) {
+    if (prefillQuery && !prefillHandledRef.current) {
+      prefillHandledRef.current = true;
       handleSubmit(prefillQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefillQuery]);
 
-  const hasActivity = messages.length > 0 || submitQuery.isPending || submitQuery.isError;
+  const isSwitchingConversation = shouldFetchMessages && isLoadingMessages;
+  const hasActivity =
+    messages.length > 0 ||
+    submitQuery.isPending ||
+    submitQuery.isError ||
+    isSwitchingConversation;
 
   return (
     <div className="relative flex h-[calc(100vh-6rem)] w-full max-w-full gap-6 overflow-hidden">
       <div className="flex flex-1 min-w-0 flex-col h-full items-center justify-between">
-        {!hasActivity ? (
+        {isSwitchingConversation ? (
+          <div className="flex flex-col h-full w-full max-w-3xl">
+            <div className="flex-1 overflow-y-auto px-2 sm:px-4 pr-3 scrollbar-thin">
+              <ChatSkeletonThread />
+            </div>
+          </div>
+        ) : !hasActivity ? (
           <div className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center px-2 sm:px-4">
             <div className="relative w-full overflow-hidden rounded-3xl bg-navy-gradient p-8 shadow-popover sm:p-12">
-              <div className="absolute inset-0 bg-grid-overlay opacity-30" aria-hidden="true" />
-              <div className="absolute -left-20 -top-24 h-72 w-72 rounded-full bg-primary/40 blur-3xl" aria-hidden="true" />
-              <div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full bg-violet/30 blur-3xl animate-float" aria-hidden="true" />
+              <div
+                className="absolute inset-0 bg-grid-overlay opacity-30"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute -left-20 -top-24 h-72 w-72 rounded-full bg-primary/40 blur-3xl"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full bg-violet/30 blur-3xl animate-float"
+                aria-hidden="true"
+              />
               <div
                 className="absolute right-1/4 top-8 h-40 w-40 rounded-full bg-sky-400/20 blur-3xl animate-float"
                 style={{ animationDelay: "1.5s" }}
@@ -105,11 +162,16 @@ export default function QueryPage() {
                   What can I help you discover?
                 </h1>
                 <p className="max-w-md text-sm text-white/70">
-                  Access institutional knowledge and decision models with natural language.
+                  Access institutional knowledge and decision models with
+                  natural language.
                 </p>
               </div>
               <div className="relative z-10 mx-auto mt-8 w-full max-w-2xl">
-                <QueryBuilder onSubmit={handleSubmit} isSubmitting={submitQuery.isPending} elevated />
+                <QueryBuilder
+                  onSubmit={handleSubmit}
+                  isSubmitting={submitQuery.isPending}
+                  elevated
+                />
               </div>
             </div>
           </div>
@@ -120,12 +182,19 @@ export default function QueryPage() {
                 messages={messages}
                 isLoading={submitQuery.isPending}
                 isError={submitQuery.isError}
-                errorMessage={submitQuery.error instanceof Error ? submitQuery.error.message : undefined}
+                errorMessage={
+                  submitQuery.error instanceof Error
+                    ? submitQuery.error.message
+                    : undefined
+                }
               />
               <div ref={bottomRef} />
             </div>
             <div className="shrink-0 w-full bg-transparent pt-3 pb-2 px-2 sm:px-4">
-              <QueryBuilder onSubmit={handleSubmit} isSubmitting={submitQuery.isPending} />
+              <QueryBuilder
+                onSubmit={handleSubmit}
+                isSubmitting={submitQuery.isPending}
+              />
             </div>
           </div>
         )}

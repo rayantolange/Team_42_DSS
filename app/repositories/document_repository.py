@@ -110,6 +110,22 @@ class DocumentRepository(BaseRepository[Document]):
         ).scalar()
 
     # -------------------------------------------------------
+    # DASHBOARD AGGREGATES
+    # -------------------------------------------------------
+    def count_all(self) -> int:
+        return self.db.query(Document).count()
+
+    def count_by_department(self, department_id: int) -> int:
+        from app.models.decision import Decision
+
+        return (
+            self.db.query(Document)
+            .join(Decision, Document.decision_id == Decision.decision_id)
+            .filter(Decision.department_id == department_id)
+            .count()
+        )
+
+    # -------------------------------------------------------
     # CREATE
     # -------------------------------------------------------
 

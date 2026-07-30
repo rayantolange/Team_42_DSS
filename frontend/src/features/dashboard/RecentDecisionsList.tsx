@@ -2,16 +2,17 @@ import { Link } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@components/ui/Card";
 import { Badge } from "@components/ui/Badge";
-import { getDepartmentById } from "@services/index";
-import type { Decision, DecisionStatus } from "@/types/domain";
+import type { RecentDecision } from "@services/dashboardService";
 
-const STATUS_CONFIG: Record<DecisionStatus, { label: string; dot: string; badge: "soft-success" | "soft-destructive" | "soft" | "soft-warning" }> = {
-  approved: { label: "Approved", dot: "bg-success", badge: "soft-success" },
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; dot: string; badge: "soft-success" | "soft-destructive" | "soft" | "soft-warning" }
+> = {
+  draft: { label: "Draft", dot: "bg-muted-foreground", badge: "soft" },
+  approved: { label: "Approved", dot: "bg-primary", badge: "soft" },
   implemented: { label: "Implemented", dot: "bg-success", badge: "soft-success" },
-  rejected: { label: "Rejected", dot: "bg-destructive", badge: "soft-destructive" },
-  under_review: { label: "Processing", dot: "bg-primary", badge: "soft" },
-  deferred: { label: "Deferred", dot: "bg-warning", badge: "soft-warning" },
-  conditional: { label: "Conditional", dot: "bg-warning", badge: "soft-warning" },
+  completed: { label: "Completed", dot: "bg-success", badge: "soft-success" },
+  cancelled: { label: "Cancelled", dot: "bg-destructive", badge: "soft-destructive" },
 };
 
 function formatRelativeTime(iso: string): string {
@@ -27,15 +28,9 @@ function formatRelativeTime(iso: string): string {
 }
 
 interface RecentDecisionsListProps {
-  decisions: Decision[];
+  decisions: RecentDecision[];
 }
 
-/**
- * "Recent Activity" panel — styled as a real activity log (request-style
- * ID, source entity, relative timestamp, status, quick action) rather
- * than a plain list, matching the dashboard reference design while
- * staying backed entirely by real decision data (no fabricated log rows).
- */
 export function RecentDecisionsList({ decisions }: RecentDecisionsListProps) {
   return (
     <Card>
@@ -50,9 +45,7 @@ export function RecentDecisionsList({ decisions }: RecentDecisionsListProps) {
       </CardHeader>
       <CardContent className="p-0">
         {decisions.length === 0 ? (
-          <p className="px-6 py-10 text-center text-sm text-muted-foreground">
-            No recent decisions found.
-          </p>
+          <p className="px-6 py-10 text-center text-sm text-muted-foreground">No recent decisions found.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -69,23 +62,22 @@ export function RecentDecisionsList({ decisions }: RecentDecisionsListProps) {
               </thead>
               <tbody className="divide-y divide-border">
                 {decisions.map((decision, i) => {
-                  const dept = getDepartmentById(decision.departmentId);
-                  const status = STATUS_CONFIG[decision.status];
+                  const status = STATUS_CONFIG[decision.status] ?? STATUS_CONFIG.draft;
                   return (
                     <tr
-                      key={decision.id}
+                      key={decision.decisionId}
                       className="animate-fade-in border-l-2 border-l-transparent transition-colors hover:border-l-primary hover:bg-muted/40"
                       style={{ animationDelay: `${i * 45}ms`, animationFillMode: "backwards" }}
                     >
                       <td className="whitespace-nowrap px-6 py-3 font-mono text-xs text-muted-foreground">
-                        #{decision.id.slice(0, 8).toUpperCase()}
+                        #{decision.decisionId}
                       </td>
                       <td className="max-w-[220px] px-4 py-3">
                         <p className="truncate font-medium">{decision.title}</p>
-                        <p className="truncate text-xs text-muted-foreground">{dept?.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">{decision.departmentName}</p>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
-                        {formatRelativeTime(decision.dateCreated)}
+                        {formatRelativeTime(decision.createdAt)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <Badge variant={status.badge} className="gap-1.5 font-medium">
@@ -95,7 +87,7 @@ export function RecentDecisionsList({ decisions }: RecentDecisionsListProps) {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <Link
-                          to={`/history?decisionId=${decision.id}`}
+                          to={`/decisions/${decision.decisionId}`}
                           aria-label={`View ${decision.title}`}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         >
