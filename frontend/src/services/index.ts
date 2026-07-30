@@ -31,7 +31,7 @@ export {
   type TrendPoint,
 } from "./mock/dashboardService";
 
-export { submitQuery } from "./mock/queryService";
+export { createThread, sendMessage, type ChatMode, type SendMessageResult } from "./chatService";
 
 export {
   fetchDocuments,
