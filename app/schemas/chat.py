@@ -1,7 +1,7 @@
 # app/schemas/chat.py
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
 from app.models.enums import ChatRoleEnum, ChatModeEnum
@@ -44,3 +44,5 @@ class ChatMessageResponse(BaseModel):
     content: str
     created_at: datetime
     citations: List[SourceCitation] = []
+    confidence_score: Optional[float] = None
+    confidence_level: Optional[Literal["high", "medium", "low"]] = None
