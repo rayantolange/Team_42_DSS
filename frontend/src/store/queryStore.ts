@@ -8,7 +8,6 @@ export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
   createdAt: string;
-  /** Only present on assistant messages that came from a fresh search. */
   sources?: QuerySource[];
   confidenceScore?: number;
   confidenceLevel?: ConfidenceLevel;
@@ -34,28 +33,19 @@ interface QueryState {
 interface QueryActions {
   setCurrentQueryText: (text: string) => void;
   setMode: (mode: QueryMode) => void;
-  /** Deselects the active conversation so the next message starts a fresh one. */
   startNewConversation: () => void;
-  selectConversation: (id: string) => void;
-  /** Appends a message to the active conversation, creating one first if none is active. */
+  selectConversation: (id: string | null) => void;
   addMessageToActive: (message: ChatMessage) => void;
+  addMessageToConversation: (conversationId: string, message: ChatMessage) => void;
   deleteConversation: (id: string) => void;
   clearAllConversations: () => void;
   ensureActiveConversation: () => string;
   setThreadId: (conversationId: string, threadId: number) => void;
   getThreadId: (conversationId: string) => number | undefined;
   hydrateThreads: (
-    threads: {
-      threadId: number;
-      title: string;
-      createdAt: string;
-      updatedAt: string;
-    }[],
+    threads: { threadId: number; title: string; createdAt: string; updatedAt: string }[],
   ) => void;
-  setMessagesForConversation: (
-    conversationId: string,
-    messages: ChatMessage[],
-  ) => void;
+  setMessagesForConversation: (conversationId: string, messages: ChatMessage[]) => void;
 }
 
 const MAX_CONVERSATIONS = 50;
@@ -82,9 +72,7 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
 
   setCurrentQueryText: (text) => set({ currentQueryText: text }),
   setMode: (mode) => set({ mode }),
-
   startNewConversation: () => set({ activeConversationId: null }),
-
   selectConversation: (id) => set({ activeConversationId: id }),
 
   ensureActiveConversation: () => {
@@ -97,13 +85,10 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
       messages: [],
       createdAt: now,
       updatedAt: now,
-      messagesLoaded: true, // Added: missing required field
+      messagesLoaded: true,
     };
     set({
-      conversations: [newConversation, ...conversations].slice(
-        0,
-        MAX_CONVERSATIONS,
-      ),
+      conversations: [newConversation, ...conversations].slice(0, MAX_CONVERSATIONS),
       activeConversationId: newConversation.id,
     });
     return newConversation.id;
@@ -113,35 +98,42 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
     set((state) => {
       const now = new Date().toISOString();
       const { conversations, activeConversationId } = state;
-
       if (!activeConversationId) {
         const newConversation: ChatConversation = {
           id: makeConversationId(),
-          title:
-            message.role === "user" ? titleFromText(message.text) : "New chat",
+          title: message.role === "user" ? titleFromText(message.text) : "New chat",
           messages: [message],
           createdAt: now,
           updatedAt: now,
-          messagesLoaded: true, // Added: missing required field
+          messagesLoaded: true,
         };
         return {
-          conversations: [newConversation, ...conversations].slice(
-            0,
-            MAX_CONVERSATIONS,
-          ),
+          conversations: [newConversation, ...conversations].slice(0, MAX_CONVERSATIONS),
           activeConversationId: newConversation.id,
         };
       }
-
       const updated = conversations.map((c) => {
         if (c.id !== activeConversationId) return c;
         const isFirstMessage = c.messages.length === 0;
         return {
           ...c,
-          title:
-            isFirstMessage && message.role === "user"
-              ? titleFromText(message.text)
-              : c.title,
+          title: isFirstMessage && message.role === "user" ? titleFromText(message.text) : c.title,
+          messages: [...c.messages, message],
+          updatedAt: now,
+        };
+      });
+      return { conversations: updated };
+    }),
+
+  addMessageToConversation: (conversationId, message) =>
+    set((state) => {
+      const now = new Date().toISOString();
+      const updated = state.conversations.map((c) => {
+        if (c.id !== conversationId) return c;
+        const isFirstMessage = c.messages.length === 0;
+        return {
+          ...c,
+          title: isFirstMessage && message.role === "user" ? titleFromText(message.text) : c.title,
           messages: [...c.messages, message],
           updatedAt: now,
         };
@@ -155,29 +147,20 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
       delete restThreadIds[id];
       return {
         conversations: state.conversations.filter((c) => c.id !== id),
-        activeConversationId:
-          state.activeConversationId === id ? null : state.activeConversationId,
+        activeConversationId: state.activeConversationId === id ? null : state.activeConversationId,
         threadIdsByConversationId: restThreadIds,
       };
     }),
 
   clearAllConversations: () =>
-    set({
-      conversations: [],
-      activeConversationId: null,
-      threadIdsByConversationId: {},
-    }),
+    set({ conversations: [], activeConversationId: null, threadIdsByConversationId: {} }),
 
   setThreadId: (conversationId, threadId) =>
     set((state) => ({
-      threadIdsByConversationId: {
-        ...state.threadIdsByConversationId,
-        [conversationId]: threadId,
-      },
+      threadIdsByConversationId: { ...state.threadIdsByConversationId, [conversationId]: threadId },
     })),
 
-  getThreadId: (conversationId) =>
-    get().threadIdsByConversationId[conversationId],
+  getThreadId: (conversationId) => get().threadIdsByConversationId[conversationId],
 
   hydrateThreads: (threads) =>
     set((state) => {
@@ -193,17 +176,12 @@ export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
           messagesLoaded: false,
         }));
       const newThreadIdEntries: Record<string, number> = {};
-      for (const t of threads)
-        newThreadIdEntries[`thread-${t.threadId}`] = t.threadId;
+      for (const t of threads) newThreadIdEntries[`thread-${t.threadId}`] = t.threadId;
       return {
         conversations: [...state.conversations, ...newConversations].sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+          (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
         ),
-        threadIdsByConversationId: {
-          ...newThreadIdEntries,
-          ...state.threadIdsByConversationId,
-        },
+        threadIdsByConversationId: { ...newThreadIdEntries, ...state.threadIdsByConversationId },
       };
     }),
 
