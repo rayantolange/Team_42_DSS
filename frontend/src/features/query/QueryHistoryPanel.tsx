@@ -20,6 +20,7 @@ import {
   DialogClose,
 } from "@components/ui/Dialog";
 import { cn } from "@utils/cn";
+import { useNavigate } from "react-router-dom";
 
 function isSameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
@@ -49,8 +50,7 @@ export function QueryHistoryPanel() {
 
   const conversations = useQueryStore((s) => s.conversations);
   const activeConversationId = useQueryStore((s) => s.activeConversationId);
-  const selectConversation = useQueryStore((s) => s.selectConversation);
-  const startNewConversation = useQueryStore((s) => s.startNewConversation);
+  const navigate = useNavigate();
   const deleteConversationMutation = useDeleteConversation();
 
   const grouped = useMemo(() => {
@@ -115,7 +115,7 @@ export function QueryHistoryPanel() {
         <div className="w-full px-2 pb-2">
           <button
             type="button"
-            onClick={startNewConversation}
+            onClick={() => navigate("/query")}
             title="New chat"
             className="flex w-full items-center gap-2 rounded-xl border border-border/60 px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-[#282a2d]"
           >
@@ -176,7 +176,7 @@ export function QueryHistoryPanel() {
                         >
                           <button
                             type="button"
-                            onClick={() => selectConversation(item.id)}
+                            onClick={() => navigate(`/query/${item.id}`)}
                             className="flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-left"
                           >
                             <MessageSquareText

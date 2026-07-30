@@ -2,28 +2,23 @@ import { useMutation } from "@tanstack/react-query";
 import { createThread, sendMessage } from "@services/index";
 import { useQueryStore, makeMessageId, titleFromText } from "@store/queryStore";
 
-
 const MODE_MAP = { search: "rag_search", chat: "chat" } as const;
 
 export function useSubmitQuery() {
-  const addMessageToActive = useQueryStore((s) => s.addMessageToActive);
-  const ensureActiveConversation = useQueryStore(
-    (s) => s.ensureActiveConversation,
-  );
+  const addMessageToConversation = useQueryStore((s) => s.addMessageToConversation);
   const getThreadId = useQueryStore((s) => s.getThreadId);
   const setThreadId = useQueryStore((s) => s.setThreadId);
   const mode = useQueryStore((s) => s.mode);
 
   return useMutation({
     mutationFn: async ({
+      conversationId,
       queryText,
     }: {
+      conversationId: string;
       queryText: string;
-      departmentId?: string;
     }) => {
-      const conversationId = ensureActiveConversation();
-
-      addMessageToActive({
+      addMessageToConversation(conversationId, {
         id: makeMessageId(),
         role: "user",
         text: queryText,
@@ -36,10 +31,11 @@ export function useSubmitQuery() {
         setThreadId(conversationId, threadId);
       }
 
-      return sendMessage(threadId, queryText, MODE_MAP[mode]);
+      const result = await sendMessage(threadId, queryText, MODE_MAP[mode]);
+      return { conversationId, result };
     },
-    onSuccess: (result) => {
-      addMessageToActive({
+    onSuccess: ({ conversationId, result }) => {
+      addMessageToConversation(conversationId, {
         id: makeMessageId(),
         role: "assistant",
         text: result.answer,

@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { AppLayout } from "@layouts/AppLayout";
 import { PageSkeleton } from "@components/ui/PageSkeleton";
@@ -39,6 +39,19 @@ const DecisionDetailPage = lazy(() => import("@pages/DecisionDetailPage"));
 /** Wraps a lazy page in Suspense with a consistent loading skeleton. */
 function withSuspense(element: ReactNode) {
   return <Suspense fallback={<PageSkeleton />}>{element}</Suspense>;
+}
+
+/**
+ * Forces a full remount of QueryPage whenever the conversation changes
+ * (including "no conversation" -> a specific one, and between two
+ * different conversations). Without this, navigating between chats
+ * would just re-render QueryPage in place, letting a pending mutation
+ * from the old conversation keep showing as "active" on the new one.
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+function QueryPageRoute() {
+  const { conversationId } = useParams();
+  return <QueryPage key={conversationId ?? "new"} />;
 }
 
 export const router = createBrowserRouter([
@@ -84,7 +97,11 @@ export const router = createBrowserRouter([
             ),
             children: [
               { path: "/dashboard", element: withSuspense(<DashboardPage />) },
-              { path: "/query", element: withSuspense(<QueryPage />) },
+              { path: "/query", element: withSuspense(<QueryPageRoute />) },
+              {
+                path: "/query/:conversationId",
+                element: withSuspense(<QueryPageRoute />),
+              },
               { path: "/graph", element: withSuspense(<GraphExplorerPage />) },
               {
                 path: "/history",
