@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { BrainCircuit, Sparkles } from "lucide-react";
-
 import { QueryBuilder } from "@features/query/QueryBuilder";
 import { QueryHistoryPanel } from "@features/query/QueryHistoryPanel";
 import { useSubmitQuery } from "@features/query/useSubmitQuery";
@@ -16,27 +15,32 @@ interface QueryPageLocationState {
 }
 
 export default function QueryPage() {
-  // Fetch overall conversation history on mount
   useChatHistory();
 
   const submitQuery = useSubmitQuery();
+  const { conversationId } = useParams();          // NEW — URL is now the source of truth
+  const navigate = useNavigate();                  // NEW
+
   const conversations = useQueryStore((s) => s.conversations);
-  const activeConversationId = useQueryStore((s) => s.activeConversationId);
+  const ensureActiveConversation = useQueryStore((s) => s.ensureActiveConversation); // NEW
+  const selectConversation = useQueryStore((s) => s.selectConversation);             // NEW
   const getThreadId = useQueryStore((s) => s.getThreadId);
   const setMessagesForConversation = useQueryStore((s) => s.setMessagesForConversation);
 
   const location = useLocation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const activeConversation = conversations.find(
-    (c) => c.id === activeConversationId,
-  );
+  const activeConversation = conversations.find((c) => c.id === conversationId);
   const messages = activeConversation?.messages ?? [];
 
-  // Lazily fetch messages the first time a conversation is opened
-  const activeThreadId = activeConversationId
-    ? getThreadId(activeConversationId)
-    : undefined;
+  // Keep the store's activeConversationId in sync with the URL, purely
+  // so other components (e.g. the history panel's highlight) stay
+  // consistent — the URL remains the actual source of truth.
+  useEffect(() => {
+    selectConversation(conversationId ?? null);
+  }, [conversationId, selectConversation]);
+
+  const activeThreadId = conversationId ? getThreadId(conversationId) : undefined;
   const shouldFetchMessages = activeConversation?.messagesLoaded === false;
 
   const { data: fetchedMessages } = useQuery({
@@ -46,53 +50,44 @@ export default function QueryPage() {
   });
 
   useEffect(() => {
-    if (fetchedMessages && activeConversationId) {
-      setMessagesForConversation(activeConversationId, fetchedMessages);
+    if (fetchedMessages && conversationId) {
+      setMessagesForConversation(conversationId, fetchedMessages);
     }
-  }, [fetchedMessages, activeConversationId, setMessagesForConversation]);
+  }, [fetchedMessages, conversationId, setMessagesForConversation]);
 
-  // Auto-scroll when new messages land
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
-  const prefillQuery = (location.state as QueryPageLocationState | null)
-    ?.prefillQuery;
+  const prefillQuery = (location.state as QueryPageLocationState | null)?.prefillQuery;
 
-  function handleSubmit(queryText: string, departmentId?: string) {
-    submitQuery.mutate({ queryText, departmentId });
+  function handleSubmit(queryText: string) {
+    let id = conversationId;
+    if (!id) {
+      id = ensureActiveConversation();
+      navigate(`/query/${id}`, { replace: true });   // URL updates immediately, before the response arrives
+    }
+    submitQuery.mutate({ conversationId: id, queryText });
   }
 
   useEffect(() => {
     if (prefillQuery) {
-      submitQuery.mutate({ queryText: prefillQuery });
+      handleSubmit(prefillQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefillQuery]);
 
-  const hasActivity =
-    messages.length > 0 || submitQuery.isPending || submitQuery.isError;
+  const hasActivity = messages.length > 0 || submitQuery.isPending || submitQuery.isError;
 
   return (
     <div className="relative flex h-[calc(100vh-6rem)] w-full max-w-full gap-6 overflow-hidden">
-      {/* Main Chat & Input Column */}
       <div className="flex flex-1 min-w-0 flex-col h-full items-center justify-between">
         {!hasActivity ? (
-          /* Empty State View */
           <div className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center px-2 sm:px-4">
             <div className="relative w-full overflow-hidden rounded-3xl bg-navy-gradient p-8 shadow-popover sm:p-12">
-              <div
-                className="absolute inset-0 bg-grid-overlay opacity-30"
-                aria-hidden="true"
-              />
-              <div
-                className="absolute -left-20 -top-24 h-72 w-72 rounded-full bg-primary/40 blur-3xl"
-                aria-hidden="true"
-              />
-              <div
-                className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full bg-violet/30 blur-3xl animate-float"
-                aria-hidden="true"
-              />
+              <div className="absolute inset-0 bg-grid-overlay opacity-30" aria-hidden="true" />
+              <div className="absolute -left-20 -top-24 h-72 w-72 rounded-full bg-primary/40 blur-3xl" aria-hidden="true" />
+              <div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full bg-violet/30 blur-3xl animate-float" aria-hidden="true" />
               <div
                 className="absolute right-1/4 top-8 h-40 w-40 rounded-full bg-sky-400/20 blur-3xl animate-float"
                 style={{ animationDelay: "1.5s" }}
@@ -110,49 +105,31 @@ export default function QueryPage() {
                   What can I help you discover?
                 </h1>
                 <p className="max-w-md text-sm text-white/70">
-                  Access institutional knowledge and decision models with
-                  natural language.
+                  Access institutional knowledge and decision models with natural language.
                 </p>
               </div>
               <div className="relative z-10 mx-auto mt-8 w-full max-w-2xl">
-                <QueryBuilder
-                  onSubmit={handleSubmit}
-                  isSubmitting={submitQuery.isPending}
-                  elevated
-                />
+                <QueryBuilder onSubmit={handleSubmit} isSubmitting={submitQuery.isPending} elevated />
               </div>
             </div>
           </div>
         ) : (
-          /* Active Thread Layout */
           <div className="flex flex-col h-full w-full max-w-3xl">
-            {/* Scrollable Chat Area */}
             <div className="flex-1 overflow-y-auto px-2 sm:px-4 pr-3 scrollbar-thin">
               <ChatThread
                 messages={messages}
                 isLoading={submitQuery.isPending}
                 isError={submitQuery.isError}
-                errorMessage={
-                  submitQuery.error instanceof Error
-                    ? submitQuery.error.message
-                    : undefined
-                }
+                errorMessage={submitQuery.error instanceof Error ? submitQuery.error.message : undefined}
               />
               <div ref={bottomRef} />
             </div>
-
-            {/* Seamless Anchored Input Dock */}
             <div className="shrink-0 w-full bg-transparent pt-3 pb-2 px-2 sm:px-4">
-              <QueryBuilder
-                onSubmit={handleSubmit}
-                isSubmitting={submitQuery.isPending}
-              />
+              <QueryBuilder onSubmit={handleSubmit} isSubmitting={submitQuery.isPending} />
             </div>
           </div>
         )}
       </div>
-
-      {/* Right History Panel */}
       <div className="hidden shrink-0 h-full lg:block">
         <QueryHistoryPanel />
       </div>
