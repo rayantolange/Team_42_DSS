@@ -149,10 +149,14 @@ def _confidence_from_score(raw_score: float) -> tuple[float, str]:
     return confidence_score, level
 
 
-def _build_citation(result: dict) -> dict:
+def _build_citation(result: dict) -> dict | None:
     source_type = result["source_type"]
     id_field = REFERENCE_ID_FIELD[source_type]
     reference_id = result[id_field]
+    if reference_id is None:
+        # Stale/orphaned embedding row — source_type doesn't match its
+        # populated FK. Skip rather than crash the whole response.
+        return None
     metadata = dict(result["metadata"] or {})
     return {
         "source_type": source_type,
@@ -160,7 +164,7 @@ def _build_citation(result: dict) -> dict:
         "embedding_id": result["embedding_id"],
         "snippet": result["content"][:300],
         "metadata": metadata,
-        "rerank_score": result.get("rerank_score"),  # NEW — dropped by SourceCitation.model_validate, same as embedding_id
+        "rerank_score": result.get("rerank_score"),
     }
 
 
@@ -193,8 +197,7 @@ def synthesize(state: dict) -> dict:
 Question: {state['query']}"""
 
     answer = generate_answer(SYSTEM_PROMPT, user_prompt)
-    citations = [_build_citation(r) for r in results]  # graph_result stays uncited, per earlier note
-
+    citations = [c for c in (_build_citation(r) for r in results) if c is not None]
     # Confidence is still anchored purely to vector rerank_score — a
     # graph-only hit (no vector_results at all) has no rerank_score to
     # read, so it falls back to a neutral 0.5/medium rather than 0.0/low,
