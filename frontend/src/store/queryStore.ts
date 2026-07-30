@@ -27,6 +27,7 @@ interface QueryState {
   mode: QueryMode;
   conversations: ChatConversation[];
   activeConversationId: string | null;
+  threadIdsByConversationId: Record<string, number>;
 }
 
 interface QueryActions {
@@ -39,6 +40,9 @@ interface QueryActions {
   addMessageToActive: (message: ChatMessage) => void;
   deleteConversation: (id: string) => void;
   clearAllConversations: () => void;
+  ensureActiveConversation: () => string; // NEW
+  setThreadId: (conversationId: string, threadId: number) => void; // NEW
+  getThreadId: (conversationId: string) => number | undefined;
 }
 
 const MAX_CONVERSATIONS = 50;
@@ -56,11 +60,12 @@ function titleFromText(text: string): string {
   return trimmed.length > 48 ? `${trimmed.slice(0, 48)}…` : trimmed;
 }
 
-export const useQueryStore = create<QueryState & QueryActions>((set) => ({
+export const useQueryStore = create<QueryState & QueryActions>((set, get) => ({
   currentQueryText: "",
   mode: "search",
   conversations: [],
   activeConversationId: null,
+  threadIdsByConversationId: {},
 
   setCurrentQueryText: (text) => set({ currentQueryText: text }),
   setMode: (mode) => set({ mode }),
@@ -68,6 +73,27 @@ export const useQueryStore = create<QueryState & QueryActions>((set) => ({
   startNewConversation: () => set({ activeConversationId: null }),
 
   selectConversation: (id) => set({ activeConversationId: id }),
+
+  ensureActiveConversation: () => {
+    const { activeConversationId, conversations } = get();
+    if (activeConversationId) return activeConversationId;
+    const now = new Date().toISOString();
+    const newConversation: ChatConversation = {
+      id: makeConversationId(),
+      title: "New chat",
+      messages: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    set({
+      conversations: [newConversation, ...conversations].slice(
+        0,
+        MAX_CONVERSATIONS,
+      ),
+      activeConversationId: newConversation.id,
+    });
+    return newConversation.id;
+  },
 
   addMessageToActive: (message) =>
     set((state) => {
@@ -94,24 +120,53 @@ export const useQueryStore = create<QueryState & QueryActions>((set) => ({
         };
       }
 
-      // Append to the existing active conversation.
-      const updated = conversations.map((c) =>
-        c.id === activeConversationId
-          ? { ...c, messages: [...c.messages, message], updatedAt: now }
-          : c,
-      );
+      const updated = conversations.map((c) => {
+        if (c.id !== activeConversationId) return c;
+        const isFirstMessage = c.messages.length === 0; // NEW — retitle an empty conv seeded via ensureActiveConversation
+        return {
+          ...c,
+          title:
+            isFirstMessage && message.role === "user"
+              ? titleFromText(message.text)
+              : c.title,
+          messages: [...c.messages, message],
+          updatedAt: now,
+        };
+      });
       return { conversations: updated };
     }),
 
   deleteConversation: (id) =>
-    set((state) => ({
-      conversations: state.conversations.filter((c) => c.id !== id),
-      activeConversationId:
-        state.activeConversationId === id ? null : state.activeConversationId,
-    })),
+    set((state) => {
+      const restThreadIds = { ...state.threadIdsByConversationId };
+      delete restThreadIds[id]; // NEW cleanup
+      return {
+        conversations: state.conversations.filter((c) => c.id !== id),
+        activeConversationId:
+          state.activeConversationId === id ? null : state.activeConversationId,
+        threadIdsByConversationId: restThreadIds,
+      };
+    }),
 
   clearAllConversations: () =>
-    set({ conversations: [], activeConversationId: null }),
+    set({
+      conversations: [],
+      activeConversationId: null,
+      threadIdsByConversationId: {},
+    }),
+
+  // NEW
+  setThreadId: (conversationId, threadId) =>
+    set((state) => ({
+      threadIdsByConversationId: {
+        ...state.threadIdsByConversationId,
+        [conversationId]: threadId,
+      },
+    })),
+
+  // NEW
+  getThreadId: (conversationId) =>
+    get().threadIdsByConversationId[conversationId],
 }));
 
 export { makeMessageId };

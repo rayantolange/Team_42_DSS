@@ -173,3 +173,16 @@ class OutcomeRepository(BaseRepository[Outcome]):
         Cascade from decision deletion is handled at DB level.
         """
         self.delete(outcome)
+
+    def get_all_by_decisions(self, decision_ids: List[int]) -> List[Outcome]:
+        """
+        Bulk fetch: all outcomes for any of the given decisions.
+        Outcome already carries decision_id directly, no junction needed.
+        """
+        if not decision_ids:
+            return []
+        return (
+            self.db.query(Outcome)
+            .filter(Outcome.decision_id.in_(decision_ids))
+            .all()
+        )

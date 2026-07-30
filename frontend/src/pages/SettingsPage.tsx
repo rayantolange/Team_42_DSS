@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GitCommitVertical, FileCheck2, Flag, Moon, Shield, User, Mail, Building2, Sun } from "lucide-react";
 import {
   Card,
@@ -102,7 +102,7 @@ export default function SettingsPage() {
     window.localStorage.setItem(NOTIFICATION_PREFS_KEY, JSON.stringify(prefs));
     showToast({
       title: "Preferences saved",
-      description: "Your notification settings have been updated.",
+      description: "Your settings have been updated.",
       variant: "success",
     });
   }

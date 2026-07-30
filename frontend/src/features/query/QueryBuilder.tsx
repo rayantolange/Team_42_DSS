@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Plus, ArrowUp, Mic, Globe, MessageSquare } from "lucide-react";
 import { cn } from "@utils/cn";
+import { useQueryStore } from "@store/queryStore";
 
 interface QueryBuilderProps {
   onSubmit: (queryText: string, departmentId?: string) => void;
@@ -10,7 +11,8 @@ interface QueryBuilderProps {
 
 export function QueryBuilder({ onSubmit, isSubmitting }: QueryBuilderProps) {
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState<"search" | "chat">("search");
+  const mode = useQueryStore((s) => s.mode);
+  const setMode = useQueryStore((s) => s.setMode);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea height based on content

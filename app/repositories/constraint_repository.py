@@ -164,3 +164,14 @@ class ConstraintRepository(BaseRepository[ConstraintMaster]):
         """
 
         self.delete(constraint)
+
+    def get_all_for_decisions(self, decision_ids: List[int]) -> List[tuple]:
+        """Bulk fetch: (decision_id, ConstraintMaster) pairs for all given decisions."""
+        if not decision_ids:
+            return []
+        return (
+            self.db.query(DecisionConstraint.decision_id, ConstraintMaster)
+            .join(ConstraintMaster, ConstraintMaster.constraint_id == DecisionConstraint.constraint_id)
+            .filter(DecisionConstraint.decision_id.in_(decision_ids))
+            .all()
+        )
