@@ -1,5 +1,6 @@
 import { apiClient } from "./apiClient";
 import type { ConfidenceLevel, QuerySource } from "@/types/api";
+import type { ChatMessage } from "@store/queryStore";
 
 export type ChatMode = "chat" | "rag_search";
 
@@ -19,6 +20,7 @@ interface BackendSourceCitation {
     | "document_chunk";
   reference_id: number;
   snippet: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any>;
 }
 
@@ -125,4 +127,45 @@ export async function sendMessage(
     confidenceScore: data.confidence_score ?? undefined,
     confidenceLevel: data.confidence_level ?? undefined,
   };
+}
+
+export interface ThreadSummary {
+  threadId: number;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function listThreads(): Promise<ThreadSummary[]> {
+  const { data } = await apiClient.get<BackendChatThreadResponse[]>("/chat/threads");
+  return data.map((t) => ({
+    threadId: t.thread_id,
+    title: t.title ?? "New chat",
+    createdAt: t.created_at,
+    updatedAt: t.updated_at,
+  }));
+}
+
+function toChatMessage(m: BackendChatMessageResponse): ChatMessage {
+  const isRagAnswer = m.mode === "rag_search" && m.role === "assistant";
+  return {
+    id: `msg-${m.message_id}`,
+    role: m.role,
+    text: m.content,
+    createdAt: m.created_at,
+    sources: isRagAnswer ? m.citations.map(citationToSource) : undefined,
+    confidenceScore: m.confidence_score ?? undefined,
+    confidenceLevel: m.confidence_level ?? undefined,
+  };
+}
+
+export async function getThreadMessages(threadId: number): Promise<ChatMessage[]> {
+  const { data } = await apiClient.get<BackendChatMessageResponse[]>(
+    `/chat/threads/${threadId}/messages`,
+  );
+  return data.map(toChatMessage);
+}
+
+export async function deleteThreadRemote(threadId: number): Promise<void> {
+  await apiClient.delete(`/chat/threads/${threadId}`);
 }
