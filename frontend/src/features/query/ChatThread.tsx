@@ -1,5 +1,7 @@
 import { User, Sparkles, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@utils/cn";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { SourceList } from "./SourceList";
 import { ConfidenceIndicator } from "./ConfidenceIndicator";
 import type { ChatMessage } from "@store/queryStore";
@@ -40,11 +42,19 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           className={cn(
             "break-words text-[15px] leading-relaxed transition-all",
             isUser
-              ? "rounded-2xl bg-zinc-800/80 px-4 py-2.5 text-zinc-100 shadow-sm" // Subtle user pill
-              : "bg-transparent p-0 text-foreground", // Completely borderless, background-blended AI response
+              ? "rounded-2xl bg-zinc-800/80 px-4 py-2.5 text-zinc-100 shadow-sm"
+              : "bg-transparent p-0 text-foreground",
           )}
         >
-          {message.text}
+          {isUser ? (
+            message.text
+          ) : (
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ol:my-2 prose-ul:my-2 prose-li:my-0.5">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message.text}
+              </ReactMarkdown>
+            </div>
+          )}
         </div>
 
         {/* Inline Confidence Indicator Widget */}
