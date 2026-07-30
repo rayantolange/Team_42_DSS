@@ -13,5 +13,6 @@ class RAGState(TypedDict):
     query: str
     current_user: CurrentUserInfo
     vector_results: Optional[List[dict]]
+    graph_result: Optional[dict]
     answer: Optional[str]
     citations: Optional[List[dict]]

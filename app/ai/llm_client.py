@@ -48,3 +48,23 @@ def generate_chat_completion(messages: list[dict]) -> str:
     )
 
     return response.choices[0].message.content
+
+def generate_json_completion(system_prompt: str, user_prompt: str) -> str:
+    """
+    Like generate_answer, but temperature=0 (deterministic — this is
+    used for structured classification, not open-ended writing) and
+    the system prompt is expected to instruct the model to return
+    ONLY raw JSON, no markdown fences or preamble.
+    """
+    client = get_client()
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0,
+    )
+
+    return response.choices[0].message.content
