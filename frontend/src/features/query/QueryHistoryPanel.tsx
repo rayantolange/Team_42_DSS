@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useQueryStore, type ChatConversation } from "@store/queryStore";
+import { useDeleteConversation } from "@features/query/useDeleteConversation";
 import { Button } from "@components/ui/Button";
 import {
   Dialog,
@@ -50,7 +51,7 @@ export function QueryHistoryPanel() {
   const activeConversationId = useQueryStore((s) => s.activeConversationId);
   const selectConversation = useQueryStore((s) => s.selectConversation);
   const startNewConversation = useQueryStore((s) => s.startNewConversation);
-  const deleteConversation = useQueryStore((s) => s.deleteConversation);
+  const deleteConversationMutation = useDeleteConversation();
 
   const grouped = useMemo(() => {
     const sorted = [...conversations].sort(
@@ -247,7 +248,7 @@ export function QueryHistoryPanel() {
               variant="destructive"
               onClick={() => {
                 if (conversationToDelete) {
-                  deleteConversation(conversationToDelete.id);
+                  deleteConversationMutation.mutate(conversationToDelete.id);
                 }
                 setConversationToDelete(null);
               }}

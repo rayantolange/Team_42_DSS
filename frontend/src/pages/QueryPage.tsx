@@ -1,20 +1,30 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { BrainCircuit, Sparkles } from "lucide-react";
+
 import { QueryBuilder } from "@features/query/QueryBuilder";
 import { QueryHistoryPanel } from "@features/query/QueryHistoryPanel";
 import { useSubmitQuery } from "@features/query/useSubmitQuery";
+import { useChatHistory } from "@features/query/useChatHistory";
 import { useQueryStore } from "@store/queryStore";
 import { ChatThread } from "@features/query/ChatThread";
+import { getThreadMessages } from "@services/index";
 
 interface QueryPageLocationState {
   prefillQuery?: string;
 }
 
 export default function QueryPage() {
+  // Fetch overall conversation history on mount
+  useChatHistory();
+
   const submitQuery = useSubmitQuery();
   const conversations = useQueryStore((s) => s.conversations);
   const activeConversationId = useQueryStore((s) => s.activeConversationId);
+  const getThreadId = useQueryStore((s) => s.getThreadId);
+  const setMessagesForConversation = useQueryStore((s) => s.setMessagesForConversation);
+
   const location = useLocation();
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -23,6 +33,25 @@ export default function QueryPage() {
   );
   const messages = activeConversation?.messages ?? [];
 
+  // Lazily fetch messages the first time a conversation is opened
+  const activeThreadId = activeConversationId
+    ? getThreadId(activeConversationId)
+    : undefined;
+  const shouldFetchMessages = activeConversation?.messagesLoaded === false;
+
+  const { data: fetchedMessages } = useQuery({
+    queryKey: ["chatMessages", activeThreadId],
+    queryFn: () => getThreadMessages(activeThreadId!),
+    enabled: !!activeThreadId && shouldFetchMessages,
+  });
+
+  useEffect(() => {
+    if (fetchedMessages && activeConversationId) {
+      setMessagesForConversation(activeConversationId, fetchedMessages);
+    }
+  }, [fetchedMessages, activeConversationId, setMessagesForConversation]);
+
+  // Auto-scroll when new messages land
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
@@ -46,7 +75,6 @@ export default function QueryPage() {
 
   return (
     <div className="relative flex h-[calc(100vh-6rem)] w-full max-w-full gap-6 overflow-hidden">
-      {" "}
       {/* Main Chat & Input Column */}
       <div className="flex flex-1 min-w-0 flex-col h-full items-center justify-between">
         {!hasActivity ? (
@@ -123,6 +151,7 @@ export default function QueryPage() {
           </div>
         )}
       </div>
+
       {/* Right History Panel */}
       <div className="hidden shrink-0 h-full lg:block">
         <QueryHistoryPanel />
