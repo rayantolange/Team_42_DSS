@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.models.enums import DecisionStatusEnum
-from app.schemas.decision import DecisionCreate, DecisionUpdate, DecisionResponse, DecisionSummary
+from app.schemas.decision import DecisionCreate, DecisionUpdate, DecisionResponse, DecisionSummary, GraphResponse
 from app.services.decision_service import DecisionService
 from app.core.access import check_decision_access
 from app.core.permissions import allow_academics
@@ -80,6 +80,31 @@ def list_decisions(
         skip=skip,
         limit=limit,
     )
+
+@router.get(
+    "/graph",
+    response_model=GraphResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_decisions_graph(
+    status_filter: Optional[DecisionStatusEnum] = None,
+    skip: int = 0,
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(allow_academics),
+):
+    """
+    Single bulk endpoint for Graph Explorer: decisions + their
+    strategies/constraints/outcomes in one round trip.
+    """
+    service = DecisionService(db)
+    decisions, links_by_decision = service.get_graph_data(
+        department_id=current_user.department_id,
+        status=status_filter,
+        skip=skip,
+        limit=limit,
+    )
+    return {"decisions": decisions, "links_by_decision": links_by_decision}
 
 
 # -------------------------------------------------------

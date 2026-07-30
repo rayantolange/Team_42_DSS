@@ -15,3 +15,5 @@ class RAGState(TypedDict):
     vector_results: Optional[List[dict]]
     answer: Optional[str]
     citations: Optional[List[dict]]
+    confidence_score: Optional[float]   
+    confidence_level: Optional[str]     
