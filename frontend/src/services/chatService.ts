@@ -120,6 +120,7 @@ export async function sendMessage(
   const { data } = await apiClient.post<BackendChatMessageResponse>(
     `/chat/threads/${threadId}/messages`,
     { content, mode },
+    { timeout: 0 }, // RAG/LLM responses can take much longer than the 15s default
   );
   return {
     answer: data.content,
