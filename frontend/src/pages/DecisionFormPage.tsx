@@ -25,7 +25,8 @@ export default function DecisionFormPage() {
   const canSubmit =
     title.trim().length >= 3 &&
     problemStatement.trim().length >= 10 &&
-    decisionDesc.trim().length >= 10;
+    decisionDesc.trim().length >= 10 &&
+    decisionDate.trim().length > 0;
 
   async function handleNext() {
     if (!canSubmit) return;
@@ -35,7 +36,7 @@ export default function DecisionFormPage() {
         problemStatement: problemStatement.trim(),
         decisionDesc: decisionDesc.trim(),
         decisionType: decisionType || undefined,
-        decisionDate: decisionDate || undefined,
+        decisionDate: decisionDate,
       });
       // Move to step 2 (documents) of the wizard for the new decision
       navigate(`/decisions/${created.decisionId}/new/documents`);
@@ -136,7 +137,7 @@ export default function DecisionFormPage() {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium" htmlFor="decisionDate">
-              Decision Date
+              Decision Date <span className="text-destructive">*</span>
             </label>
             <input
               id="decisionDate"

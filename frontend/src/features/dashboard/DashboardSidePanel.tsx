@@ -1,33 +1,33 @@
 import { Link } from "react-router-dom";
-import { Plus, Upload, Sparkles, AlertTriangle, Activity, HardDrive, CheckCircle2 } from "lucide-react";
+import { Plus, Upload, Sparkles, AlertTriangle, Activity, ClipboardCheck, CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@components/ui/Card";
 import { Button } from "@components/ui/Button";
-import type { DepartmentComparisonRow } from "@services/mock/dashboardService";
+import type { DepartmentComparisonRow } from "@services/dashboardService";
 
 interface DashboardSidePanelProps {
   departmentComparison: DepartmentComparisonRow[];
-  storagePercentUsed: number;
+  outcomeCoveragePercent: number;
 }
 
 /**
- * Finds the department with the most concerning negative/total ratio
- * (min. 3 decisions, so a single bad outcome doesn't trigger a false
- * alarm) — a real signal from the loaded data, not a scripted demo
- * alert. Returns null when nothing stands out.
+ * Finds the department with the most concerning failed/total outcome
+ * ratio (min. 3 outcomes recorded, so a single bad result doesn't
+ * trigger a false alarm). Returns null when nothing stands out.
  */
 function findNotableDepartment(rows: DepartmentComparisonRow[]) {
-  let worst: { row: DepartmentComparisonRow; ratio: number } | null = null;
+  let worst: { row: DepartmentComparisonRow; total: number; ratio: number } | null = null;
   for (const row of rows) {
-    if (row.totalDecisions < 3) continue;
-    const ratio = row.negative / row.totalDecisions;
+    const total = row.successful + row.partiallySuccessful + row.failed;
+    if (total < 3) continue;
+    const ratio = row.failed / total;
     if (ratio >= 0.34 && (!worst || ratio > worst.ratio)) {
-      worst = { row, ratio };
+      worst = { row, total, ratio };
     }
   }
   return worst;
 }
 
-export function DashboardSidePanel({ departmentComparison, storagePercentUsed }: DashboardSidePanelProps) {
+export function DashboardSidePanel({ departmentComparison, outcomeCoveragePercent }: DashboardSidePanelProps) {
   const notable = findNotableDepartment(departmentComparison);
 
   return (
@@ -38,15 +38,15 @@ export function DashboardSidePanel({ departmentComparison, storagePercentUsed }:
         </CardHeader>
         <CardContent className="flex flex-col gap-2.5 pt-2">
           <Button asChild className="w-full justify-start">
-            <Link to="/query">
+            <Link to="/decisions/new">
               <Plus className="h-4 w-4" aria-hidden="true" />
-              New Query
+              New Decision
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-full justify-start">
-            <Link to="/documents">
+            <Link to="/decisions">
               <Upload className="h-4 w-4" aria-hidden="true" />
-              Upload Document
+              View Decisions
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-full justify-start">
@@ -57,7 +57,6 @@ export function DashboardSidePanel({ departmentComparison, storagePercentUsed }:
           </Button>
         </CardContent>
       </Card>
-
       {notable ? (
         <Card className="border-warning/30 bg-warning/[0.06]">
           <CardContent className="flex flex-col gap-3 pt-6">
@@ -66,10 +65,10 @@ export function DashboardSidePanel({ departmentComparison, storagePercentUsed }:
                 <AlertTriangle className="h-4.5 w-4.5" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Elevated negative outcomes detected</p>
+                <p className="text-sm font-semibold">Elevated failed outcomes detected</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {notable.row.departmentName} has {notable.row.negative} of {notable.row.totalDecisions}{" "}
-                  recent decisions marked as negative outcomes — worth a closer look.
+                  {notable.row.departmentName} has {notable.row.failed} of {notable.total} recorded
+                  outcomes marked as failed — worth a closer look.
                 </p>
               </div>
             </div>
@@ -96,7 +95,6 @@ export function DashboardSidePanel({ departmentComparison, storagePercentUsed }:
           </CardContent>
         </Card>
       )}
-
       <Card className="transition-shadow duration-200 hover:shadow-card-hover">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold">Platform Health</CardTitle>
@@ -105,25 +103,22 @@ export function DashboardSidePanel({ departmentComparison, storagePercentUsed }:
           <div>
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-1.5 font-medium">
-                <HardDrive className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-                Document storage
+                <ClipboardCheck className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+                Outcome coverage
               </span>
-              <span className="text-muted-foreground">{storagePercentUsed}%</span>
+              <span className="text-muted-foreground">{outcomeCoveragePercent}%</span>
             </div>
-            {storagePercentUsed > 0 ? (
-              <div className="mt-2 h-2 w-full rounded-full bg-muted">
-                <div
-                  className={`h-2 rounded-full transition-all ${
-                    storagePercentUsed >= 80 ? "bg-warning" : "bg-primary"
-                  }`}
-                  style={{ width: `${Math.max(storagePercentUsed, 3)}%` }}
-                />
-              </div>
-            ) : (
-              <div className="mt-2 flex h-2 w-full items-center overflow-hidden rounded-full bg-muted">
-                <div className="h-full w-full bg-[repeating-linear-gradient(135deg,hsl(var(--border))_0px,hsl(var(--border))_4px,transparent_4px,transparent_8px)] opacity-60" />
-              </div>
-            )}
+            <div className="mt-2 h-2 w-full rounded-full bg-muted">
+              <div
+                className={`h-2 rounded-full transition-all ${
+                  outcomeCoveragePercent >= 60 ? "bg-primary" : "bg-warning"
+                }`}
+                style={{ width: `${Math.max(outcomeCoveragePercent, 3)}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              Share of decisions with a recorded outcome
+            </p>
           </div>
           <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2.5">
             <span className="flex items-center gap-1.5 text-sm font-medium">

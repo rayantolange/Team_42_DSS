@@ -15,26 +15,39 @@ import {
   Area,
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@components/ui/Card";
-import type { DepartmentComparisonRow, TrendPoint } from "@services/index";
+import type { DepartmentComparisonRow, TrendPoint, OutcomeBreakdownItem } from "@services/dashboardService";
 import { cn } from "@utils/cn";
 
-const SENTIMENT_COLORS: Record<string, string> = {
-  positive: "#059669",
-  negative: "#dc2626",
-  neutral: "#94a3b8",
+const OUTCOME_STATUS_COLORS: Record<string, string> = {
+  successful: "#059669",
+  partially_successful: "#d97706",
+  failed: "#dc2626",
+};
+const OUTCOME_STATUS_LABELS: Record<string, string> = {
+  successful: "Successful",
+  partially_successful: "Partially Successful",
+  failed: "Failed",
 };
 
-const SENTIMENT_LABELS: Record<string, string> = {
-  positive: "Positive",
-  negative: "Negative",
-  neutral: "Neutral",
+const DECISION_STATUS_COLORS: Record<string, string> = {
+  draft: "#94a3b8",
+  approved: "#2563eb",
+  implemented: "#7c3aed",
+  completed: "#059669",
+  cancelled: "#dc2626",
+};
+const DECISION_STATUS_LABELS: Record<string, string> = {
+  draft: "Draft",
+  approved: "Approved",
+  implemented: "Implemented",
+  completed: "Completed",
+  cancelled: "Cancelled",
 };
 
 const AXIS_TICK_STYLE = { fontSize: 12, fill: "hsl(var(--muted-foreground))" };
 const GRID_STROKE = "hsl(var(--border))";
 const CHART_ANIMATION_MS = 900;
 
-/** Shared tooltip styling — matches the app's card/shadow/border tokens instead of Recharts' plain default box. */
 function ChartTooltip({
   active,
   payload,
@@ -61,7 +74,6 @@ function ChartTooltip({
   );
 }
 
-/** Renders the hovered donut slice slightly enlarged — the standard Recharts active-shape pattern. */
 function renderActiveDonutShape(props: unknown) {
   const p = props as {
     cx: number;
@@ -87,10 +99,9 @@ function renderActiveDonutShape(props: unknown) {
 }
 
 interface OutcomePieChartProps {
-  data: { sentiment: string; count: number }[];
+  data: OutcomeBreakdownItem[];
 }
 
-/** Donut chart of decision outcomes by sentiment, with a centered total and a clickable legend. */
 export function OutcomePieChart({ data }: OutcomePieChartProps) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -99,11 +110,11 @@ export function OutcomePieChart({ data }: OutcomePieChartProps) {
     <Card className="transition-shadow duration-200 hover:shadow-card-hover">
       <CardHeader>
         <CardTitle>Outcome Breakdown</CardTitle>
-        <CardDescription>Distribution of decision outcomes by sentiment</CardDescription>
+        <CardDescription>Distribution of recorded outcomes by result</CardDescription>
       </CardHeader>
       <CardContent>
         {total === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">No decisions to display yet.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">No outcomes recorded yet.</p>
         ) : (
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
             <div className="relative h-[220px] w-full max-w-[220px] shrink-0">
@@ -112,7 +123,7 @@ export function OutcomePieChart({ data }: OutcomePieChartProps) {
                   <Pie
                     data={data}
                     dataKey="count"
-                    nameKey="sentiment"
+                    nameKey="status"
                     cx="50%"
                     cy="50%"
                     innerRadius={62}
@@ -120,16 +131,16 @@ export function OutcomePieChart({ data }: OutcomePieChartProps) {
                     paddingAngle={3}
                     cornerRadius={6}
                     animationDuration={CHART_ANIMATION_MS}
-                    activeIndex={hovered ? data.findIndex((d) => d.sentiment === hovered) : undefined}
+                    activeIndex={hovered ? data.findIndex((d) => d.status === hovered) : undefined}
                     activeShape={renderActiveDonutShape}
-                    onMouseEnter={(entry: { sentiment?: string }) => setHovered(entry.sentiment ?? null)}
+                    onMouseEnter={(entry: { status?: string }) => setHovered(entry.status ?? null)}
                     onMouseLeave={() => setHovered(null)}
                   >
                     {data.map((entry) => (
                       <Cell
-                        key={entry.sentiment}
-                        fill={SENTIMENT_COLORS[entry.sentiment] ?? "#999"}
-                        opacity={hovered && hovered !== entry.sentiment ? 0.35 : 1}
+                        key={entry.status}
+                        fill={OUTCOME_STATUS_COLORS[entry.status] ?? "#999"}
+                        opacity={hovered && hovered !== entry.status ? 0.35 : 1}
                         className="transition-opacity duration-150"
                       />
                     ))}
@@ -142,27 +153,26 @@ export function OutcomePieChart({ data }: OutcomePieChartProps) {
                 <span className="text-xs text-muted-foreground">Total</span>
               </div>
             </div>
-
             <div className="flex w-full flex-col gap-2.5 sm:w-auto">
               {data.map((entry) => {
                 const pct = total > 0 ? Math.round((entry.count / total) * 100) : 0;
                 return (
                   <button
-                    key={entry.sentiment}
+                    key={entry.status}
                     type="button"
-                    onMouseEnter={() => setHovered(entry.sentiment)}
+                    onMouseEnter={() => setHovered(entry.status)}
                     onMouseLeave={() => setHovered(null)}
                     className={cn(
                       "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
-                      hovered === entry.sentiment ? "bg-accent" : "hover:bg-muted/60"
+                      hovered === entry.status ? "bg-accent" : "hover:bg-muted/60"
                     )}
                   >
                     <span
                       className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: SENTIMENT_COLORS[entry.sentiment] }}
+                      style={{ backgroundColor: OUTCOME_STATUS_COLORS[entry.status] }}
                     />
-                    <span className="min-w-[64px] font-medium">
-                      {SENTIMENT_LABELS[entry.sentiment] ?? entry.sentiment}
+                    <span className="min-w-[110px] font-medium">
+                      {OUTCOME_STATUS_LABELS[entry.status] ?? entry.status}
                     </span>
                     <span className="text-muted-foreground">{entry.count}</span>
                     <span className="ml-auto text-xs font-semibold text-muted-foreground">{pct}%</span>
@@ -181,13 +191,12 @@ interface DepartmentComparisonChartProps {
   data: DepartmentComparisonRow[];
 }
 
-/** Bar chart comparing decision volume and outcome mix across departments, with soft gradient fills. */
 export function DepartmentComparisonChart({ data }: DepartmentComparisonChartProps) {
   return (
     <Card className="transition-shadow duration-200 hover:shadow-card-hover">
       <CardHeader>
         <CardTitle>Department Comparison</CardTitle>
-        <CardDescription>Decision volume and outcomes by department</CardDescription>
+        <CardDescription>Outcome mix by department</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
@@ -196,10 +205,30 @@ export function DepartmentComparisonChart({ data }: DepartmentComparisonChartPro
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={data} layout="vertical" margin={{ left: 24 }} barGap={2}>
               <defs>
-                {(["positive", "neutral", "negative"] as const).map((key) => (
+                {(["successful", "partiallySuccessful", "failed"] as const).map((key) => (
                   <linearGradient key={key} id={`bar-gradient-${key}`} x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor={SENTIMENT_COLORS[key]} stopOpacity={0.55} />
-                    <stop offset="100%" stopColor={SENTIMENT_COLORS[key]} stopOpacity={1} />
+                    <stop
+                      offset="0%"
+                      stopColor={
+                        key === "successful"
+                          ? OUTCOME_STATUS_COLORS.successful
+                          : key === "partiallySuccessful"
+                            ? OUTCOME_STATUS_COLORS.partially_successful
+                            : OUTCOME_STATUS_COLORS.failed
+                      }
+                      stopOpacity={0.55}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor={
+                        key === "successful"
+                          ? OUTCOME_STATUS_COLORS.successful
+                          : key === "partiallySuccessful"
+                            ? OUTCOME_STATUS_COLORS.partially_successful
+                            : OUTCOME_STATUS_COLORS.failed
+                      }
+                      stopOpacity={1}
+                    />
                   </linearGradient>
                 ))}
               </defs>
@@ -208,36 +237,35 @@ export function DepartmentComparisonChart({ data }: DepartmentComparisonChartPro
               <YAxis type="category" dataKey="departmentName" width={160} tick={AXIS_TICK_STYLE} />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "hsl(var(--muted) / 0.4)" }} />
               <Bar
-                dataKey="positive"
+                dataKey="successful"
                 stackId="a"
-                fill="url(#bar-gradient-positive)"
-                name="Positive"
+                fill="url(#bar-gradient-successful)"
+                name="Successful"
                 animationDuration={CHART_ANIMATION_MS}
               />
               <Bar
-                dataKey="neutral"
+                dataKey="partiallySuccessful"
                 stackId="a"
-                fill="url(#bar-gradient-neutral)"
-                name="Neutral"
+                fill="url(#bar-gradient-partiallySuccessful)"
+                name="Partially Successful"
                 animationDuration={CHART_ANIMATION_MS}
               />
               <Bar
-                dataKey="negative"
+                dataKey="failed"
                 stackId="a"
-                fill="url(#bar-gradient-negative)"
-                name="Negative"
+                fill="url(#bar-gradient-failed)"
+                name="Failed"
                 radius={[0, 4, 4, 0]}
                 animationDuration={CHART_ANIMATION_MS}
               />
             </BarChart>
           </ResponsiveContainer>
         )}
-
         <div className="mt-4 flex flex-wrap justify-center gap-4 border-t border-border pt-3">
-          {(["positive", "neutral", "negative"] as const).map((key) => (
+          {(["successful", "partially_successful", "failed"] as const).map((key) => (
             <span key={key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: SENTIMENT_COLORS[key] }} />
-              {SENTIMENT_LABELS[key]}
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OUTCOME_STATUS_COLORS[key] }} />
+              {OUTCOME_STATUS_LABELS[key]}
             </span>
           ))}
         </div>
@@ -250,13 +278,12 @@ interface TrendChartProps {
   data: TrendPoint[];
 }
 
-const TREND_SERIES = [
-  { key: "approved" as const, label: "Approved", color: SENTIMENT_COLORS.positive },
-  { key: "deferred" as const, label: "Deferred", color: SENTIMENT_COLORS.neutral },
-  { key: "rejected" as const, label: "Rejected", color: SENTIMENT_COLORS.negative },
-];
+const TREND_SERIES = (["draft", "approved", "implemented", "completed", "cancelled"] as const).map((key) => ({
+  key,
+  label: DECISION_STATUS_LABELS[key],
+  color: DECISION_STATUS_COLORS[key],
+}));
 
-/** Smooth gradient area chart of decision status trends, with a clickable legend to isolate a series. */
 export function TrendChart({ data }: TrendChartProps) {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
@@ -310,7 +337,6 @@ export function TrendChart({ data }: TrendChartProps) {
                 ))}
               </AreaChart>
             </ResponsiveContainer>
-
             <div className="mt-3 flex flex-wrap justify-center gap-2 border-t border-border pt-3">
               {TREND_SERIES.map((s) => {
                 const isHidden = hiddenSeries.has(s.key);

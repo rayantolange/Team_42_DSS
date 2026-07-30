@@ -24,14 +24,6 @@ export {
 export { fetchDepartmentById } from "./departmentService";
 
 export {
-  fetchDashboardMetrics,
-  fetchDashboardTrends,
-  type DashboardMetrics,
-  type DepartmentComparisonRow,
-  type TrendPoint,
-} from "./mock/dashboardService";
-
-export {
   fetchDocuments,
   uploadDocument,
   deleteDocument,
