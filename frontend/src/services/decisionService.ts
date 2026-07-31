@@ -67,7 +67,7 @@ export interface DecisionFilters {
 export async function fetchDecisions(
   filters: DecisionFilters = {}
 ): Promise<DecisionRecordSummary[]> {
-  const { data } = await apiClient.get<DecisionSummaryWire[]>("/decisions", {
+  const { data } = await apiClient.get<DecisionSummaryWire[]>("/decisions/", {
     params: {
       status_filter: filters.statusFilter,
       skip: filters.skip ?? 0,
@@ -87,7 +87,7 @@ export async function fetchDecisionById(decisionId: number): Promise<DecisionRec
 export async function createDecision(
   input: DecisionCreateInput
 ): Promise<DecisionRecord> {
-  const { data } = await apiClient.post<DecisionResponseWire>("/decisions", {
+  const { data } = await apiClient.post<DecisionResponseWire>("/decisions/", {
     title: input.title,
     problem_statement: input.problemStatement,
     decision_desc: input.decisionDesc,

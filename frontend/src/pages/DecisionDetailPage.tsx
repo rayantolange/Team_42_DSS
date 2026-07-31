@@ -9,6 +9,8 @@ import {
   Plus,
   AlertCircle,
   Download,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import {
   useDecision,
@@ -255,14 +257,39 @@ function DocumentsTab({ decisionId }: { decisionId: number }) {
               key={doc.documentId}
               className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm"
             >
-              <div className="flex items-center gap-2 truncate">
+              <div className="flex min-w-0 items-center gap-2">
                 <FileText
                   className="h-4 w-4 shrink-0 text-muted-foreground"
                   aria-hidden="true"
                 />
-                <span className="truncate">{doc.fileName}</span>
+                <div className="min-w-0">
+                  <span className="block truncate">{doc.fileName}</span>
+                  {doc.status === "failed" && doc.statusMessage && (
+                    <span className="block truncate text-xs text-destructive">
+                      {doc.statusMessage}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex shrink-0 items-center gap-1">
+                {(doc.status === "pending" || doc.status === "processing") && (
+                  <Loader2
+                    className="h-4 w-4 animate-spin text-primary"
+                    aria-label="Processing"
+                  />
+                )}
+                {doc.status === "completed" && (
+                  <CheckCircle2
+                    className="h-4 w-4 text-success"
+                    aria-label="Ready"
+                  />
+                )}
+                {doc.status === "failed" && (
+                  <AlertCircle
+                    className="h-4 w-4 text-destructive"
+                    aria-label="Failed"
+                  />
+                )}
                 <button
                   onClick={() => handleDownload(doc.documentId)}
                   className="rounded p-1 text-muted-foreground hover:bg-accent"

@@ -3,7 +3,7 @@
 from typing import List, Optional
 import re
 import fitz  # PyMuPDF
-
+import base64
 
 from app.services.embedding_service import EmbeddingService
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.repositories.document_repository import DocumentRepository
 from app.schemas.documents import DocumentCreate
+from app.models.enums import DocumentStatusEnum
 
 
 class DocumentService:
@@ -39,15 +40,9 @@ class DocumentService:
         file_bytes: Optional[bytes] = None,
     ) -> Document:
         """
-        Creates a new document record.
-
-        Business Rules:
-        - A decision cannot contain two files with the same name.
-        - The physical file should already exist in storage before
-          calling this (file_bytes here is only used for extraction,
-          not for the upload itself).
+        Creates a new document record and, for PDFs, enqueues background
+        extraction + embedding via Celery instead of blocking the request.
         """
-
         if self.document_repo.file_exists_on_decision(
             decision_id=decision_id,
             file_name=data.file_name,
@@ -56,16 +51,21 @@ class DocumentService:
                 "A document with this file name already exists for this decision."
             )
 
+        is_pdf = data.file_name.lower().endswith(".pdf")
+
         document = self.document_repo.create(
             decision_id=decision_id,
             uploaded_by=uploaded_by,
             file_name=data.file_name,
             file_path=data.file_path,
             upload_date=data.upload_date,
+            status=DocumentStatusEnum.pending if is_pdf else DocumentStatusEnum.completed,
         )
 
-        if file_bytes is not None:
-            self._extract_and_embed(document, file_bytes)
+        if file_bytes is not None and is_pdf:
+            from app.tasks.document_tasks import process_document_task
+            file_bytes_b64 = base64.b64encode(file_bytes).decode("utf-8")
+            process_document_task.delay(document.document_id, file_bytes_b64)
 
         return document
 

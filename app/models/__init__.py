@@ -13,6 +13,7 @@ from app.models.document_page import DocumentPage
 from app.models.outcome import Outcome
 from app.models.embedding import Embedding
 from app.models.chat import ChatThread, ChatMessage, MessageCitation
+from app.models.refresh_token import RefreshToken
 
 __all__ = [
     "Base",
@@ -21,4 +22,5 @@ __all__ = [
     "Department", "User", "Decision", "Strategy", "ConstraintMaster",
     "DecisionStrategy", "DecisionConstraint", "Document", "DocumentPage",
     "Outcome", "Embedding", "ChatThread", "ChatMessage", "MessageCitation",
+    "RefreshToken",
 ]

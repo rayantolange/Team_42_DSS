@@ -35,3 +35,9 @@ class ChatRoleEnum(str, enum.Enum):
 class ChatModeEnum(str, enum.Enum):
     chat = "chat"
     rag_search = "rag_search"
+
+class DocumentStatusEnum(str, enum.Enum):
+    pending = "pending"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"

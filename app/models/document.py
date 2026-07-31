@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Date
+from sqlalchemy import Column, Enum, Integer, String, Text, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.models.base import Base
+from app.models.enums import DocumentStatusEnum
 
 
 class Document(Base):
@@ -15,6 +16,13 @@ class Document(Base):
     file_path = Column(Text, nullable=False)
     upload_date = Column(Date, server_default=func.current_date())
     created_at = Column(DateTime(timezone=False), server_default=func.now())
+
+    status = Column(
+        Enum(DocumentStatusEnum, name="documentstatusenum"),
+        nullable=False,
+        server_default=DocumentStatusEnum.pending.value,
+    )
+    status_message = Column(Text, nullable=True)  # NEW — populated on failure
 
     # Relationships
     decision = relationship("Decision", back_populates="documents")

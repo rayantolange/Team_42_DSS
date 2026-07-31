@@ -5,11 +5,24 @@ import {
   deleteDocument,
   fetchAllDocuments,
 } from "@services/decisionDocumentService";
+import type { DecisionDocument } from "@/types/domain";
+
+// Polls every 3s while anything is still processing; stops once
+// everything has settled into completed/failed, so we're not
+// hammering the API forever after a document finishes.
+function pollWhileProcessing(documents: DecisionDocument[] | undefined) {
+  if (!documents) return false;
+  const stillWorking = documents.some(
+    (d) => d.status === "pending" || d.status === "processing",
+  );
+  return stillWorking ? 3000 : false;
+}
 
 export function useAllDocuments() {
   return useQuery({
     queryKey: ["documents", "all"],
     queryFn: fetchAllDocuments,
+    refetchInterval: (query) => pollWhileProcessing(query.state.data),
   });
 }
 export function useDecisionDocuments(decisionId: number) {
@@ -17,6 +30,7 @@ export function useDecisionDocuments(decisionId: number) {
     queryKey: ["decisions", decisionId, "documents"],
     queryFn: () => fetchDocumentsForDecision(decisionId),
     enabled: !!decisionId,
+    refetchInterval: (query) => pollWhileProcessing(query.state.data),
   });
 }
 

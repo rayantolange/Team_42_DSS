@@ -67,7 +67,7 @@ class AuthService:
 
         return {
             "access_token": access_token,
-            "token_type": "bearer",
+            "token_type": "bearer", # nosec B105 - OAuth2 standard token type label, not a credential
             "user_id": user.user_id,
             "full_name": user.full_name,
             "role": user.role,
@@ -91,7 +91,7 @@ class AuthService:
 
         return {
             "access_token": new_access_token,
-            "token_type": "bearer",
+            "token_type": "bearer", # nosec B105 - OAuth2 standard token type label, not a credential
             "user_id": user.user_id,
             "full_name": user.full_name,
             "role": user.role,

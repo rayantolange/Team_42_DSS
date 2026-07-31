@@ -3,12 +3,6 @@
  * app's hooks/components. Currently re-exports mock implementations
  * since the team's FastAPI endpoints aren't available yet.
  *
- * To switch a given resource to the real backend once its endpoint
- * is ready: replace that resource's export here with a real
- * apiClient-based implementation (see services/apiClient.ts for the
- * configured Axios instance with JWT injection + 401 handling). No
- * caller needs to change, since they all import from "@services/index"
- * rather than reaching into services/mock directly.
  */
 
 export {
@@ -23,14 +17,8 @@ export {
 
 export { fetchDepartmentById } from "./departmentService";
 
-export {
-  fetchDocuments,
-  uploadDocument,
-  deleteDocument,
-  validateFile,
-} from "./mock/uploadService";
-
 export { login } from "./authService";
+
 export { register, type RegisterRequest } from "./authService";
 
 export { requestPasswordReset, resetPassword } from "./authService";

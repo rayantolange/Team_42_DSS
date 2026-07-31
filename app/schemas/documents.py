@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict
+from app.models.enums import DocumentStatusEnum 
 
 
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".png", ".jpg", ".jpeg"}
@@ -97,6 +98,13 @@ class DocumentResponse(BaseModel):
     created_at: datetime = Field(
         description="Timestamp when this record was created in the DB."
     )
+    status: DocumentStatusEnum = Field(                        
+        description="Processing status: pending, processing, completed, or failed."
+    )
+    status_message: Optional[str] = Field(                     
+        default=None,
+        description="Error detail if status is failed."
+    )
 
 
 # -------------------------------------------------------
@@ -118,20 +126,6 @@ class DocumentSummary(BaseModel):
     uploaded_by: int
     upload_date: Optional[date] = None
     created_at: datetime
+    status: DocumentStatusEnum                                 
+    status_message: Optional[str] = None 
 
-# DocumentCreate POST /decisions/{id}/documents Metadata saved after file is stored
-# DocumentResponse GET /documents/{id}, upload response Full detail of one document
-# DocumentSummary GET /decisions/{id}/documents List view, no file_path exposed
-
-# @router.post("/decisions/{decision_id}/documents")
-# async def upload_document(
-#     decision_id: int,
-#     file: UploadFile,                  # FastAPI handles the bytes
-#     current_user: User = Depends(...)
-# ):
-#     file_path = await save_file(file)  # your storage logic
-#     doc_data = DocumentCreate(
-#         file_name=file.filename,
-#         file_path=file_path
-#     )
-#     return document_service.create(decision_id, doc_data, current_user)

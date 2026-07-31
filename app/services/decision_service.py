@@ -156,38 +156,18 @@ class DecisionService:
         decision_id: int,
         new_status: DecisionStatusEnum,
     ) -> Decision:
-        """
-        Enforces the decision workflow.
-
-        Workflow:
-
-        draft
-            ↓
-        approved
-            ↓
-        implemented
-            ↓
-        completed
-
-        cancelled can be reached from any non-terminal state
-        and is terminal.
-        """
-
         decision = self.get_decision(decision_id)
 
-        # Cannot change a cancelled decision
+        # Terminal states — cannot be modified at all, including cancellation
         if decision.status == DecisionStatusEnum.cancelled:
-            raise ValueError(
-                "Cancelled decisions cannot be modified."
-            )
+            raise ValueError("Cancelled decisions cannot be modified.")
+        if decision.status == DecisionStatusEnum.completed:
+            raise ValueError("Completed decisions cannot be modified.")
 
-        # Allow cancelling at any time
+        # Allow cancelling at any time (from any remaining non-terminal state)
         if new_status == DecisionStatusEnum.cancelled:
-            cancelled = self.decision_repo.update_status(
-                decision,
-                new_status,
-            )
-            self.graph_sync_service.sync_decision(cancelled)  # add
+            cancelled = self.decision_repo.update_status(decision, new_status)
+            self.graph_sync_service.sync_decision(cancelled)
             return cancelled
 
         status_order = [
@@ -197,15 +177,8 @@ class DecisionService:
             DecisionStatusEnum.completed,
         ]
 
-        # Completed is terminal
-        if decision.status == DecisionStatusEnum.completed:
-            raise ValueError(
-                "Completed decisions cannot be modified."
-            )
-
         current_index = status_order.index(decision.status)
         expected_next = status_order[current_index + 1]
-
         if new_status != expected_next:
             raise ValueError(
                 f"Decision can only move from "
@@ -213,9 +186,8 @@ class DecisionService:
                 f"to "
                 f"{expected_next.value}."
             )
-
         updated = self.decision_repo.update_status(decision, new_status)
-        self.graph_sync_service.sync_decision(updated)  # add
+        self.graph_sync_service.sync_decision(updated)
         return updated
 
 # -------------------------------------------------------

@@ -223,6 +223,8 @@ export interface ConstraintCreateInput {
   description?: string;
 }
 
+export type DocumentStatus = "pending" | "processing" | "completed" | "failed";
+
 export interface DecisionDocument {
   documentId: number;
   decisionId: number;
@@ -231,6 +233,8 @@ export interface DecisionDocument {
   filePath?: string;
   uploadDate?: string;
   createdAt: string;
+  status: DocumentStatus;
+  statusMessage?: string;
 }
 
 export type OutcomeStatus = "successful" | "partially_successful" | "failed";

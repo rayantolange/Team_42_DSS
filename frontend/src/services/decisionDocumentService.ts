@@ -1,5 +1,5 @@
 import { apiClient } from "./apiClient";
-import type { DecisionDocument } from "@/types/domain";
+import type { DecisionDocument, DocumentStatus } from "@/types/domain";
 
 interface DocumentSummaryWire {
   document_id: number;
@@ -7,6 +7,8 @@ interface DocumentSummaryWire {
   uploaded_by: number;
   upload_date?: string | null;
   created_at: string;
+  status: DocumentStatus;
+  status_message?: string | null;
 }
 
 interface DocumentResponseWire extends DocumentSummaryWire {
@@ -25,6 +27,8 @@ function toDocSummary(
     fileName: w.file_name,
     uploadDate: w.upload_date ?? undefined,
     createdAt: w.created_at,
+    status: w.status,
+    statusMessage: w.status_message ?? undefined,
   };
 }
 
@@ -37,6 +41,8 @@ function toDocResponse(w: DocumentResponseWire): DecisionDocument {
     filePath: w.file_path,
     uploadDate: w.upload_date ?? undefined,
     createdAt: w.created_at,
+    status: w.status,
+    statusMessage: w.status_message ?? undefined,
   };
 }
 
@@ -85,6 +91,8 @@ export async function fetchAllDocuments(): Promise<DecisionDocument[]> {
       upload_date?: string | null;
       created_at: string;
       decision_id: number;
+      status: DocumentStatus;
+      status_message?: string | null;
     }>
   >("/documents");
 
@@ -95,5 +103,7 @@ export async function fetchAllDocuments(): Promise<DecisionDocument[]> {
     fileName: w.file_name,
     uploadDate: w.upload_date ?? undefined,
     createdAt: w.created_at,
+    status: w.status,                              
+    statusMessage: w.status_message ?? undefined,
   }));
 }

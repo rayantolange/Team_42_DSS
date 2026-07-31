@@ -27,6 +27,8 @@ build/
 # Python
 **/__pycache__/
 *.py[cod]
+*.pyc
+
 
 # Coverage reports
 coverage/
@@ -39,3 +41,16 @@ frontend/.vite/
 .ipynb_checkpoints/
 
 /.venv
+
+# Ignore Redis database dumps
+dump.rdb
+*.rdb
+
+# Security and Error Scans / Reports
+*bandit*
+*sentry*
+*_report.txt
+*.log
+
+# Testing generated files
+Testing/**/coverage/

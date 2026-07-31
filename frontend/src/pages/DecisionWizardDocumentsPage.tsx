@@ -8,6 +8,7 @@ import {
   X,
   AlertCircle,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import {
   useDecisionDocuments,
@@ -100,20 +101,48 @@ export default function DecisionWizardDocumentsPage() {
                 key={doc.documentId}
                 className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm"
               >
-                <div className="flex items-center gap-2 truncate">
+                <div className="flex min-w-0 items-center gap-2">
                   <FileText
                     className="h-4 w-4 shrink-0 text-muted-foreground"
                     aria-hidden="true"
                   />
-                  <span className="truncate">{doc.fileName}</span>
+                  <div className="min-w-0">
+                    <span className="block truncate">{doc.fileName}</span>
+                    {doc.status === "failed" && doc.statusMessage && (
+                      <span className="block truncate text-xs text-destructive">
+                        {doc.statusMessage}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <button
-                  onClick={() => remove.mutate(doc.documentId)}
-                  className="shrink-0 rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  aria-label={`Remove ${doc.fileName}`}
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  {(doc.status === "pending" ||
+                    doc.status === "processing") && (
+                    <Loader2
+                      className="h-4 w-4 animate-spin text-primary"
+                      aria-label="Processing"
+                    />
+                  )}
+                  {doc.status === "completed" && (
+                    <CheckCircle2
+                      className="h-4 w-4 text-success"
+                      aria-label="Ready"
+                    />
+                  )}
+                  {doc.status === "failed" && (
+                    <AlertCircle
+                      className="h-4 w-4 text-destructive"
+                      aria-label="Failed"
+                    />
+                  )}
+                  <button
+                    onClick={() => remove.mutate(doc.documentId)}
+                    className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Remove ${doc.fileName}`}
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

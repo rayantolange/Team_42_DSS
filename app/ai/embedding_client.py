@@ -29,6 +29,17 @@ def embed_document(text: str) -> list[float]:
     prefixed = f"search_document: {text}"
     return model.encode(prefixed, normalize_embeddings=True).tolist()
 
+def embed_documents_batch(texts: list[str]) -> list[list[float]]:
+    """
+    Embed multiple STORED/searched texts in a single batched call.
+    Far faster than looping embed_document() per chunk — the model
+    processes the whole batch together instead of one string at a time.
+    """
+    model = get_model()
+    prefixed = [f"search_document: {t}" for t in texts]
+    vectors = model.encode(prefixed, normalize_embeddings=True)
+    return vectors.tolist()
+
 
 def embed_query(text: str) -> list[float]:
     """

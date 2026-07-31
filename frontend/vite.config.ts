@@ -1,13 +1,9 @@
-import { defineConfig } from "vite";
+import { defineConfig, mergeConfig } from "vite";
+import { defineConfig as defineVitestConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-// Path aliases (@, @app, @routes, etc.) are defined once in
-// tsconfig.json's "paths" and synced into Vite automatically by
-// vite-tsconfig-paths, so there's no risk of the two configs
-// drifting out of sync or of prefix-collision bugs from manually
-// listing overlapping "@..." keys in resolve.alias.
-export default defineConfig({
+const viteConfig = defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
     port: 5173,
@@ -17,8 +13,6 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        // Manual chunking so route-level code splitting produces
-        // sensible vendor bundles instead of one giant chunk.
         manualChunks: {
           "react-vendor": ["react", "react-dom", "react-router-dom"],
           "query-vendor": ["@tanstack/react-query"],
@@ -30,3 +24,23 @@ export default defineConfig({
   },
 });
 
+const vitestConfig = defineVitestConfig({
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+    css: true,
+
+    coverage: {
+      provider: "v8",
+      reporter: [
+        "text",
+        "html",
+        "lcov"
+      ],
+      reportsDirectory: "../Testing/frontend/coverage",
+    },
+  },
+});
+
+export default mergeConfig(viteConfig, vitestConfig);

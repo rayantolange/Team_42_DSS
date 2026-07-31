@@ -19,3 +19,9 @@ pymupdf
 langgraph
 groq
 neo4j
+bandit
+safety
+sentry-sdk[fastapi]
+celery
+redis
+flower

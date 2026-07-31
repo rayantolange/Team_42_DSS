@@ -25,8 +25,8 @@
     "exactOptionalPropertyTypes": false,
 
     /* Path aliases */
-    "baseUrl": ".",
     "paths": {
+      "*": ["./*"] ,
       "@/*": ["./src/*"],
       "@app/*": ["./src/app/*"],
       "@routes/*": ["./src/routes/*"],

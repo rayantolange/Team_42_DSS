@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.repositories.base import BaseRepository
 from app.models.document_page import DocumentPage
+from app.models.enums import DocumentStatusEnum 
 
 class DocumentRepository(BaseRepository[Document]):
     """
@@ -136,6 +137,7 @@ class DocumentRepository(BaseRepository[Document]):
         file_name: str,
         file_path: str,
         upload_date=None,
+        status: DocumentStatusEnum = DocumentStatusEnum.pending,  # NEW
     ) -> Document:
         """
         Creates and persists a new document record.
@@ -149,6 +151,7 @@ class DocumentRepository(BaseRepository[Document]):
             file_name=file_name,
             file_path=file_path,
             upload_date=upload_date,
+            status=status,  # NEW
         )
         return self.save(new_document)
 

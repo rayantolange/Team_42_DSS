@@ -1,0 +1,32 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.6, pytest-9.1.1, pluggy-1.6.0 -- /home/ryan/Team_42_DSS/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/ryan/Team_42_DSS
+configfile: pytest.ini
+testpaths: Testing/backend
+plugins: anyio-4.14.2, langsmith-0.10.10, Faker-40.36.0, mock-3.15.1, cov-7.1.0, asyncio-1.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 14 items
+
+Testing/backend/integration/test_constraints_routes.py::test_cannot_list_constraints_for_other_departments_decision PASSED [  7%]
+Testing/backend/integration/test_constraints_routes.py::test_can_list_constraints_for_own_departments_decision PASSED [ 14%]
+Testing/backend/integration/test_outcome_service.py::test_outcome_blocked_for_non_implemented_decision[draft] PASSED [ 21%]
+Testing/backend/integration/test_outcome_service.py::test_outcome_blocked_for_non_implemented_decision[approved] PASSED [ 28%]
+Testing/backend/integration/test_outcome_service.py::test_outcome_blocked_for_non_implemented_decision[cancelled] PASSED [ 35%]
+Testing/backend/integration/test_outcome_service.py::test_outcome_allowed_for_implemented_or_completed_decision[implemented] PASSED [ 42%]
+Testing/backend/integration/test_outcome_service.py::test_outcome_allowed_for_implemented_or_completed_decision[completed] PASSED [ 50%]
+Testing/backend/unit/test_permissions.py::test_allow_academics_accepts_all_academic_roles[admin] PASSED [ 57%]
+Testing/backend/unit/test_permissions.py::test_allow_academics_accepts_all_academic_roles[principal] PASSED [ 64%]
+Testing/backend/unit/test_permissions.py::test_allow_academics_accepts_all_academic_roles[hod] PASSED [ 71%]
+Testing/backend/unit/test_permissions.py::test_allow_academics_accepts_all_academic_roles[faculty] PASSED [ 78%]
+Testing/backend/unit/test_permissions.py::test_allow_academics_accepts_all_academic_roles[staff] PASSED [ 85%]
+Testing/backend/unit/test_permissions.py::test_allow_academics_rejects_no_other_roles PASSED [ 92%]
+Testing/backend/unit/test_permissions.py::test_allow_admin_rejects_non_admin_roles PASSED [100%]
+
+=============================== warnings summary ===============================
+venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /home/ryan/Team_42_DSS/venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=================== 14 passed, 1 warning in 60.27s (0:01:00) ===================
