@@ -6,22 +6,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
-FROM_EMAIL = os.getenv("FROM_EMAIL", GMAIL_ADDRESS)
+BREVO_SMTP_LOGIN = os.getenv("BREVO_SMTP_LOGIN")
+BREVO_SMTP_KEY = os.getenv("BREVO_SMTP_KEY")
+FROM_EMAIL = os.getenv("FROM_EMAIL", BREVO_SMTP_LOGIN)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-SMTP_HOST = "smtp.gmail.com"
+SMTP_HOST = "smtp-relay.brevo.com"
 SMTP_PORT = 587
 
 
 def _send_email(to_email: str, subject: str, html_body: str) -> None:
     """
-    Sends a single HTML email via Gmail SMTP using an App Password.
-    Failure here should not silently corrupt the calling flow —
-    callers decide whether to raise or just log (this re-raises so
-    that decision stays with them, matching the previous Resend
-    behavior of raising on API failure).
+    Sends a single HTML email via Brevo's SMTP relay (free tier: 300
+    emails/day, no account-age restrictions unlike Gmail App Passwords).
     """
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -31,7 +28,7 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
         server.starttls()
-        server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+        server.login(BREVO_SMTP_LOGIN, BREVO_SMTP_KEY)
         server.sendmail(FROM_EMAIL, to_email, message.as_string())
 
 

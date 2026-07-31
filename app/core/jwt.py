@@ -4,6 +4,8 @@ from typing import Optional
 import jwt
 from jwt.exceptions import PyJWTError
 
+from datetime import datetime, timezone
+
 from app.core.config import (
     SECRET_KEY,
     ALGORITHM,
@@ -20,7 +22,7 @@ def create_access_token(
     """
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + (
+    expire = datetime.now(timezone.utc) + (
         expires_delta
         or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )

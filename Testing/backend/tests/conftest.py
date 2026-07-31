@@ -5,6 +5,10 @@ Uses a separate test database (a Neon branch, or any Postgres with
 pgvector installed) so tests never touch real data. Set TEST_DATABASE_URL
 in your environment (or a .env.test file) before running.
 """
+
+from dotenv import load_dotenv
+load_dotenv(".env.test")
+
 import os
 import pytest
 from sqlalchemy import create_engine

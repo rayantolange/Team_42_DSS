@@ -10,6 +10,8 @@ from app.core.config import (
     PASSWORD_RESET_EXPIRE_MINUTES,
 )
 
+from datetime import timezone
+
 
 def create_email_verification_token(
     user_id: int,
@@ -20,7 +22,7 @@ def create_email_verification_token(
     payload = {
         "sub": str(user_id),
         "scope": "email_verification",
-        "exp": datetime.utcnow()
+        "exp": datetime.now(timezone.utc)
         + timedelta(
             minutes=EMAIL_VERIFICATION_EXPIRE_MINUTES
         ),
