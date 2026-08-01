@@ -2,14 +2,12 @@ import base64
 import re
 from typing import List
 
-import fitz  
 
 from app.celery_app import celery_app
 from app.database import SessionLocal
 from app.models.document import Document
 from app.models.enums import DocumentStatusEnum
 from app.repositories.document_repository import DocumentRepository
-from app.services.embedding_service import EmbeddingService
 
 
 def _split_paragraphs(page_text: str) -> List[str]:
@@ -32,6 +30,9 @@ def process_document_task(document_id: int, file_bytes_b64: str) -> None:
     this to re-downloading from storage inside the task instead of
     passing bytes through the broker.
     """
+    import fitz
+    from app.services.embedding_service import EmbeddingService
+
     db = SessionLocal()
     try:
         document_repo = DocumentRepository(db)
