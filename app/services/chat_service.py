@@ -9,10 +9,13 @@ from app.models.enums import ChatRoleEnum, ChatModeEnum
 from app.models.user import User
 from app.repositories.chat_repository import ChatRepository
 from app.repositories.embedding_repository import EmbeddingRepository
-from app.ai.graph.graph import build_rag_graph
-from app.ai.graph.chat_graph import build_chat_graph  # new, written below
+from app.ai.graph.chat_graph import build_chat_graph  
 from app.ai.graph.nodes import _build_citation
 from app.models.enums import SourceTypeEnum
+from app.tasks.chat_tasks import rag_search_task
+from celery.exceptions import TimeoutError as CeleryTimeoutError
+
+
 HISTORY_LIMIT = 10  # max prior messages fed to the LLM as conversation context
 REFERENCE_ID_FIELD = {
         SourceTypeEnum.decision: "decision_id",
@@ -111,16 +114,18 @@ class ChatService:
     def _handle_rag_search(
         self, thread: ChatThread, query: str, current_user: User
     ) -> ChatMessageResponse:
-        graph = build_rag_graph(db=self.db)
-
-        result = graph.invoke({
-            "query": query,
-            "current_user": {
+        async_result = rag_search_task.delay(
+            query,
+            {
                 "user_id": current_user.user_id,
                 "role": current_user.role.value,
                 "department_id": current_user.department_id,
             },
-        })
+        )
+        try:
+            result = async_result.get(timeout=45)
+        except CeleryTimeoutError:
+            raise ValueError("Search is temporarily unavailable — please try again shortly.")
 
         assistant_message = self.chat_repo.create_message(
             thread_id=thread.thread_id,
@@ -155,8 +160,8 @@ class ChatService:
             content=assistant_message.content,
             created_at=assistant_message.created_at,
             citations=citations,
-            confidence_score=result.get("confidence_score"),   
-            confidence_level=result.get("confidence_level"),   
+            confidence_score=result.get("confidence_score"),
+            confidence_level=result.get("confidence_level"),
         )
 
     # -------------------------------------------------------

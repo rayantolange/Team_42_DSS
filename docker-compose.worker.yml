@@ -1,0 +1,10 @@
+services:
+  worker:
+    build:
+      context: .
+      args:
+        REQUIREMENTS_FILE: requirements-worker.txt
+    command: celery -A app.celery_app.celery_app worker --loglevel=info
+    env_file:
+      - .env.production
+    restart: always
