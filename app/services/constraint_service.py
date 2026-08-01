@@ -11,8 +11,7 @@ from app.schemas.constraint import (
     ConstraintUpdate,
     DecisionConstraintLink,
 )
-from app.services.embedding_service import EmbeddingService
-
+from app.tasks.embedding_tasks import embed_constraint_task
 
 class ConstraintService:
     """
@@ -26,7 +25,6 @@ class ConstraintService:
 
     def __init__(self, db: Session):
         self.constraint_repo = ConstraintRepository(db)
-        self.embedding_service = EmbeddingService(db)
         self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
@@ -45,7 +43,7 @@ class ConstraintService:
             description=data.description,
         )
 
-        self.embedding_service.embed_constraint(constraint)
+        embed_constraint_task.delay(constraint.constraint_id)
         self.graph_sync_service.sync_constraint(constraint)
         return constraint
 
@@ -115,7 +113,7 @@ class ConstraintService:
             description=data.description,
         )
 
-        self.embedding_service.embed_constraint(updated_constraint)
+        embed_constraint_task.delay(updated_constraint.constraint_id)
         self.graph_sync_service.sync_constraint(updated_constraint)
         return updated_constraint
 

@@ -8,7 +8,7 @@ from app.models.decision import Decision
 from app.models.enums import DecisionStatusEnum
 from app.repositories.decision_repository import DecisionRepository
 from app.schemas.decision import DecisionCreate, DecisionUpdate
-from app.services.embedding_service import EmbeddingService
+from app.tasks.embedding_tasks import embed_decision_task
 
 from app.repositories.strategy_repository import StrategyRepository
 from app.repositories.constraint_repository import ConstraintRepository
@@ -28,7 +28,6 @@ class DecisionService:
     def __init__(self, db: Session):
         self.db = db
         self.decision_repo = DecisionRepository(db)
-        self.embedding_service = EmbeddingService(db)
         self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
@@ -60,7 +59,7 @@ class DecisionService:
             decision_date=data.decision_date,
         )
 
-        self.embedding_service.embed_decision(decision)
+        embed_decision_task.delay(decision.decision_id)
         self.graph_sync_service.sync_decision(decision)
         return decision
 
@@ -231,7 +230,7 @@ class DecisionService:
             decision_date=update_data.get("decision_date"),
         )
 
-        self.embedding_service.embed_decision(updated_decision)
+        embed_decision_task.delay(updated_decision.decision_id)
         self.graph_sync_service.sync_decision(updated_decision)
         return updated_decision
 # -------------------------------------------------------

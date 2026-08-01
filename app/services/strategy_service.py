@@ -11,7 +11,7 @@ from app.schemas.strategy import (
     StrategyUpdate,
     DecisionStrategyLink,
 )
-from app.services.embedding_service import EmbeddingService
+from app.tasks.embedding_tasks import embed_strategy_task
 
 class StrategyService:
     """
@@ -26,7 +26,6 @@ class StrategyService:
 
     def __init__(self, db: Session):
         self.strategy_repo = StrategyRepository(db)
-        self.embedding_service = EmbeddingService(db)
         self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
@@ -57,7 +56,7 @@ class StrategyService:
             description=data.description,
         )
 
-        self.embedding_service.embed_strategy(strategy)
+        embed_strategy_task.delay(strategy.strategy_id)
         self.graph_sync_service.sync_strategy(strategy)
 
         return strategy
@@ -142,7 +141,7 @@ class StrategyService:
             description=data.description,
         )
 
-        self.embedding_service.embed_strategy(updated_strategy)
+        embed_strategy_task.delay(updated_strategy.strategy_id)
         self.graph_sync_service.sync_strategy(updated_strategy)
 
         return updated_strategy

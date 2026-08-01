@@ -9,7 +9,7 @@ from app.models.enums import OutcomeStatusEnum, DecisionStatusEnum
 from app.repositories.outcome_repository import OutcomeRepository
 from app.repositories.decision_repository import DecisionRepository
 from app.schemas.outcome import OutcomeCreate, OutcomeUpdate
-from app.services.embedding_service import EmbeddingService
+from app.tasks.embedding_tasks import embed_outcome_task
 
 class OutcomeService:
     """
@@ -25,7 +25,6 @@ class OutcomeService:
     def __init__(self, db: Session):
         self.outcome_repo = OutcomeRepository(db)
         self.decision_repo = DecisionRepository(db)
-        self.embedding_service = EmbeddingService(db)
         self.graph_sync_service = GraphSyncService()
     # -------------------------------------------------------
     # CREATE
@@ -67,7 +66,7 @@ class OutcomeService:
             evaluation_date=data.evaluation_date,
         )
 
-        self.embedding_service.embed_outcome(outcome)
+        embed_outcome_task.delay(outcome.outcome_id)
         self.graph_sync_service.sync_outcome(outcome)
         return outcome
 
@@ -183,7 +182,7 @@ class OutcomeService:
             evaluation_date=update_data.get("evaluation_date"),
         )
 
-        self.embedding_service.embed_outcome(updated_outcome)
+        embed_outcome_task.delay(updated_outcome.outcome_id)
         self.graph_sync_service.sync_outcome(updated_outcome)
 
         return updated_outcome
