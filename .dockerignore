@@ -1,0 +1,16 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.docker
+.git/
+.github/
+Testing/
+frontend/
+app/ai/notebooks/
+*.ipynb
+build_log.txt
+dump.rdb
+.pytest_cache/
+.mypy_cache/
