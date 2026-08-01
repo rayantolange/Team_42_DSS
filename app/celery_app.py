@@ -10,7 +10,7 @@ celery_app = Celery(
     "dss",
     broker=REDIS_URL,
     backend=REDIS_URL,
-    include=["app.tasks.document_tasks", "app.tasks.health_check_task", "app.tasks.chat_tasks"],
+    include=["app.tasks.document_tasks", "app.tasks.health_check_task", "app.tasks.chat_tasks", "app.tasks.embedding_tasks"],
 )
 
 celery_app.conf.update(

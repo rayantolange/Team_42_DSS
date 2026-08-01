@@ -1,7 +1,6 @@
 # app/services/document_service.py
 from typing import List, Optional
 import re
-import base64
 from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.repositories.document_repository import DocumentRepository
@@ -51,8 +50,7 @@ class DocumentService:
         )
         if file_bytes is not None and is_pdf:
             from app.tasks.document_tasks import process_document_task
-            file_bytes_b64 = base64.b64encode(file_bytes).decode("utf-8")
-            process_document_task.delay(document.document_id, file_bytes_b64)
+            process_document_task.delay(document.document_id, document.file_path)
         return document
     # -------------------------------------------------------
     # EXTRACTION + CHUNKING (PDFs only)
