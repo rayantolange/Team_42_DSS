@@ -1,21 +1,19 @@
 from app.celery_app import celery_app
 from app.database import SessionLocal
-from app.ai.graph.graph import build_rag_graph
 
 
 @celery_app.task(name="rag_search")
 def rag_search_task(query: str, current_user: dict) -> dict:
     """
-    Runs the RAG search graph (query embedding, vector search, LLM
-    synthesis) inside the worker process instead of the API process.
-    This is what lets the API stay free of sentence-transformers/torch
-    — all the heavy lifting happens here, on whichever machine is
-    running the Celery worker.
-
-    current_user is passed as a plain dict (not a User model instance)
-    since Celery serializes task arguments as JSON — the graph only
-    ever reads user_id/role/department_id from it anyway.
+    Runs the RAG search graph inside the worker process. build_rag_graph
+    is imported here, inside the function, rather than at module level —
+    this file gets imported by chat_service.py (which runs in the light
+    API process too, just to enqueue this task), and a module-level
+    import would drag neo4j/graph dependencies into the API process even
+    though it never actually executes this function itself.
     """
+    from app.ai.graph.graph import build_rag_graph
+
     db = SessionLocal()
     try:
         graph = build_rag_graph(db=db)
@@ -23,9 +21,6 @@ def rag_search_task(query: str, current_user: dict) -> dict:
             "query": query,
             "current_user": current_user,
         })
-        # Only return plain JSON-serializable data — citations are
-        # already plain dicts per the existing code, so this should
-        # pass through untouched.
         return {
             "answer": result["answer"],
             "citations": result.get("citations", []),
