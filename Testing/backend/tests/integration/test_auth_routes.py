@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from app.core.password import hash_password
 from app.models.user import User
 from app.models.enums import UserRoleEnum
@@ -7,7 +9,8 @@ from app.models.enums import UserRoleEnum
 # REGISTER
 # -------------------------------------------------------
 
-def test_register_success(client, test_department):
+@patch("app.services.auth_services.send_verification_email")
+def test_register_success(mock_send_email, client, test_department):
     response = client.post(
         "/auth/register",
         json={
@@ -18,17 +21,16 @@ def test_register_success(client, test_department):
             "password": "Password123!"
         }
     )
-
     assert response.status_code == 201
-
     data = response.json()
-
     assert data["email"] == "newuser@gmail.com"
     assert data["full_name"] == "New User"
     assert "password" not in data
+    mock_send_email.assert_called_once()
 
 
-def test_register_duplicate_user(client, test_department):
+@patch("app.services.auth_services.send_verification_email")
+def test_register_duplicate_user(mock_send_email, client, test_department):
     payload = {
         "department_id": test_department.department_id,
         "full_name": "Existing User",
@@ -36,19 +38,16 @@ def test_register_duplicate_user(client, test_department):
         "role": "faculty",
         "password": "Password123!"
     }
-
     first_response = client.post(
         "/auth/register",
         json=payload
     )
-
     assert first_response.status_code == 201
 
     second_response = client.post(
         "/auth/register",
         json=payload
     )
-
     assert second_response.status_code == 400
 
 
