@@ -18,3 +18,4 @@ celery
 redis
 neo4j
 langgraph==1.2.9
+groq

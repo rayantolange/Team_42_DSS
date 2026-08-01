@@ -10,7 +10,6 @@ from app.models.user import User
 from app.repositories.chat_repository import ChatRepository
 from app.repositories.embedding_repository import EmbeddingRepository
 from app.ai.graph.chat_graph import build_chat_graph  
-from app.ai.graph.nodes import _build_citation
 from app.models.enums import SourceTypeEnum
 from app.tasks.chat_tasks import rag_search_task
 from celery.exceptions import TimeoutError as CeleryTimeoutError
