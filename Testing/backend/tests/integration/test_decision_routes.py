@@ -3,19 +3,20 @@ import pytest
 from app.models.user import User
 from app.models.enums import UserRoleEnum, DecisionStatusEnum
 from app.core.permissions import allow_academics
-from app.services.embedding_service import EmbeddingService
+from app.services.decision_service import embed_decision_task
 from app.services.graph_sync_service import GraphSyncService
 
 
 @pytest.fixture(autouse=True)
 def mock_ai_and_graph(mocker):
     """
-    Decision mutations trigger embedding + graph sync.
-    Router tests only verify API behavior, so mock external side effects.
+    Decision mutations enqueue an embedding task + trigger graph sync.
+    Router tests only verify API behavior, so mock external side effects
+    (no real Celery/Redis, no real Neo4j).
     """
     mocker.patch.object(
-        EmbeddingService,
-        "embed_decision",
+        embed_decision_task,
+        "delay",
         return_value=None,
     )
 
