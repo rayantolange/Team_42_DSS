@@ -272,7 +272,6 @@ export function AppLayout() {
                 <div className="border-l border-border pl-2.5 sm:pl-3">
                   <ProfileMenu
                     user={user}
-                    isAdmin={isAdmin}
                     onLogout={logout}
                   />
                 </div>
