@@ -35,8 +35,8 @@ def test_outcome_blocked_for_non_implemented_decision(
     decision = make_decision(
         db_session, faculty_user.department_id, faculty_user.user_id, blocked_status
     )
-    # Mock out the LLM embedding + Neo4j sync — irrelevant to this rule
-    mocker.patch("app.services.outcome_service.EmbeddingService.embed_outcome")
+    # Mock out the embedding task enqueue + Neo4j sync — irrelevant to this rule
+    mocker.patch("app.services.outcome_service.embed_outcome_task.delay")
     mocker.patch("app.services.outcome_service.GraphSyncService.sync_outcome")
 
     service = OutcomeService(db_session)
@@ -57,7 +57,7 @@ def test_outcome_allowed_for_implemented_or_completed_decision(
     decision = make_decision(
         db_session, faculty_user.department_id, faculty_user.user_id, allowed_status
     )
-    mocker.patch("app.services.outcome_service.EmbeddingService.embed_outcome")
+    mocker.patch("app.services.outcome_service.embed_outcome_task.delay")
     mocker.patch("app.services.outcome_service.GraphSyncService.sync_outcome")
 
     service = OutcomeService(db_session)

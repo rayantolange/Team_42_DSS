@@ -5,10 +5,25 @@ Regression tests for Strategy endpoints:
 - link/unlink/list-for-decision must enforce check_decision_access,
   same as Constraints.
 """
+import pytest
+
 from app.models.decision import Decision
 from app.models.enums import DecisionStatusEnum
 from app.core.dependencies import get_current_user
 from app.main import app
+from app.services.strategy_service import embed_strategy_task
+from app.services.graph_sync_service import GraphSyncService
+
+
+@pytest.fixture(autouse=True)
+def mock_ai_and_graph(mocker):
+    """
+    Strategy mutations enqueue an embedding task + trigger graph sync.
+    Router tests only verify API behavior, so mock external side effects
+    (no real Celery/Redis, no real Neo4j).
+    """
+    mocker.patch.object(embed_strategy_task, "delay", return_value=None)
+    mocker.patch.object(GraphSyncService, "sync_strategy", return_value=None)
 
 
 def make_decision(db_session, department_id, created_by):
