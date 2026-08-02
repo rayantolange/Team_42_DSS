@@ -21,6 +21,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Vercel
-.vercel*.tsbuildinfo
+.vercel/
+*.tsbuildinfo
 vite.config.d.ts
 vite.config.js
+tsconfig.node.tsbuildinfo
+
