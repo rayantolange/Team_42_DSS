@@ -12,6 +12,7 @@ export interface QuerySource {
   documentId?: string;
   decisionId?: string;
   policyId?: string;
+  graphNodeId?: string;
   relevanceScore: number; // 0 - 1
 }
 

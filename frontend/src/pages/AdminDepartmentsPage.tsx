@@ -55,8 +55,8 @@ export default function AdminDepartmentsPage() {
   const createMutation = useMutation({
     mutationFn: () =>
       createDepartment({
-        name: form.name,
-        type: form.type,
+        departmentName: form.name,
+        departmentType: form.type,
         description: form.description,
       }),
     onSuccess: () => {
@@ -78,8 +78,8 @@ export default function AdminDepartmentsPage() {
   const updateMutation = useMutation({
     mutationFn: () =>
       updateDepartment(editingDept!.id, {
-        name: form.name,
-        type: form.type,
+        departmentName: form.name,
+        departmentType: form.type,
         description: form.description,
       }),
     onSuccess: () => {

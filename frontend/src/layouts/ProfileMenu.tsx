@@ -22,7 +22,6 @@ function initials(name: string) {
 
 interface ProfileMenuProps {
   user: AuthUser;
-  isAdmin: boolean;
   onLogout: () => void;
 }
 
@@ -33,7 +32,7 @@ interface ProfileMenuProps {
  * exposes Log out — everything a real profile menu needs before a
  * dedicated "edit profile" flow exists.
  */
-export function ProfileMenu({ user, isAdmin, onLogout }: ProfileMenuProps) {
+export function ProfileMenu({ user, onLogout }: ProfileMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

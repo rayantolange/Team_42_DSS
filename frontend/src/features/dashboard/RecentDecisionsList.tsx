@@ -62,7 +62,7 @@ export function RecentDecisionsList({ decisions }: RecentDecisionsListProps) {
               </thead>
               <tbody className="divide-y divide-border">
                 {decisions.map((decision, i) => {
-                  const status = STATUS_CONFIG[decision.status] ?? STATUS_CONFIG.draft;
+                  const status = STATUS_CONFIG[decision.status] ?? STATUS_CONFIG.draft!;
                   return (
                     <tr
                       key={decision.decisionId}
