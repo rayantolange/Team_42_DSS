@@ -216,7 +216,9 @@ def test_reprocess_document_clears_old_chunks_and_pages_before_re_extracting(
         file_bytes=b"%PDF-1.4 fake bytes",
     )
 
-    mock_clear_chunks = mocker.patch.object(service.embedding_service, "clear_document_chunks")
+    mock_clear_chunks = mocker.patch(
+        "app.services.embedding_service.EmbeddingService.clear_document_chunks"
+    )
     mock_delete_pages = mocker.patch.object(service.document_repo, "delete_pages_for_document")
     mock_extract = mocker.patch.object(service, "_extract_and_embed")
 

@@ -145,3 +145,17 @@ def test_get_supabase_client_caches_after_first_call():
 
         mock_create.assert_called_once()  # only constructed once, not twice
         assert client_1 is client_2
+
+def test_download_file_from_storage_downloads_by_path():
+    with patch.object(storage_module, "get_supabase_client") as mock_get_client:
+        mock_supabase = MagicMock()
+        mock_get_client.return_value = mock_supabase
+        bucket = MagicMock()
+        mock_supabase.storage.from_.return_value = bucket
+        bucket.download.return_value = b"pdf-bytes"
+
+        result = storage_module.download_file_from_storage("dept/1/doc.pdf")
+
+        mock_supabase.storage.from_.assert_called_once_with(storage_module.SUPABASE_BUCKET)
+        bucket.download.assert_called_once_with("dept/1/doc.pdf")
+        assert result == b"pdf-bytes"
