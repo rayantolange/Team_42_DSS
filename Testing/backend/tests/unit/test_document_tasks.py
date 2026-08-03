@@ -1,21 +1,21 @@
 # Testing/backend/tests/unit/test_document_tasks.py
 """
 Unit tests for process_document_task — the Celery background task that
-extracts text from a PDF, splits it into paragraphs, and embeds each
-page's chunks.
+downloads an uploaded PDF from storage, extracts its text, splits it into
+paragraphs, and embeds each page's chunks.
 
 Everything that touches a real resource is mocked:
-  - SessionLocal      -> fake DB session (no real Postgres connection)
-  - DocumentRepository -> fake repo, no real queries
-  - EmbeddingService   -> fake service, no real embedding model calls
-  - fitz (PyMuPDF)     -> fake PDF object, no real file parsing
+  - SessionLocal               -> fake DB session (no real Postgres connection)
+  - DocumentRepository          -> fake repo, no real queries
+  - download_file_from_storage  -> fake bytes, no real Supabase Storage call
+  - EmbeddingService            -> fake service, no real embedding model calls
+  - fitz.open (PyMuPDF)         -> fake PDF object, no real file parsing
 
 This lets the test suite verify task LOGIC (status transitions, which
 pages get created, which paragraphs survive filtering, error handling)
-without needing Postgres, Redis, or the embedding model — pure unit
-level, runs in milliseconds, no Docker required.
+without needing Postgres, Redis, Supabase, or the embedding model — pure
+unit level, runs in milliseconds, no Docker required.
 """
-import base64
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -75,61 +75,65 @@ def mock_document():
     return doc
 
 
-def make_pdf_bytes_b64() -> str:
-    # Task only cares about the base64 string it receives — fitz.open
-    # is mocked, so the actual bytes content never gets parsed for real.
-    return base64.b64encode(b"fake-pdf-bytes").decode()
+STORAGE_PATH = "1/policy.pdf"
 
 
 class TestProcessDocumentTask:
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_document_not_found_returns_early(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz, mock_db
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db,
     ):
         mock_session_local.return_value = mock_db
         mock_repo = mock_repo_cls.return_value
         mock_repo.get_by_id.return_value = None
 
-        process_document_task(document_id=999, file_bytes_b64=make_pdf_bytes_b64())
+        process_document_task(document_id=999, storage_path=STORAGE_PATH)
 
         mock_repo.get_by_id.assert_called_once_with(999)
-        # Nothing else should happen — no status set, no PDF opened
-        mock_fitz.open.assert_not_called()
+        # Nothing else should happen — no download, no PDF opened
+        mock_download.assert_not_called()
+        mock_fitz_open.assert_not_called()
         mock_db.close.assert_called_once()
 
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_non_pdf_file_marks_completed_without_processing(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz,
-        mock_db, mock_document,
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db, mock_document,
     ):
         mock_session_local.return_value = mock_db
         mock_document.file_name = "notes.docx"
         mock_repo = mock_repo_cls.return_value
         mock_repo.get_by_id.return_value = mock_document
 
-        process_document_task(document_id=1, file_bytes_b64=make_pdf_bytes_b64())
+        process_document_task(document_id=1, storage_path="1/notes.docx")
 
         assert mock_document.status == DocumentStatusEnum.completed
-        mock_fitz.open.assert_not_called()
+        mock_download.assert_not_called()
+        mock_fitz_open.assert_not_called()
         mock_repo.create_page.assert_not_called()
 
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_successful_processing_creates_pages_and_embeds_chunks(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz,
-        mock_db, mock_document,
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db, mock_document,
     ):
         mock_session_local.return_value = mock_db
         mock_repo = mock_repo_cls.return_value
         mock_repo.get_by_id.return_value = mock_document
+        mock_download.return_value = b"fake-pdf-bytes"
         mock_embed_service = mock_embed_cls.return_value
 
         # Two fake pages: one with real paragraph text, one blank.
@@ -143,12 +147,15 @@ class TestProcessDocumentTask:
 
         mock_pdf = MagicMock()
         mock_pdf.__iter__.return_value = iter([page_1, page_2])
-        mock_fitz.open.return_value = mock_pdf
+        mock_fitz_open.return_value = mock_pdf
 
         mock_page_row = MagicMock()
         mock_repo.create_page.return_value = mock_page_row
 
-        process_document_task(document_id=1, file_bytes_b64=make_pdf_bytes_b64())
+        process_document_task(document_id=1, storage_path=STORAGE_PATH)
+
+        mock_download.assert_called_once_with(STORAGE_PATH)
+        mock_fitz_open.assert_called_once_with(stream=b"fake-pdf-bytes", filetype="pdf")
 
         # Page 1 created (page_number=1); page 2 skipped (blank text)
         mock_repo.create_page.assert_called_once_with(
@@ -173,17 +180,19 @@ class TestProcessDocumentTask:
         mock_pdf.close.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_page_with_no_surviving_paragraphs_skips_embedding(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz,
-        mock_db, mock_document,
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db, mock_document,
     ):
         mock_session_local.return_value = mock_db
         mock_repo = mock_repo_cls.return_value
         mock_repo.get_by_id.return_value = mock_document
+        mock_download.return_value = b"fake-pdf-bytes"
         mock_embed_service = mock_embed_cls.return_value
 
         # Page has text, but every fragment is under the 20-char filter
@@ -191,10 +200,10 @@ class TestProcessDocumentTask:
         page.get_text.return_value = "Pg 1\n\nHdr"
         mock_pdf = MagicMock()
         mock_pdf.__iter__.return_value = iter([page])
-        mock_fitz.open.return_value = mock_pdf
+        mock_fitz_open.return_value = mock_pdf
         mock_repo.create_page.return_value = MagicMock()
 
-        process_document_task(document_id=1, file_bytes_b64=make_pdf_bytes_b64())
+        process_document_task(document_id=1, storage_path=STORAGE_PATH)
 
         # Page row still created (there was text)...
         mock_repo.create_page.assert_called_once()
@@ -202,23 +211,25 @@ class TestProcessDocumentTask:
         mock_embed_service.embed_document_chunks_batch.assert_not_called()
         assert mock_document.status == DocumentStatusEnum.completed
 
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_exception_marks_failed_with_truncated_message(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz,
-        mock_db, mock_document,
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db, mock_document,
     ):
         mock_session_local.return_value = mock_db
         mock_repo = mock_repo_cls.return_value
         mock_repo.get_by_id.return_value = mock_document
+        mock_download.return_value = b"fake-pdf-bytes"
 
         long_error = "x" * 600  # deliberately over the 500-char truncation limit
-        mock_fitz.open.side_effect = RuntimeError(long_error)
+        mock_fitz_open.side_effect = RuntimeError(long_error)
 
         with pytest.raises(RuntimeError):
-            process_document_task(document_id=1, file_bytes_b64=make_pdf_bytes_b64())
+            process_document_task(document_id=1, storage_path=STORAGE_PATH)
 
         assert mock_document.status == DocumentStatusEnum.failed
         assert mock_document.status_message == long_error[:500]
@@ -226,13 +237,14 @@ class TestProcessDocumentTask:
         mock_db.rollback.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_exception_when_document_deleted_mid_processing_does_not_crash(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz,
-        mock_db, mock_document,
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db, mock_document,
     ):
         """
         If the document gets deleted between the initial get_by_id and the
@@ -244,22 +256,24 @@ class TestProcessDocumentTask:
         # First call (before processing) finds it; second call (in the
         # except block) simulates it having been deleted meanwhile.
         mock_repo.get_by_id.side_effect = [mock_document, None]
-        mock_fitz.open.side_effect = RuntimeError("boom")
+        mock_download.return_value = b"fake-pdf-bytes"
+        mock_fitz_open.side_effect = RuntimeError("boom")
 
         with pytest.raises(RuntimeError):
-            process_document_task(document_id=1, file_bytes_b64=make_pdf_bytes_b64())
+            process_document_task(document_id=1, storage_path=STORAGE_PATH)
 
         assert mock_repo.get_by_id.call_count == 2
         mock_db.rollback.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("app.tasks.document_tasks.fitz")
-    @patch("app.tasks.document_tasks.EmbeddingService")
+    @patch("fitz.open")
+    @patch("app.services.embedding_service.EmbeddingService")
+    @patch("app.core.storage.download_file_from_storage")
     @patch("app.tasks.document_tasks.DocumentRepository")
     @patch("app.tasks.document_tasks.SessionLocal")
     def test_status_set_to_processing_before_extraction_begins(
-        self, mock_session_local, mock_repo_cls, mock_embed_cls, mock_fitz,
-        mock_db, mock_document,
+        self, mock_session_local, mock_repo_cls, mock_download, mock_embed_cls,
+        mock_fitz_open, mock_db, mock_document,
     ):
         """
         Confirms the processing -> completed transition actually happens
@@ -269,6 +283,7 @@ class TestProcessDocumentTask:
         mock_session_local.return_value = mock_db
         mock_repo = mock_repo_cls.return_value
         mock_repo.get_by_id.return_value = mock_document
+        mock_download.return_value = b"fake-pdf-bytes"
 
         status_when_pdf_opened = {}
 
@@ -278,9 +293,9 @@ class TestProcessDocumentTask:
             mock_pdf.__iter__.return_value = iter([])
             return mock_pdf
 
-        mock_fitz.open.side_effect = capture_status
+        mock_fitz_open.side_effect = capture_status
 
-        process_document_task(document_id=1, file_bytes_b64=make_pdf_bytes_b64())
+        process_document_task(document_id=1, storage_path=STORAGE_PATH)
 
         assert status_when_pdf_opened["value"] == DocumentStatusEnum.processing
         assert mock_document.status == DocumentStatusEnum.completed

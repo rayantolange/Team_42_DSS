@@ -9,7 +9,7 @@ import { DecisionDetailModal } from "@features/history/DecisionDetailModal";
 import { useDecisionsList } from "@features/history/useDecisionHistory";
 import type { DecisionRecordSummary } from "@/types/domain";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10; 
 
 export default function DecisionHistoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();

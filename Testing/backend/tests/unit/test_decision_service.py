@@ -14,10 +14,10 @@ from app.services.decision_service import DecisionService
 
 @pytest.fixture(autouse=True)
 def mock_side_effects(mocker):
-    """Every decision mutation triggers embedding + Neo4j sync — mock
-    both out globally for this file since they're irrelevant to the
-    workflow rules being tested here."""
-    mocker.patch("app.services.decision_service.EmbeddingService.embed_decision")
+    """Every decision mutation enqueues an embedding task + triggers Neo4j
+    sync — mock both out globally for this file since they're irrelevant
+    to the workflow rules being tested here."""
+    mocker.patch("app.services.decision_service.embed_decision_task.delay")
     mocker.patch("app.services.decision_service.GraphSyncService.sync_decision")
 
 
