@@ -22,6 +22,7 @@ yarn-error.log*
 
 # Vercel
 .vercel/
+dist/
 *.tsbuildinfo
 vite.config.d.ts
 vite.config.js
