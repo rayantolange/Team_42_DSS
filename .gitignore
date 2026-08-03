@@ -64,3 +64,5 @@ Testing/frontend/reports/*.txt
 coverage.xml
 .coverage
 .pytest_cache/.env.production
+
+*.sql
