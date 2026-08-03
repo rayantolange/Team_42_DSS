@@ -12,6 +12,7 @@ load_dotenv(".env.test")
 import os
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
@@ -69,6 +70,8 @@ def setup_test_database():
     - Prevents accidental database destruction.
     - Test database cleanup must be done manually.
     """
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
     Base.metadata.create_all(bind=engine)
     yield
 
