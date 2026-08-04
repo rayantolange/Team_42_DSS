@@ -26,7 +26,7 @@ Open the printed local URL (default `http://localhost:5173`).
 All mock accounts use the password `password123`.
 
 | Email | Role | Department |
-|---|---|---|
+| --- | --- | --- |
 | `admin@college.edu.np` | Administrator | All departments |
 | `head.bad@college.edu.np` | Department Head | Business Administration |
 | `head.itd@college.edu.np` | Department Head | Information Technology |
@@ -39,7 +39,7 @@ React Flow · Recharts · Axios
 
 ## Project Structure
 
-```
+```tree
 src/
 ├── app/            # App shell, QueryClient config
 ├── routes/         # Router config, ProtectedRoute
@@ -158,7 +158,7 @@ responsibility, to minimize re-renders:
 Per-resource `staleTime` is centralized in `src/app/queryClient.ts`:
 
 | Resource | staleTime |
-|---|---|
+| --- | --- |
 | Dashboard metrics | 5 minutes |
 | Decision details | 1 hour |
 | Query results | 0 (always fresh; modeled as a mutation, not a query) |
