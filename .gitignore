@@ -10,8 +10,7 @@ Thumbs.db
 .env.local
 .env.test
 .env.docker
-.env.*
-!.env.example
+.env.production
 
 # Dependency directories
 node_modules/
