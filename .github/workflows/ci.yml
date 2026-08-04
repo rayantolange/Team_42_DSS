@@ -133,7 +133,7 @@ jobs:
           docker logs dss-ci-test
           exit 1
 
-  # 4. Deployment Job
+  # 4. Deployment Job (Backend Only)
   deploy:
     needs: [changes, test, docker-build]
     if: |
@@ -153,18 +153,3 @@ jobs:
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
             --fail --silent --show-error
-
-      # Vercel Frontend Deployment
-      - name: Deploy Frontend to Vercel
-        if: ${{ needs.changes.outputs.frontend == 'true' }}
-        working-directory: ./frontend
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          npm i -g vercel
-          rm -rf .vercel
-          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          vercel build --prod --token="$VERCEL_TOKEN"
-          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
