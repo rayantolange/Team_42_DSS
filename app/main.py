@@ -25,7 +25,7 @@ app.add_middleware(
         "http://localhost:5173",
         "https://team-42-dss.vercel.app",
     ],
-    # This regex matches ANY deployment preview on Vercel under team-42-dss
+    # Matches any deployment preview on Vercel under team-42-dss
     allow_origin_regex=r"https://team-42-dss.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],

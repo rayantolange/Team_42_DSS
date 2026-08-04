@@ -38,7 +38,7 @@ function StatValue({ stat }: { stat: StatCardDef }) {
 /** Top-row summary metric cards: colored accent bar, icon square, animated big number, and a trend/live indicator. */
 export function StatCards({ stats }: { stats: StatCardDef[] }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {stats.map((stat, i) => (
         <Card
           key={stat.label}
@@ -60,20 +60,20 @@ export function StatCards({ stats }: { stats: StatCardDef[] }) {
             style={{ backgroundColor: stat.accent }}
             aria-hidden="true"
           />
-          <CardContent className="flex items-start justify-between gap-3 pt-6">
+          <CardContent className="flex items-start justify-between gap-2 pt-4 sm:gap-3 sm:pt-6">
             <div>
               <div
                 className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110",
+                  "flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 sm:h-11 sm:w-11",
                   stat.tint
                 )}
               >
-                <stat.icon className="h-5 w-5" aria-hidden="true" />
+                <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
               </div>
-              <p className="mt-4 text-2xl font-bold leading-none tabular-nums tracking-tight">
+              <p className="mt-3 text-xl font-bold leading-none tabular-nums tracking-tight sm:mt-4 sm:text-2xl">
                 <StatValue stat={stat} />
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{stat.label}</p>
             </div>
 
             {stat.live && (

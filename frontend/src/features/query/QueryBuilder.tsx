@@ -51,7 +51,7 @@ export function QueryBuilder({ onSubmit, isSubmitting }: QueryBuilderProps) {
           onKeyDown={handleKeyDown}
           placeholder="Ask about institutional data, reports, or trends…"
           rows={1}
-          className="w-full resize-none border-none bg-transparent px-3 pt-1 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none max-h-40 scrollbar-thin"
+          className="w-full resize-none border-none bg-transparent px-3 pt-1 text-base sm:text-sm text-foreground placeholder:text-muted-foreground outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none max-h-40 scrollbar-thin"
         />
 
         {/* Bottom Bar: Action Controls & Send */}

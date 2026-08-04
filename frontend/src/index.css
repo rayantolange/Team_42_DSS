@@ -203,3 +203,14 @@
     background: transparent;
   }
 }
+/* Prevent iOS Safari auto-zoom on focus: any input under 16px font-size
+   triggers a forced zoom-in when the keyboard opens. This overrides
+   every text input, textarea, and select on small screens regardless
+   of the Tailwind text size utility used on the element. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

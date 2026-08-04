@@ -246,7 +246,7 @@ export function AppLayout() {
           </div>
           {mobileSidebarBody}
         </nav>
-        <div className="flex min-h-screen flex-1 flex-col">
+        <div className="flex min-h-screen min-w-0 flex-1 flex-col">
           {/* Top header */}
           <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-background px-4 sm:px-6">
             <button
@@ -282,7 +282,7 @@ export function AppLayout() {
             id="main-content"
             key={location.pathname}
             tabIndex={-1}
-            className="flex-1 animate-fade-in bg-muted/20 p-4 sm:p-6 lg:p-8"
+            className="min-w-0 flex-1 animate-fade-in bg-muted/20 p-4 sm:p-6 lg:p-8"
           >
             <Outlet />
           </main>
