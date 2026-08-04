@@ -118,6 +118,7 @@ a time without touching calling code. For each resource:
 Example — swapping `fetchDepartments`:
 
 ```ts
+
 // Before (services/index.ts)
 export { fetchDepartments } from "./mock/departmentService";
 
