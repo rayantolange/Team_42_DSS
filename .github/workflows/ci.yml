@@ -160,14 +160,16 @@ jobs:
         working-directory: ./frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           npm i -g vercel
-          # 1. Force-link the directory using your secrets
-          vercel link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
-          # 2. Pull production environment settings
+          rm -rf .vercel
+          
+          # Manually create the .vercel config directory so Vercel stops asking for ORG_ID
+          mkdir -p .vercel
+          echo "{\"projectId\":\"${VERCEL_PROJECT_ID}\",\"orgId\":\"${VERCEL_ORG_ID}\"}" > .vercel/project.json
+
+          # Pull and deploy using the token directly
           vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-          # 3. Build and deploy
           vercel build --prod --token="$VERCEL_TOKEN"
           vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
