@@ -27,4 +27,5 @@ dist/
 vite.config.d.ts
 vite.config.js
 tsconfig.node.tsbuildinfo
+project.json
 
