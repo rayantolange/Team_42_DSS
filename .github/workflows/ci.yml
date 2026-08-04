@@ -7,7 +7,33 @@ on:
     branches: [main]
 
 jobs:
+  # 1. Path Filtering Job
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check path changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'Testing/backend/**'
+              - 'app/**'
+              - 'requirements*.txt'
+              - 'Dockerfile'
+            frontend:
+              - 'frontend/**'
+
+  # 2. Backend Tests
   test:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
 
     services:
@@ -71,7 +97,10 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
+  # 3. Docker Build Test
   docker-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -102,21 +131,28 @@ jobs:
           docker logs dss-ci-test
           exit 1
 
+  # 4. Deployment Job
   deploy:
-    needs: [test, docker-build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [changes, test, docker-build]
+    if: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
+      (needs.docker-build.result == 'success' || needs.docker-build.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # Render Backend Deployment
+      # Render Backend Deployment (Runs if backend files changed)
       - name: Trigger Render deploy
+        if: ${{ needs.changes.outputs.backend == 'true' }}
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
             --fail --silent --show-error
 
-      # Vercel Frontend Deployment
+      # Vercel Frontend Deployment (Runs if frontend files changed)
       - name: Deploy Frontend to Vercel
         if: ${{ needs.changes.outputs.frontend == 'true' }}
         working-directory: ./frontend
@@ -127,4 +163,7 @@ jobs:
         run: |
           npm i -g vercel
           rm -rf .vercel
-          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
+          vercel deploy --prod --yes \
+            --token="$VERCEL_TOKEN" \
+            --scope="$VERCEL_ORG_ID" \
+            --project="$VERCEL_PROJECT_ID"
