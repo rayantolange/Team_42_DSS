@@ -48,6 +48,11 @@ const AXIS_TICK_STYLE = { fontSize: 12, fill: "hsl(var(--muted-foreground))" };
 const GRID_STROKE = "hsl(var(--border))";
 const CHART_ANIMATION_MS = 900;
 
+const MAX_LABEL_LENGTH = 14;
+function truncateLabel(value: string) {
+  return value.length > MAX_LABEL_LENGTH ? `${value.slice(0, MAX_LABEL_LENGTH - 1)}…` : value;
+}
+
 function ChartTooltip({
   active,
   payload,
@@ -191,7 +196,10 @@ interface DepartmentComparisonChartProps {
   data: DepartmentComparisonRow[];
 }
 
+import { useIsMobile } from "@hooks/useIsMobile";
+
 export function DepartmentComparisonChart({ data }: DepartmentComparisonChartProps) {
+  const isMobile = useIsMobile();
   return (
     <Card className="transition-shadow duration-200 hover:shadow-card-hover">
       <CardHeader>
@@ -202,8 +210,8 @@ export function DepartmentComparisonChart({ data }: DepartmentComparisonChartPro
         {data.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">No department data to display.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={data} layout="vertical" margin={{ left: 24 }} barGap={2}>
+          <ResponsiveContainer width="100%" height={isMobile ? Math.max(data.length * 42, 200) : 320}>
+            <BarChart data={data} layout="vertical" margin={{ left: isMobile ? 8 : 24 }} barGap={2}>
               <defs>
                 {(["successful", "partiallySuccessful", "failed"] as const).map((key) => (
                   <linearGradient key={key} id={`bar-gradient-${key}`} x1="0" y1="0" x2="1" y2="0">
@@ -234,7 +242,7 @@ export function DepartmentComparisonChart({ data }: DepartmentComparisonChartPro
               </defs>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={GRID_STROKE} />
               <XAxis type="number" allowDecimals={false} tick={AXIS_TICK_STYLE} />
-              <YAxis type="category" dataKey="departmentName" width={160} tick={AXIS_TICK_STYLE} />
+              <YAxis type="category" dataKey="departmentName" width={isMobile ? 90 : 160} tick={AXIS_TICK_STYLE} tickFormatter={truncateLabel} />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "hsl(var(--muted) / 0.4)" }} />
               <Bar
                 dataKey="successful"
