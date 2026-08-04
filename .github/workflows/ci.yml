@@ -111,3 +111,8 @@ jobs:
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
             --fail --silent --show-error
+
+      - name: Trigger Vercel deploy
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}" \
+            --fail --silent --show-error
