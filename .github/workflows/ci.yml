@@ -14,8 +14,10 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetches history so git diff works reliably across pushes
 
       - name: Check path changes
         uses: dorny/paths-filter@v3
@@ -30,7 +32,7 @@ jobs:
             frontend:
               - 'frontend/**'
 
-  # 2. Backend Tests
+  # 2. Backend Tests (Runs only if backend files changed)
   test:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
@@ -73,7 +75,7 @@ jobs:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Set up Python
@@ -97,14 +99,14 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
-  # 3. Docker Build Test
+  # 3. Docker Build Test (Runs only if backend files changed)
   docker-build:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Build image
@@ -145,14 +147,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      # Render Backend Deployment (Runs if backend files changed)
+      # Render Backend Deployment
       - name: Trigger Render deploy
         if: ${{ needs.changes.outputs.backend == 'true' }}
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
             --fail --silent --show-error
 
-      # Vercel Frontend Deployment (Runs if frontend files changed)
+      # Vercel Frontend Deployment
       - name: Deploy Frontend to Vercel
         if: ${{ needs.changes.outputs.frontend == 'true' }}
         working-directory: ./frontend
