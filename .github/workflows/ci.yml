@@ -101,3 +101,13 @@ jobs:
           echo "Container never became healthy — dumping logs:"
           docker logs dss-ci-test
           exit 1
+
+  deploy:
+    needs: [test, docker-build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            --fail --silent --show-error
