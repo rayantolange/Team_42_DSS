@@ -45,12 +45,3 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-/**
- * Flag indicating whether real backend endpoints should be used.
- * While teammates' FastAPI endpoints are unavailable, mock services
- * (see services/mock/*) are used instead. Flip this once endpoints
- * are live, or wire it to an env var.
- */
-export const USE_MOCK_API =
-  (import.meta.env.VITE_USE_MOCK_API ?? "true") === "true";

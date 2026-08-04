@@ -1,8 +1,6 @@
 /**
  * Single import surface for all data-fetching functions used by the
- * app's hooks/components. Currently re-exports mock implementations
- * since the team's FastAPI endpoints aren't available yet.
- *
+ * app's hooks/components.
  */
 
 export {
@@ -30,11 +28,6 @@ export {
   getPoliciesByDepartment,
   getDepartmentById,
 } from "@/data/datasetLoader";
-export {
-  DECISIONS,
-  getDecisionsByPolicy,
-  getDecisionById,
-} from "@/data/decisionGenerator";
 
 export {
   fetchAllUsers,
@@ -46,10 +39,6 @@ export {
   type AdminUser,
   type SystemStats,
 } from "./adminService";
-
-export {
-  fetchDecisionPolicyContext,
-} from "./mock/decisionService";
 
 export {
   fetchDecisions,

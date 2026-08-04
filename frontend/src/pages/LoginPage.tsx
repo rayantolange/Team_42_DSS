@@ -15,8 +15,6 @@ import { AuthSplitLayout } from "@layouts/AuthSplitLayout";
 
 /**
  * Login page. Not wrapped by AppLayout (no nav needed pre-auth).
- * Demo accounts are listed since this prototype uses a mock auth
- * service rather than the team's real FastAPI JWT endpoint.
  */
 export default function LoginPage() {
   const [email, setEmail] = useState("");

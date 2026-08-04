@@ -3,7 +3,7 @@
  *
  * These model the knowledge graph entities backing the app, matching
  * the actual "Simulated College Institutional Policy Dataset"
- * (Nepal Higher Education context) used to seed mock data:
+ * (Nepal Higher Education context) used to seed the app's dataset:
  *
  *   Policy -> Department | Policy -> Role | Policy -> Regulation
  *   Policy -> Decision   | Decision -> Outcome

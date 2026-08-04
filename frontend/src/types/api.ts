@@ -1,5 +1,3 @@
-import type { Decision } from "./domain";
-
 /**
  * Types describing the shape of API requests/responses, especially
  * the RAG query flow: Query -> AI Response -> Sources -> Confidence.
@@ -25,7 +23,6 @@ export interface QueryResult {
   sources: QuerySource[];
   confidenceScore: number; // 0 - 1
   confidenceLevel: ConfidenceLevel;
-  relatedDecisions: Decision[];
   createdAt: string;
 }
 
