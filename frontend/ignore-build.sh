@@ -1,16 +1,18 @@
 #!/bin/bash
 
-# Vercel sets VERCEL_GIT_COMMIT_REF on automatic git push builds.
-# For Deploy Hooks, Vercel triggers under a hook context where we want to proceed.
+echo "Checking Vercel build trigger..."
+echo "Commit Ref: $VERCEL_GIT_COMMIT_REF"
+echo "Target ENV: $VERCEL_ENV"
 
-echo "Evaluating build for branch: $VERCEL_GIT_COMMIT_REF"
+# Vercel sets VERCEL_GIT_COMMIT_AUTHOR or VERCEL_GIT_COMMIT_SHA on git pushes.
+# When triggered via Deploy Hook without parameters, we check if it's an automated git event.
 
-# Check if the deployment was triggered by standard automatic Git push to main
-if [ "$VERCEL_GIT_COMMIT_REF" = "main" ] && [ -z "$VERCEL_URL" ]; then
-  echo "🚫 Standard Git push to main detected. Skipping automatic Vercel build."
-  echo "GitHub Actions CI will trigger the Deploy Hook after tests pass."
+if [ "$VERCEL_GIT_COMMIT_REF" = "main" ] && [ -n "$VERCEL_GIT_COMMIT_SHA" ]; then
+  # Check if this build was triggered by GitHub Actions or normal Git push
+  # If it's a raw git push, skip it!
+  echo "🚫 Automatic Git Push detected. Skipping Vercel build to let GitHub Actions CI finish."
   exit 0
 fi
 
-echo "✅ Proceeding with Vercel deployment build."
+echo "✅ Triggered via Deploy Hook. Proceeding with deployment!"
 exit 1
