@@ -164,8 +164,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           npm i -g vercel
-          rm -rf .vercel
-          vercel deploy --prod --yes \
-            --token="$VERCEL_TOKEN" \
-            --scope="$VERCEL_ORG_ID" \
-            --project="$VERCEL_PROJECT_ID"
+          # 1. Force-link the directory using your secrets
+          vercel link --yes --token="$VERCEL_TOKEN" --project="$VERCEL_PROJECT_ID"
+          # 2. Pull production environment settings
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          # 3. Build and deploy
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
