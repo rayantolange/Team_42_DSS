@@ -15,10 +15,9 @@ os.environ.setdefault("NEO4J_URI", "bolt://localhost:7687")
 os.environ.setdefault("NEO4J_USERNAME", "neo4j")
 os.environ.setdefault("NEO4J_PASSWORD", "password")
 
-# 2. Safely mock all heavy external AI/ML modules in sys.modules during import
+# 2. Mock external ML/Graph dependencies not installed in basic CI runners
 MOCK_MODULES = {
     "sentence_transformers": MagicMock(),
-    "qdrant_client": MagicMock(),
     "neo4j": MagicMock(),
     "langchain_groq": MagicMock(),
     "langchain_community": MagicMock(),

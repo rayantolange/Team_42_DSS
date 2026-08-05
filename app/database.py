@@ -19,7 +19,7 @@ engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,  # Automatically re-connects stale idle connections
     pool_recycle=300,    # Prevents closed connection errors on Render/Neon
-    connect_args=connect_args
+    connect_args={"connect_timeout": 30},
 )
 
 SessionLocal = sessionmaker(
