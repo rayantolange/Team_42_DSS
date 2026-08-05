@@ -89,4 +89,5 @@ def send_message(
             current_user=current_user,
         )
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        # Set to 400 so you can distinguish route missing (404) vs logic errors
+        raise HTTPException(status_code=400, detail=str(e))

@@ -71,7 +71,7 @@ class MessageCitation(Base):
 
     citation_id = Column(Integer, primary_key=True, autoincrement=True)
     message_id = Column(Integer, ForeignKey("chat_messages.message_id", ondelete="CASCADE"), nullable=False)
-    embedding_id = Column(Integer, ForeignKey("embeddings.embedding_id", ondelete="CASCADE"), nullable=False)
+    embedding_id = Column(Integer, ForeignKey("embeddings.id"), nullable=True)
     rank = Column(Integer, nullable=False)  # position in the retrieved result list
     snippet = Column(Text, nullable=False)  # frozen copy of the matched content
 
