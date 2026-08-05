@@ -19,6 +19,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+
+    # Enable the pgvector extension first
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector;") 
+
     """Upgrade schema."""
     op.create_table('embeddings',
         sa.Column('embedding_id', sa.Integer(), autoincrement=True, nullable=False),
