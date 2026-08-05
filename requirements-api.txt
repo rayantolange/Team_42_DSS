@@ -19,3 +19,4 @@ redis
 neo4j
 langgraph==1.2.9
 groq
+PyMuPDF>=1.23.0
