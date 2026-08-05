@@ -5,21 +5,23 @@ whose source_type doesn't match its actually-populated foreign key
 chat response with a pydantic ValidationError.
 """
 import os
-from unittest.mock import MagicMock, patch
+import sys
+from unittest.mock import MagicMock
 
-# 1. Environment fallbacks for CI collection
+# 1. Provide safe environment fallbacks for CI
 os.environ.setdefault("GROQ_API_KEY", "dummy-groq-key-for-testing")
 os.environ.setdefault("OPENAI_API_KEY", "sk-proj-dummykeyforcitesting1234567890")
 os.environ.setdefault("NEO4J_URI", "bolt://localhost:7687")
 os.environ.setdefault("NEO4J_USERNAME", "neo4j")
 os.environ.setdefault("NEO4J_PASSWORD", "password")
-os.environ.setdefault("QDRANT_URL", "http://localhost:6333")
 
-# 2. Patch external vector/graph clients before app.ai.graph imports them
-with patch("qdrant_client.QdrantClient", getattr(MagicMock(), "return_value", MagicMock())), \
-     patch("neo4j.AsyncGraphDatabase.driver", getattr(MagicMock(), "return_value", MagicMock())):
-    from app.ai.graph.nodes import _build_citation, synthesize
+# 2. Safely mock uninstalled vector/graph modules in sys.modules BEFORE importing app code
+for module_name in ["qdrant_client", "neo4j", "langchain_groq"]:
+    if module_name not in sys.modules:
+        sys.modules[module_name] = MagicMock()
 
+# 3. Now safely import graph node functions
+from app.ai.graph.nodes import _build_citation, synthesize
 from app.models.enums import SourceTypeEnum
 
 
