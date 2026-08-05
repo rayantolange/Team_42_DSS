@@ -1,33 +1,3 @@
-from app.services import (
-    auth_services,
-    chat_service,
-    constraint_service,
-    dashboard_service,
-    decision_service,
-    department_service,
-    document_service,
-    email_service,
-    embedding_service,
-    graph_query_service,
-    graph_sync_service,
-    outcome_service,
-    strategy_service,
-    user_service,
-)
+# app/services/__init__.py
 
-__all__ = [
-    "auth_services",
-    "chat_service",
-    "constraint_service",
-    "dashboard_service",
-    "decision_service",
-    "department_service",
-    "document_service",
-    "email_service",
-    "embedding_service",
-    "graph_query_service",
-    "graph_sync_service",
-    "outcome_service",
-    "strategy_service",
-    "user_service",
-]
+# Keeping this package init empty prevents circular imports and heavy eager loading on app startup.

@@ -1,11 +1,14 @@
 # app/ai/embedding_client.py
 
-from sentence_transformers import SentenceTransformer
+from typing import TYPE_CHECKING
 
-_model: SentenceTransformer | None = None
+if TYPE_CHECKING:
+    from sentence_transformers import SentenceTransformer
+
+_model = None
 
 
-def get_model() -> SentenceTransformer:
+def get_model():
     """
     Loads nomic-embed-text once and caches it at module level.
     Avoids reloading the ~547MB model on every call — this should
@@ -13,6 +16,7 @@ def get_model() -> SentenceTransformer:
     """
     global _model
     if _model is None:
+        from sentence_transformers import SentenceTransformer  # Lazy import to prevent app boot crashes
         _model = SentenceTransformer(
             "nomic-ai/nomic-embed-text-v1.5",
             trust_remote_code=True,
@@ -28,6 +32,7 @@ def embed_document(text: str) -> list[float]:
     model = get_model()
     prefixed = f"search_document: {text}"
     return model.encode(prefixed, normalize_embeddings=True).tolist()
+
 
 def embed_documents_batch(texts: list[str]) -> list[list[float]]:
     """
