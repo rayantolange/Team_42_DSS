@@ -72,7 +72,7 @@ def setup_test_database():
     """
     with engine.begin() as conn:
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-    Base.metadata.create_all(bind=engine)
+    #Base.metadata.create_all(bind=engine)
     yield
 
 
