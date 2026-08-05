@@ -1,4 +1,7 @@
 # Testing/backend/tests/unit/test_document_tasks.py
+
+import app.services.embedding_service
+
 """
 Unit tests for process_document_task — the Celery background task that
 downloads an uploaded PDF from storage, extracts its text, splits it into

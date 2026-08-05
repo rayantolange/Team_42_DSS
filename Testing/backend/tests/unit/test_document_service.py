@@ -1,3 +1,5 @@
+import app.services.embedding_service
+
 """
 Tests for DocumentService's create/status workflow:
 - PDF uploads default to 'pending' and enqueue a Celery task
