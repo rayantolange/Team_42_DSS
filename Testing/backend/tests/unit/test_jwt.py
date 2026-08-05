@@ -50,7 +50,7 @@ def test_empty_token_returns_none():
 def test_token_signed_with_wrong_secret_returns_none():
     bad_token = pyjwt.encode(
         {"sub": "42"},
-        "a-completely-different-secret",
+        "secret_key_for_testing_purposes_12345",
         algorithm=ALGORITHM,
     )
     assert decode_access_token(bad_token) is None

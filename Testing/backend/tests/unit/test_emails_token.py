@@ -69,7 +69,7 @@ def test_email_verification_token_wrong_secret_returns_none():
     future = dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=5)
     token = pyjwt.encode(
         {"sub": "7", "scope": "email_verification", "exp": future},
-        "a-totally-different-secret",
+        "secret_key_for_testing_purposes_12345",
         algorithm=ALGORITHM,
     )
     assert decode_email_verification_token(token) is None
