@@ -124,6 +124,7 @@ class TestProcessDocumentTask:
         mock_fitz_open.assert_not_called()
         mock_repo.create_page.assert_not_called()
 
+    @patch("app.tasks.document_tasks._embedding_service", None)
     @patch("fitz.open")
     @patch("app.services.embedding_service.EmbeddingService")
     @patch("app.core.storage.download_file_from_storage")
@@ -197,6 +198,7 @@ class TestProcessDocumentTask:
         mock_repo.get_by_id.return_value = mock_document
         mock_download.return_value = b"fake-pdf-bytes"
         mock_embed_service = mock_embed_cls.return_value
+        mock_embed_service.embed_document_chunks_batch.return_value = []
 
         # Page has text, but every fragment is under the 20-char filter
         page = MagicMock()
