@@ -98,9 +98,20 @@ jobs:
           DATABASE_URL: postgresql://postgres@localhost:5432/team42_test
 
       - name: Run tests with coverage
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@localhost:5432/team42_test
+          DATABASE_URL: postgresql://postgres@localhost:5432/team42_test
+          SECRET_KEY: test-secret
+          REDIS_URL: redis://localhost:6379/0
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://dummy.supabase.co' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'dummy-key' }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI || 'bolt://localhost:7687' }}
+          NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME || 'neo4j' }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD || 'password' }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY || 'dummy-groq-key' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'sk-proj-dummykeyforcitesting12345678901234567890' }}
         run: |
-          pytest Testing/backend/tests/ -n auto --maxfail=3 --durations=10 --cov=app --cov-branch --cov-report=xml --cov-report=term
-
+          pytest Testing/backend/tests/ -n 2 --maxfail=3 --durations=10 --cov=app --cov-branch --cov-report=xml --cov-report=term   
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
