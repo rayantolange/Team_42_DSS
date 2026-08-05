@@ -3,6 +3,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
   api:
     build: .
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
@@ -14,6 +15,7 @@ services:
       REDIS_URL: redis://redis:6379/0
     depends_on:
       - redis
+
   worker:
     build:
       context: .
@@ -22,4 +24,9 @@ services:
     command: celery -A app.celery_app.celery_app worker --loglevel=info
     env_file:
       - .env.docker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - HF_HUB_OFFLINE=1  # Prevents HF from checking for updates on every start
+    depends_on:
+      - redis
     restart: always

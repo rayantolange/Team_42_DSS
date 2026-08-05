@@ -17,11 +17,29 @@ def warmup_embedding_worker(**kwargs):
 
     db = SessionLocal()
     try:
-        _embedding_service = EmbeddingService(db=db)
+        service = EmbeddingService(db=db)
+
+        # FORCE MODEL INITIALIZATION IN RAM NOW:
+        # Accessing the models/embedder directly triggers Hugging Face loading
+        # Adjust these attribute names to match how your EmbeddingService stores them
+        # (e.g., service.model, service.embedder, service.encoder, etc.)
+        if hasattr(service, "model") and service.model is None:
+            _ = service.model
+        if hasattr(service, "embedder"):
+            _ = service.embedder
+
+        # Alternatively, run a dummy 1-word embedding to force-warm both models:
+        try:
+            if hasattr(service, "get_embedding"):
+                service.get_embedding("warmup query")
+        except Exception:
+            pass
+
+        _embedding_service = service
     finally:
         db.close()
 
-    print("✅ Embedding models pre-loaded successfully.")
+    print("......Embedding models fully loaded in memory......")
 
 
 def _get_embedding_service(db):

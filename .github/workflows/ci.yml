@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetches history so git diff works reliably across pushes
+          fetch-depth: 0
 
       - name: Check path changes
         uses: dorny/paths-filter@v3
@@ -69,7 +69,6 @@ jobs:
       DATABASE_URL: postgresql://postgres@localhost:5432/team42_test
       SECRET_KEY: test-secret
       REDIS_URL: redis://localhost:6379/0
-      # Provide fallback dummy values so drivers don't fail parsing empty strings:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://dummy.supabase.co' }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'dummy-key' }}
       NEO4J_URI: ${{ secrets.NEO4J_URI || 'bolt://localhost:7687' }}
@@ -79,20 +78,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          pip install -r requirements-api.txt
+          pip install -r requirements-dev.txt || pip install -r requirements.txt
 
-      # Add this step if you use Alembic:
       - name: Run Database Migrations
         run: |
           alembic upgrade head
@@ -104,7 +102,7 @@ jobs:
           pytest Testing/backend/tests/ -n auto --maxfail=3 --durations=10 --cov=app --cov-branch --cov-report=xml --cov-report=term
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage.xml
@@ -117,7 +115,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Build image
         run: docker build . -t dss:ci
@@ -126,7 +124,7 @@ jobs:
         run: |
           docker run -d --name dss-ci-test \
             -e SECRET_KEY=test-secret \
-            -e DATABASE_URL="${{ secrets.TEST_DATABASE_URL }}" \
+            -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/team42_test" \
             -e REDIS_URL=redis://localhost:6379/0 \
             -p 8000:8000 dss:ci
 
@@ -155,9 +153,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      # Render Backend Deployment
       - name: Trigger Render deploy
         if: ${{ needs.changes.outputs.backend == 'true' }}
         run: |

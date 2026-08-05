@@ -9,23 +9,23 @@ _graph = None
 
 @worker_process_init.connect
 def warmup_chat_worker(**kwargs):
-    """Fires ONLY inside Celery worker child processes on boot.
-
-    Pre-loads the RAG graph into memory so API calls remain fast while
-    worker executions take seconds instead of minutes.
-    """
     global _graph
-    print("Pre-loading RAG graph in Celery worker process...")
+    print("🚀 Pre-loading RAG graph in Celery worker process...")
 
     from app.ai.graph.graph import build_rag_graph
 
     db = SessionLocal()
     try:
-        _graph = build_rag_graph(db=db)
+        graph = build_rag_graph(db=db)
+
+        # Force models to load by invoking a dummy run if applicable,
+        # or pre-instantiate the retriever/embedder directly here.
+
+        _graph = graph
     finally:
         db.close()
 
-    print("✅ RAG graph loaded successfully.")
+    print("......RAG graph loaded successfully......")
 
 
 @celery_app.task(name="rag_search")

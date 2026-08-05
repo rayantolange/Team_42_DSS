@@ -7,4 +7,6 @@ services:
     command: celery -A app.celery_app.celery_app worker --loglevel=info
     env_file:
       - .env.production
+    environment:
+      - HF_HUB_OFFLINE=1  # Disables Hugging Face HEAD requests on cached models
     restart: always
