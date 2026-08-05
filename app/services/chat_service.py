@@ -135,21 +135,38 @@ class ChatService:
 
         raw_citations = result.get("citations", [])  # plain dicts, still have embedding_id
 
+        # ---------------------------------------------------
+        # SAFEGUARD: Validate embedding_ids against Postgres
+        # ---------------------------------------------------
+        extracted_ids = [
+            c["embedding_id"] for c in raw_citations if c.get("embedding_id") is not None
+        ]
+        
+        valid_embedding_ids = set()
+        if extracted_ids:
+            # Check DB to ensure foreign key constraint won't be violated
+            for emb_id in extracted_ids:
+                if self.embedding_repo.get_by_id(emb_id) is not None:
+                    valid_embedding_ids.add(emb_id)
+
+        # Filter out citations whose embedding_ids do not exist in the database
+        valid_raw_citations = [
+            c for c in raw_citations if c.get("embedding_id") in valid_embedding_ids
+        ]
+
         citation_rows = [
             {
                 "embedding_id": c["embedding_id"],
                 "rank": i,
                 "snippet": c["snippet"],
             }
-            for i, c in enumerate(raw_citations, start=1)
+            for i, c in enumerate(valid_raw_citations, start=1)
         ]
         if citation_rows:
             self.chat_repo.create_citations(assistant_message.message_id, citation_rows)
 
-        # Convert to the response schema only now, after embedding_id has
-        # already been used for persistence — SourceCitation doesn't declare
-        # that field, so it's fine (and expected) for it to be dropped here.
-        citations = [SourceCitation.model_validate(c) for c in raw_citations]
+        # Convert valid citations to response schema
+        citations = [SourceCitation.model_validate(c) for c in valid_raw_citations]
 
         return ChatMessageResponse(
             message_id=assistant_message.message_id,
@@ -215,8 +232,6 @@ class ChatService:
             confidence_level=None, 
         )
 
-    
-
     def _hydrate_citations(self, message: ChatMessage) -> List[SourceCitation]:
         """
         Rebuilds SourceCitation-shaped dicts from stored MessageCitation rows
@@ -250,5 +265,6 @@ class ChatService:
             )
 
         return citations
+
 def get_chat_service(db: Session) -> ChatService:
     return ChatService(db)
