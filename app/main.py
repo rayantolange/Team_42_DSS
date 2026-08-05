@@ -61,6 +61,14 @@ def root():
     return {"status": "ok", "message": "College DSS API is running."}
 
 
+@app.get("/api/health", tags=["Health"])
+def health_check():
+    """
+    Lightweight health check used by uptime monitoring services.
+    """
+    return {"status": "ok"}
+
+
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
     # Percentage of requests to trace for performance monitoring (1.0 = 100%).
