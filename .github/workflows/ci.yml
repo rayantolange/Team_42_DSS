@@ -20,13 +20,14 @@ jobs:
           fetch-depth: 0 # Fetches history so git diff works reliably across pushes
 
       - name: Check path changes
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
             backend:
               - 'Testing/backend/**'
               - 'app/**'
+              - 'alembic/**'
               - 'requirements*.txt'
               - 'Dockerfile'
               - '.github/workflows/**'
