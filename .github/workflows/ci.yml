@@ -29,6 +29,7 @@ jobs:
               - 'app/**'
               - 'requirements*.txt'
               - 'Dockerfile'
+              - '.github/workflows/**'
             frontend:
               - 'frontend/**'
 
