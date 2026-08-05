@@ -6,32 +6,28 @@ chat response with a pydantic ValidationError.
 """
 import os
 import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-# Environment variable fallbacks for CI collection
+# 1. Environment variable fallbacks for CI collection
 os.environ.setdefault("GROQ_API_KEY", "dummy-groq-key-for-testing")
 os.environ.setdefault("OPENAI_API_KEY", "sk-proj-dummykeyforcitesting1234567890")
 os.environ.setdefault("NEO4J_URI", "bolt://localhost:7687")
 os.environ.setdefault("NEO4J_USERNAME", "neo4j")
 os.environ.setdefault("NEO4J_PASSWORD", "password")
 
+# 2. Safely mock all heavy external AI/ML modules in sys.modules during import
+MOCK_MODULES = {
+    "sentence_transformers": MagicMock(),
+    "qdrant_client": MagicMock(),
+    "neo4j": MagicMock(),
+    "langchain_groq": MagicMock(),
+    "langchain_community": MagicMock(),
+    "langchain_openai": MagicMock(),
+}
 
-# Catch-all mock loader to automatically prevent any ModuleNotFoundError during CI import
-class AutoMockDict(dict):
-    def __getitem__(self, item):
-        try:
-            return super().__getitem__(item)
-        except KeyError:
-            # If a module isn't installed in CI, return a dummy MagicMock instead of crashing
-            mock = MagicMock()
-            self[item] = mock
-            return mock
+with patch.dict(sys.modules, MOCK_MODULES):
+    from app.ai.graph.nodes import _build_citation, synthesize
 
-
-# Replace sys.modules with our fallback loader before loading app logic
-sys.modules = AutoMockDict(sys.modules)
-
-from app.ai.graph.nodes import _build_citation, synthesize
 from app.models.enums import SourceTypeEnum
 
 
