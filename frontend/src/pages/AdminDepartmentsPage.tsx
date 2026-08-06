@@ -75,6 +75,7 @@ export default function AdminDepartmentsPage() {
     },
   });
 
+  
   const updateMutation = useMutation({
     mutationFn: () =>
       updateDepartment(editingDept!.id, {
