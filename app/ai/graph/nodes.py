@@ -12,21 +12,18 @@ import math
 
 RERANK_TOP_N = 4  # how many results survive reranking, feeding into synthesis
 
+from langchain_core.runnables import RunnableConfig
 
-def retrieve_vector(state: dict, db: Session) -> dict:
+def retrieve_vector(state: dict, config: RunnableConfig) -> dict:
+    db = config["configurable"]["db"]
     embedding_service = get_embedding_service(db)
-
     user = db.query(User).filter(User.user_id == state["current_user"]["user_id"]).first()
-
     results = embedding_service.search(
         query_text=state["query"],
         current_user=user,
         top_k=5,
     )
-
     return {**state, "vector_results": results}
-
-
 
 
 SYSTEM_PROMPT = """You are a decision support assistant for a college institution.
@@ -218,16 +215,9 @@ Question: {state['query']}"""
         "confidence_level": confidence_level,
     }
 
-def query_graph(state: dict, db: Session) -> dict:
-    """
-    LangGraph node. Reads state["query"] and state["current_user"],
-    writes state["graph_result"] — either a dict with template/results,
-    or None if the question didn't match any known graph template or
-    the mentioned entity couldn't be resolved.
-    """
+def query_graph(state: dict, config: RunnableConfig) -> dict:
+    db = config["configurable"]["db"]
     user = db.query(User).filter(User.user_id == state["current_user"]["user_id"]).first()
-
     graph_query_service = get_graph_query_service(db)
     graph_result = graph_query_service.run(state["query"], user)
-
     return {**state, "graph_result": graph_result}

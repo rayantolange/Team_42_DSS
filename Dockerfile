@@ -37,6 +37,11 @@ RUN chmod +x entrypoint.sh && \
 # 4. Switch context to the non-root user
 USER appuser
 
+# Pre-download models into HF_HOME so no network call is needed at runtime.
+RUN python -c "from sentence_transformers import SentenceTransformer, CrossEncoder; \
+    SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True); \
+    CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')"
+
 # Render injects $PORT at runtime — not fixed here, entrypoint.sh reads it.
 EXPOSE 8000
 

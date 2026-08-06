@@ -19,6 +19,9 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    broker_pool_limit=2,
+    redis_max_connections=5,
+    broker_connection_retry_on_startup=True,
 )
 
 # Ensures tasks defined in app/tasks/ get registered with this app.

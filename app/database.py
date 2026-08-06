@@ -10,7 +10,7 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
 
 # Detect if we're using PostgreSQL with PgBouncer/Neon Pooler
-connect_args = {}
+connect_args = {"connect_timeout": 30}
 if DATABASE_URL.startswith("postgresql"):
     # Disables prepared statements (required for PgBouncer / Neon transaction pooling)
     connect_args["prepare_threshold"] = None
@@ -19,7 +19,7 @@ engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,  # Automatically re-connects stale idle connections
     pool_recycle=300,    # Prevents closed connection errors on Render/Neon
-    connect_args={"connect_timeout": 30},
+    connect_args=connect_args,
 )
 
 SessionLocal = sessionmaker(
