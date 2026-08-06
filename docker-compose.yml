@@ -11,8 +11,6 @@ services:
       - "8000:8000"
     env_file:
       - .env.docker
-    environment:
-      REDIS_URL: redis://redis:6379/0
     depends_on:
       - redis
 
@@ -25,7 +23,6 @@ services:
     env_file:
       - .env.docker
     environment:
-      - REDIS_URL=redis://redis:6379/0
       - HF_HUB_OFFLINE=1  # Prevents HF from checking for updates on every start
     depends_on:
       - redis
