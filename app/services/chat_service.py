@@ -122,7 +122,7 @@ class ChatService:
             },
         )
         try:
-            result = async_result.get(timeout=45)
+            result = async_result.get(timeout=90)
         except CeleryTimeoutError:
             raise ValueError("Search is temporarily unavailable — please try again shortly.")
 
